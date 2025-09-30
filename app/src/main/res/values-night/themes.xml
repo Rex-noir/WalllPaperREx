@@ -1,0 +1,9 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Base application theme for Material 3 Compose (Dark Mode). -->
+    <style name="Theme.WallPaperREx" parent="android:Theme.Material.NoActionBar">
+        <!-- Optional: Default status bar color for dark theme -->
+        <!-- <item name="android:statusBarColor">@color/your_dark_status_bar_color</item> -->
+
+        <!-- Remove all Material Components attributes -->
+    </style>
+</resources>

@@ -1,0 +1,31 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Base application theme for Material 3 Compose. -->
+    <!-- This theme is primarily for system UI like the status bar, -->
+    <!-- and any legacy Android Views if you have them. -->
+    <!-- Compose theming is handled in ui/theme/Color.kt and ui/theme/Theme.kt -->
+    <style name="Theme.WallPaperREx" parent="android:Theme.Material.Light.NoActionBar">
+        <!-- Optional: You can set a status bar color here if you want a default -->
+        <!-- that's different from what Material 3 might infer or if you want to -->
+        <!-- override it for specific legacy View activities. -->
+        <!-- However, for Compose screens, you often control this with Accompanist or Modifier.statusBarsPadding() -->
+        <!-- <item name="android:statusBarColor">@color/your_light_status_bar_color</item> -->
+
+        <!-- Remove all Material Components attributes like: -->
+        <!-- <item name="colorPrimary">...</item> -->
+        <!-- <item name="colorPrimaryVariant">...</item> -->
+        <!-- <item name="colorOnPrimary">...</item> -->
+        <!-- <item name="colorSecondary">...</item> -->
+        <!-- <item name="colorSecondaryVariant">...</item> -->
+        <!-- <item name="colorOnSecondary">...</item> -->
+    </style>
+
+    <!-- If you are using the Android 12+ Splash Screen API, you might also have: -->
+    <!-- <style name="Theme.App.Starting" parent="Theme.SplashScreen"> -->
+    <!-- Set the splash screen background, animated icon, and animation duration. -->
+    <!-- <item name="windowSplashScreenBackground">@color/...</item> -->
+    <!-- Use windowSplashScreenAnimatedIcon to add either a drawable or an -->
+    <!-- animated drawable. -->
+    <!-- <item name="windowSplashScreenAnimatedIcon">@drawable/...</item> -->
+    <!-- <item name="postSplashScreenTheme">@style/Theme.WallPaperREx</item> -->
+    <!-- </style> -->
+</resources>
