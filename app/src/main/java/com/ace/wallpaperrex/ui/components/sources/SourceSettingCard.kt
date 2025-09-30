@@ -15,7 +15,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.ace.wallpaperrex.ui.screens.setting.WallpaperSourceItem
+import com.ace.wallpaperrex.data.WallpaperSourceItem
 
 /**
  * A generic card to display a wallpaper source item.

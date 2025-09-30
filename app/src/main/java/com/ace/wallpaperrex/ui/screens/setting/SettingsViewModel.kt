@@ -1,9 +1,9 @@
-package com.ace.wallpaperrex.data
+package com.ace.wallpaperrex.ui.screens.setting
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.ace.wallpaperrex.ui.screens.setting.WallpaperSourceItem
-import com.ace.wallpaperrex.ui.screens.setting.wallpaperSources
+import com.ace.wallpaperrex.data.WallpaperSourceItem
+import com.ace.wallpaperrex.data.wallpaperSources
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
