@@ -26,7 +26,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.unit.dp
-import com.ace.wallpaperrex.data.WallpaperSourceItem
+import com.ace.wallpaperrex.ui.screens.setting.WallpaperSourceItem
 
 @Composable
 fun WallhavenSetting(
