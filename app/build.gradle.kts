@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.compose.compiler)
+    kotlin("plugin.serialization") version "2.2.20"
 }
 
 android {
@@ -57,6 +58,7 @@ dependencies {
     androidTestImplementation(composeBom)
 
     implementation(kotlin("reflect"))
+    implementation(libs.kotlinx.serialization.json)
 
     // Compose UI libraries
     implementation(libs.androidx.ui)
