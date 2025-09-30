@@ -9,7 +9,10 @@ espressoCore = "3.7.0"
 appcompat = "1.7.1"
 kotlinxSerializationJson = "1.9.0"
 ktorClientCio = "3.3.0"
+ktorClientContentNegotiation = "3.3.0"
 ktorClientCore = "3.3.0"
+ktorClientLogging = "3.3.0"
+ktorSerializationKotlinxJson = "3.3.0"
 material = "1.9.2"
 materialIconsExtendedAndroid = "1.7.8"
 navigationCompose = "2.9.5"
@@ -33,7 +36,10 @@ androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-co
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
 ktor-client-cio = { module = "io.ktor:ktor-client-cio", version.ref = "ktorClientCio" }
+ktor-client-content-negotiation = { module = "io.ktor:ktor-client-content-negotiation", version.ref = "ktorClientContentNegotiation" }
 ktor-client-core = { module = "io.ktor:ktor-client-core", version.ref = "ktorClientCore" }
+ktor-client-logging = { module = "io.ktor:ktor-client-logging", version.ref = "ktorClientLogging" }
+ktor-serialization-kotlinx-json = { module = "io.ktor:ktor-serialization-kotlinx-json", version.ref = "ktorSerializationKotlinxJson" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
