@@ -52,6 +52,11 @@ dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
 
+    dependencies {
+        implementation(libs.ktor.client.core)
+        implementation(libs.ktor.client.cio)
+    }
+
     // Compose BOM (manages Compose versions)
     val composeBom = platform("androidx.compose:compose-bom:2025.09.01")
     implementation(composeBom)
