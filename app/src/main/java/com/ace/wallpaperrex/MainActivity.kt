@@ -66,7 +66,7 @@ class MainActivity : ComponentActivity() {
                     composable(HomeRoute.route) {
                         HomeLayout(
                             modifier = Modifier.fillMaxSize(),
-                            wallpaperListViewModel
+                            wallPaperListViewModelFromActivity = wallpaperListViewModel
                         )
                     }
                 }
