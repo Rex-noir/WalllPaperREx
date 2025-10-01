@@ -1,4 +1,4 @@
-package com.ace.wallpaperrex.ui.components.wallpaperlists
+package com.ace.wallpaperrex.ui.components.wallpaper
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically

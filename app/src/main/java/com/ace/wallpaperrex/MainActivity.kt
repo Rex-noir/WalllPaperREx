@@ -42,7 +42,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.ace.wallpaperrex.data.repositories.WallhavenImageRepository
 import com.ace.wallpaperrex.data.repositories.WallhavenImageRepositoryImpl
-import com.ace.wallpaperrex.ui.components.wallpaperlists.WallpaperListTopAppBar
+import com.ace.wallpaperrex.ui.components.wallpaper.WallpaperListTopAppBar
 import com.ace.wallpaperrex.ui.screens.setting.SettingsScreen
 import com.ace.wallpaperrex.ui.screens.wallpapers.WallPaperListViewModel
 import com.ace.wallpaperrex.ui.screens.wallpapers.WallpaperListScreen
