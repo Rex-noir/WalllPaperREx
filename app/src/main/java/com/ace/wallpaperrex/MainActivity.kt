@@ -23,11 +23,15 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
-import androidx.navigation.NavDestination.Companion.hierarchy
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -36,20 +40,24 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.ace.wallpaperrex.data.repositories.WallhavenImageRepository
+import com.ace.wallpaperrex.data.repositories.WallhavenImageRepositoryImpl
+import com.ace.wallpaperrex.ui.components.wallpaperlists.WallpaperListTopAppBar
 import com.ace.wallpaperrex.ui.screens.setting.SettingsScreen
+import com.ace.wallpaperrex.ui.screens.wallpapers.WallPaperListViewModel
+import com.ace.wallpaperrex.ui.screens.wallpapers.WallpaperListScreen
 import com.ace.wallpaperrex.ui.theme.AppTheme
 
 // Define your screen routes, including those for bottom navigation
 sealed class Screen(
     val route: String,
     val titleResId: Int? = null,
-    val hasCustomTopBar: Boolean = false,
     val icon: ImageVector? = null, // Icon for bottom navigation
     val bottomNavTitleResId: Int? = null // Title for bottom navigation
 ) {
     object WallpaperList : Screen(
         route = "wallpaper_list",
-        titleResId = R.string.app_name,
+        titleResId = R.string.bottom_nav_home,
         icon = Icons.Filled.Home,
         bottomNavTitleResId = R.string.bottom_nav_home // Add to strings.xml
     )
@@ -57,7 +65,6 @@ sealed class Screen(
     object Settings : Screen(
         route = "settings",
         titleResId = R.string.settings_title,
-        hasCustomTopBar = false, // Let's use the main TopAppBar for settings for now
         icon = Icons.Filled.Settings,
         bottomNavTitleResId = R.string.bottom_nav_settings // Add to strings.xml
     )
@@ -79,6 +86,12 @@ class MainActivity : ComponentActivity() {
     @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+
+        val repository = WallhavenImageRepositoryImpl();
+        val viewModel: WallPaperListViewModel = WallPaperListViewModel(repository);
+
+
         setContent {
             AppTheme {
                 val navController = rememberNavController()
@@ -92,16 +105,30 @@ class MainActivity : ComponentActivity() {
                         .find { currentRoute?.startsWith(it.route) == true }
                 }
 
+
+                val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior();
+
                 Scaffold(
                     topBar = {
-                        // Show TopAppBar if current screen is not a detail screen or one with a custom top bar
-                        val showTopBar = currentScreen != null &&
-                                !currentScreen.hasCustomTopBar
+                        // Show TopAppBar  current screen is not a detail screen or one with a custom top bar
+                        var searchQuery by remember { mutableStateOf("") }
 
-                        if (showTopBar) {
+                        if (currentScreen == Screen.WallpaperList) {
+                            WallpaperListTopAppBar(
+                                query = searchQuery,
+                                onQueryChange = { searchQuery = it },
+                                onSearchSubmit = {
+                                    viewModel.searchWallpapers(it)
+                                },
+                                onCloseClicked = {
+                                    searchQuery = ""
+                                },
+                                scrollBehavior = scrollBehavior
+                            )
+                        } else {
                             TopAppBar(
                                 title = {
-                                    currentScreen.titleResId?.let { Text(stringResource(it)) }
+                                    currentScreen?.titleResId?.let { Text(stringResource(it)) }
                                         ?: Text(stringResource(R.string.app_name))
                                 },
                                 navigationIcon = {
@@ -136,8 +163,11 @@ class MainActivity : ComponentActivity() {
                     }
                 ) { innerPadding ->
                     AppNavigation(
+                        wallpaperListModel = viewModel,
                         navController = navController,
-                        modifier = Modifier.padding(innerPadding)
+                        modifier = Modifier
+                            .padding(innerPadding)
+                            .nestedScroll(scrollBehavior.nestedScrollConnection)
                     )
                 }
             }
@@ -150,7 +180,6 @@ fun AppBottomNavigationBar(navController: NavHostController, currentRoute: Strin
     NavigationBar {
         bottomNavItems.forEach { screen ->
             val currentDestination = navController.currentBackStackEntry?.destination
-            val isSelected = currentDestination?.hierarchy?.any { it.route == screen.route } == true
             NavigationBarItem(
                 icon = {
                     screen.icon?.let { icon ->
@@ -183,8 +212,23 @@ fun AppBottomNavigationBar(navController: NavHostController, currentRoute: Strin
     }
 }
 
+class WallpaperListViewModelFactory(private val wallhavenRepository: WallhavenImageRepository) :
+    ViewModelProvider.Factory {
+    override fun <T : ViewModel> create(modelClass: Class<T>): T {
+        if (modelClass.isAssignableFrom(WallPaperListViewModel::class.java)) {
+            @Suppress("UNCHECKED_CAST")
+            return WallPaperListViewModel(wallhavenRepository) as T
+        }
+        throw IllegalArgumentException("Unknown ViewModel class")
+    }
+}
+
 @Composable
-fun AppNavigation(navController: NavHostController, modifier: Modifier = Modifier) {
+fun AppNavigation(
+    wallpaperListModel: WallPaperListViewModel,
+    navController: NavHostController,
+    modifier: Modifier = Modifier
+) {
     NavHost(
         enterTransition = { EnterTransition.None },
         exitTransition = { ExitTransition.None },
@@ -195,7 +239,13 @@ fun AppNavigation(navController: NavHostController, modifier: Modifier = Modifie
         modifier = modifier.fillMaxSize() // Ensure NavHost fills the available space
     ) {
         composable(Screen.WallpaperList.route) {
-            Text("List of wallpapers")
+
+
+            WallpaperListScreen(
+                viewModel = wallpaperListModel,
+                onWallpaperClick = { wallpaperId -> },
+                modifier = Modifier.fillMaxSize()
+            )
         }
         composable(
             route = "${Screen.WallpaperSourceDetail.route}/{sourceId}", // Route with argument
