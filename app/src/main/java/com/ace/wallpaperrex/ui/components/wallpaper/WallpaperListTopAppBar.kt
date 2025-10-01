@@ -45,7 +45,7 @@ fun WallpaperListTopAppBar(
     query: String,
     onQueryChange: (String) -> Unit,
     onSearchSubmit: (String) -> Unit,
-    onCloseClicked: () -> Unit,
+    onClearClicked: () -> Unit,
     debounceMillis: Long = 500L,
     scrollBehavior: TopAppBarScrollBehavior
 ) {
@@ -87,7 +87,7 @@ fun WallpaperListTopAppBar(
         },
         actions = {
             if (query.isNotEmpty()) {
-                IconButton(onClick = onCloseClicked) {
+                IconButton(onClick = onClearClicked) {
                     Icon(
                         imageVector = Icons.Default.Close,
                         contentDescription = "Close search"
@@ -130,7 +130,7 @@ fun WallpaperListTopAppBarPreview() {
                     query = query,
                     onQueryChange = { query = it },
                     onSearchSubmit = { /* do nothing for preview */ },
-                    onCloseClicked = { },
+                    onClearClicked = { },
                     scrollBehavior = scrollBehavior
                 )
             }
