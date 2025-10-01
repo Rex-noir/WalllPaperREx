@@ -29,6 +29,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
@@ -57,7 +58,7 @@ fun WallpaperListScreen(
             )
         } else if (uiState.items.isEmpty()) {
             EmptyState(
-                message = "No wallpapers found for '${uiState.currentQuery}'. Try a different search!",
+                message = "No wallpapers found for '${uiState.currentQuery}'.",
                 modifier = Modifier.fillMaxSize()
             )
         } else {
@@ -137,18 +138,6 @@ fun WallpaperStaggeredGrid(
             }
         }
 
-        if (isEndOfList && items.isNotEmpty()) {
-            item {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text("You've reached the end!")
-                }
-            }
-        }
     }
 }
 
@@ -185,7 +174,11 @@ fun ErrorState(message: String, onRetry: () -> Unit, modifier: Modifier = Modifi
 
 @Composable
 fun EmptyState(message: String, modifier: Modifier = Modifier) {
-    Box(modifier = Modifier, contentAlignment = Alignment.Center) {
-        Text(text = message, style = MaterialTheme.typography.titleMedium)
+    Box(modifier = modifier, contentAlignment = Alignment.Center) {
+        Text(
+            text = message,
+            style = MaterialTheme.typography.titleMedium,
+            textAlign = TextAlign.Center
+        )
     }
 }
