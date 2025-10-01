@@ -78,7 +78,8 @@ val bottomNavItems = listOf(
 @Composable
 fun HomeLayout(
     modifier: Modifier = Modifier,
-    wallPaperListViewModelFromActivity: WallPaperListViewModel
+    wallPaperListViewModelFromActivity: WallPaperListViewModel,
+    appNavController: NavHostController
 ) {
     val homeNavController = rememberNavController()
     val currentHomeBackStackEntry by homeNavController.currentBackStackEntryAsState()
@@ -140,7 +141,7 @@ fun HomeLayout(
                 WallpaperListScreen(
                     viewModel = wallPaperListViewModelFromActivity,
                     onWallpaperClick = { wallpaperId ->
-                        println("Wallpaper clicked : ")
+                        appNavController.navigate(Screen.WallpaperDetail.route)
                     })
             }
 

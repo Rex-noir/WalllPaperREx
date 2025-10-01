@@ -3,13 +3,12 @@ package com.ace.wallpaperrex
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.animation.EnterTransition
-import androidx.compose.animation.ExitTransition
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Text
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.navigation.compose.NavHost
@@ -41,6 +40,11 @@ sealed class Screen(
         bottomNavTitleResId = R.string.bottom_nav_settings // Add to strings.xml
     )
 
+    object WallpaperDetail : Screen(
+        route = "wallpaper_detail",
+        titleResId = R.string.wallpaper_detail_title,
+    )
+
 }
 
 object HomeRoute : Screen("home")
@@ -60,14 +64,17 @@ class MainActivity : ComponentActivity() {
                     navController = appNavController,
                     startDestination = HomeRoute.route,
                     modifier = Modifier.fillMaxSize(),
-                    enterTransition = { EnterTransition.None },
-                    exitTransition = { ExitTransition.None }
                 ) {
                     composable(HomeRoute.route) {
                         HomeLayout(
                             modifier = Modifier.fillMaxSize(),
-                            wallPaperListViewModelFromActivity = wallpaperListViewModel
+                            wallPaperListViewModelFromActivity = wallpaperListViewModel,
+                            appNavController = appNavController
                         )
+                    }
+
+                    composable(Screen.WallpaperDetail.route) {
+                        Text("Wallpaper Detail")
                     }
                 }
             }
