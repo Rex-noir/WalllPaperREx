@@ -1,10 +1,8 @@
 package com.ace.wallpaperrex.ui.screens.wallpapers
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -12,9 +10,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.itemsIndexed
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -22,17 +18,12 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import coil3.compose.AsyncImage
-import coil3.request.ImageRequest
-import coil3.request.crossfade
 import com.ace.wallpaperrex.data.ImageItem
 import com.ace.wallpaperrex.ui.components.wallpaper.GridImageItem
+import com.ace.wallpaperrex.ui.components.wallpaper.SkeletonGridItem
 
 @Composable
 fun WallpaperListScreen(
@@ -44,9 +35,7 @@ fun WallpaperListScreen(
 
     Column(modifier = modifier.fillMaxSize()) {
         if (uiState.isLoading && uiState.items.isEmpty()) {
-            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator()
-            }
+            SkeletonWallpaperGrid(modifier = Modifier.fillMaxSize())
         } else if (uiState.error != null && uiState.items.isEmpty()) {
             ErrorState(
                 message = uiState.error!!,
@@ -72,6 +61,22 @@ fun WallpaperListScreen(
         }
     }
 }
+
+
+@Composable
+fun SkeletonWallpaperGrid(
+    modifier: Modifier = Modifier,
+    itemCount: Int = 12 // Number of skeleton items to show
+) {
+    LazyVerticalStaggeredGrid(
+        columns = StaggeredGridCells.Adaptive(minSize = 150.dp),
+    ) {
+        items(itemCount) {
+            SkeletonGridItem() // Uses its internal random aspect ratio
+        }
+    }
+}
+
 
 @Composable
 fun WallpaperStaggeredGrid(
@@ -101,18 +106,24 @@ fun WallpaperStaggeredGrid(
 
         }
 
-
         if (isLoadingMore) {
-            item {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    CircularProgressIndicator()
-                }
+            // Show a few skeleton items at the end for pagination loading
+            // You can make these span the full width if you wrap them in a Box
+            // and use item(span = StaggeredGridItemSpan.FullLine)
+            // For now, let's add a few individual skeleton items.
+            items(4) { // Show 3 skeleton items while loading more
+                SkeletonGridItem()
             }
+            // Alternatively, for a full-width single shimmer bar:
+            // item(span = StaggeredGridItemSpan.FullLine) {
+            //     Spacer(
+            //         modifier = Modifier
+            //             .fillMaxWidth()
+            //             .height(80.dp) // Or some other appropriate height
+            //             .padding(vertical = 8.dp)
+            //             .shimmerBackground(RoundedCornerShape(4.dp))
+            //     )
+            // }
         }
 
         if (paginationError != null) {
