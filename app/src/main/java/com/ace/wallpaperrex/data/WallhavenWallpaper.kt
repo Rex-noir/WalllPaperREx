@@ -13,7 +13,7 @@ data class WallhavenWallpaperDetail(
     @SerialName("id") val id: String,
     @SerialName("url") val url: String,
     @SerialName("short_url") val shortUrl: String,
-    @SerialName("uploader") val uploader: Uploader,
+    @SerialName("uploader") val uploader: Uploader? = null,
     @SerialName("views") val views: Int,
     @SerialName("favorites") val favorites: Int,
     @SerialName("source") val source: String? = null,
@@ -29,7 +29,7 @@ data class WallhavenWallpaperDetail(
     @SerialName("colors") val colors: List<String>,
     @SerialName("path") val path: String,
     @SerialName("thumbs") val thumbs: Thumbs,
-    @SerialName("tags") val tags: List<Tag>
+    @SerialName("tags") val tags: List<Tag> = emptyList()
 )
 
 @Serializable
@@ -80,12 +80,4 @@ fun WallhavenWallpaperDetail.toImageItem(): ImageItem {
 data class WallhavenSearchResponse(
     @SerialName("data") val data: List<WallhavenWallpaperDetail>,
     @SerialName("meta") val meta: Meta? = null
-)
-
-@Serializable
-data class Meta(
-    @SerialName("current_page") val currentPage: Int,
-    @SerialName("last_page") val lastPage: Int,
-    @SerialName("per_page") val perPage: Int,
-    @SerialName("total") val total: Int
 )
