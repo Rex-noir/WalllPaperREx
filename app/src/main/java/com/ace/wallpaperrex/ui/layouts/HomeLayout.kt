@@ -13,10 +13,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
+import androidx.navigation.NavDestination
+import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.*
-import androidx.navigation.toRoute
 import com.ace.wallpaperrex.AppRoute // Assuming this is for app-level navigation
 import com.ace.wallpaperrex.R
 import com.ace.wallpaperrex.ui.components.wallpaper.WallpaperListTopAppBar
@@ -26,65 +27,55 @@ import com.ace.wallpaperrex.ui.screens.wallpapers.WallpaperListScreen
 import kotlinx.serialization.Serializable
 import kotlin.reflect.KClass
 
-sealed interface HomeNavScreen { // Renamed for clarity, if you prefer
-    val icon: ImageVector
+// 1. Define concrete serializable types for your destinations
+@Serializable
+data object WallpaperListRoute
+
+@Serializable
+data object SettingsRoute
+
+// 2. Data structure to hold UI metadata (icon, title) for each route KClass
+data class BottomNavigationItemInfo(
+    val routeKClass: KClass<*>, // KClass of the @Serializable route data object/class
+    val routeInstance: Any,     // The actual @Serializable route data object/class instance
+    val icon: ImageVector,
     val titleResId: Int
-    val route: KClass<*>
-}
+)
 
-@Serializable
-data object WallpaperListScreenRoute
-
-@Serializable
-data object SettingsScreenRoute
-
-object WallpaperListNavItem : HomeNavScreen {
-    override val icon: ImageVector
-        get() = Icons.Filled.Home
-
-    override val titleResId: Int
-        get() = R.string.bottom_nav_home
-    override val route = WallpaperListScreenRoute::class
-
-}
-
-object SettingsNavItem : HomeNavScreen {
-    override val icon: ImageVector
-        get() = Icons.Filled.Settings
-
-    override val titleResId: Int
-        get() = R.string.bottom_nav_settings
-    override val route = SettingsScreenRoute::class
-
-}
-
-val homeBottomNavItems = listOf(WallpaperListNavItem, SettingsNavItem)
+// 3. List of navigation items with their metadata
+val homeBottomNavItems: List<BottomNavigationItemInfo> = listOf(
+    BottomNavigationItemInfo(
+        routeKClass = WallpaperListRoute::class,
+        routeInstance = WallpaperListRoute,
+        icon = Icons.Filled.Home,
+        titleResId = R.string.bottom_nav_home
+    ),
+    BottomNavigationItemInfo(
+        routeKClass = SettingsRoute::class,
+        routeInstance = SettingsRoute,
+        icon = Icons.Filled.Settings,
+        titleResId = R.string.bottom_nav_settings
+    )
+)
 
 @Composable
 fun AppBottomNavigationBar(
-    homeNavController: NavHostController, // Specifically for navigating within HomeLayout
-    currentScreen: HomeNavScreen? // Nullable in case the route is not yet available
+    homeNavController: NavHostController,
+    currentNavDestination: NavDestination?
 ) {
-    if (currentScreen == null) return // Don't render if currentScreen is not determined
-
     NavigationBar {
-        homeBottomNavItems.forEach { screen ->
+        homeBottomNavItems.forEach { navItemInfo ->
+            val selected = currentNavDestination?.hasRoute(navItemInfo.routeKClass) == true
             NavigationBarItem(
-                icon = { Icon(screen.icon, contentDescription = null) },
-                label = { Text(stringResource(screen.titleResId)) },
-                selected = currentScreen == screen,
+                icon = { Icon(navItemInfo.icon, contentDescription = null) },
+                label = { Text(stringResource(navItemInfo.titleResId)) },
+                selected = selected,
                 onClick = {
-                    homeNavController.navigate(screen) { // Navigate to the HomeNavScreen type
-                        // Pop up to the start destination of the graph to
-                        // avoid building up a large stack of destinations
-                        // on the back stack as users select items
+                    homeNavController.navigate(navItemInfo.routeInstance) { // Navigate to the serializable object instance
                         popUpTo(homeNavController.graph.findStartDestination().id) {
                             saveState = true
                         }
-                        // Avoid multiple copies of the same destination when
-                        // reselecting the same item
                         launchSingleTop = true
-                        // Restore state when reselecting a previously selected item
                         restoreState = true
                     }
                 }
@@ -98,22 +89,11 @@ fun AppBottomNavigationBar(
 fun HomeLayout(
     modifier: Modifier = Modifier,
     wallPaperListViewModelFromActivity: WallPaperListViewModel,
-    appNavController: NavHostController // This is for navigating outside of HomeLayout
+    appNavController: NavHostController // For navigating outside HomeLayout's scope
 ) {
-    val homeNavController = rememberNavController() // NavController for screens within HomeLayout
+    val homeNavController = rememberNavController() // For navigation within HomeLayout
     val currentHomeBackStackEntry by homeNavController.currentBackStackEntryAsState()
-
-    val currentRouteClass: KClass<*>? = when {
-        runCatching { currentHomeBackStackEntry?.toRoute<WallpaperListScreenRoute>() }.isSuccess ->
-            WallpaperListScreenRoute::class
-
-        runCatching { currentHomeBackStackEntry?.toRoute<SettingsScreenRoute>() }.isSuccess ->
-            SettingsScreenRoute::class
-
-        else -> null
-    }
-
-    val currentHomeNavScreen = homeBottomNavItems.find { it.route == currentRouteClass }
+    val currentNavDestination = currentHomeBackStackEntry?.destination
 
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
     var searchQuery by remember { mutableStateOf("") }
@@ -121,9 +101,10 @@ fun HomeLayout(
     Scaffold(
         modifier = modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
-            // Conditionally display TopAppBar based on the current screen in HomeLayout
-            when (currentHomeNavScreen) {
-                is WallpaperListNavItem -> {
+            // Determine TopAppBar based on the current route type
+            // You can also fetch the titleResId from homeBottomNavItems if needed
+            when {
+                currentNavDestination?.hasRoute<WallpaperListRoute>() == true -> {
                     WallpaperListTopAppBar(
                         query = searchQuery,
                         onQueryChange = { searchQuery = it },
@@ -133,10 +114,16 @@ fun HomeLayout(
                     )
                 }
 
-                is SettingsNavItem -> {
+                currentNavDestination?.hasRoute<SettingsRoute>() == true -> {
+                    val settingsItemInfo =
+                        homeBottomNavItems.find { it.routeKClass == SettingsRoute::class }
                     TopAppBar(
                         title = {
-                            Text(stringResource(currentHomeNavScreen.titleResId))
+                            Text(
+                                stringResource(
+                                    settingsItemInfo?.titleResId ?: R.string.bottom_nav_settings
+                                )
+                            )
                         },
                         colors = TopAppBarDefaults.topAppBarColors(
                             containerColor = MaterialTheme.colorScheme.primaryContainer,
@@ -146,7 +133,7 @@ fun HomeLayout(
                     )
                 }
 
-                null -> { // Fallback or initial state
+                else -> { // Fallback or initial state (e.g., when NavHost is first composed)
                     TopAppBar(
                         title = { Text(stringResource(R.string.app_name)) },
                         scrollBehavior = scrollBehavior
@@ -157,30 +144,27 @@ fun HomeLayout(
         bottomBar = {
             AppBottomNavigationBar(
                 homeNavController = homeNavController,
-                currentScreen = currentHomeNavScreen
+                currentNavDestination = currentNavDestination
             )
         }
     ) { innerPadding ->
-        // NavHost specific to the HomeLayout, managing WallpaperList and Settings
         NavHost(
             navController = homeNavController,
-            startDestination = WallpaperListScreenRoute, // Use the object directly
+            startDestination = WallpaperListRoute, // Use the concrete @Serializable data object
             modifier = Modifier
                 .padding(innerPadding)
                 .fillMaxSize()
         ) {
-            composable<WallpaperListScreenRoute> { // Use KSP type-safe navigation
+            composable<WallpaperListRoute> { // Use the concrete @Serializable data object
                 WallpaperListScreen(
                     viewModel = wallPaperListViewModelFromActivity,
                     onWallpaperClick = { wallpaperId ->
-                        // Use the appNavController to navigate to a destination
-                        // outside of the HomeLayout's internal navigation graph.
-                        // Assuming WallpaperDetailRoute is part of your AppRoute
+                        // Use appNavController for navigation outside HomeLayout's NavHost
                         appNavController.navigate(AppRoute.WallpaperDetailRoute(wallpaperId))
                     }
                 )
             }
-            composable<SettingsScreenRoute> { // Use KSP type-safe navigation
+            composable<SettingsRoute> { // Use the concrete @Serializable data object
                 SettingsScreen(modifier = Modifier.fillMaxSize())
             }
         }
