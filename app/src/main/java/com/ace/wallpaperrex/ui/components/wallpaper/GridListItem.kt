@@ -2,7 +2,7 @@ package com.ace.wallpaperrex.ui.components.wallpaper
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -24,7 +24,7 @@ fun GridImageItem(item: ImageItem, onClick: () -> Unit, modifier: Modifier = Mod
         contentDescription = item.description,
         contentScale = ContentScale.Crop,
         modifier = modifier
-            .fillMaxWidth()
+            .fillMaxSize()
             .aspectRatio(item.aspectRatio.takeIf { it > 0 } ?: (3f / 4f))
             .clip(RoundedCornerShape(size = 0.dp))
             .clickable(onClick = onClick)
