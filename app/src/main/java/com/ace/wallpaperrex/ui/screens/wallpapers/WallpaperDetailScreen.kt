@@ -226,7 +226,7 @@ fun ExpandableFabMenu(
             Icon(
                 imageVector = if (isExpanded) Icons.Filled.Close else Icons.Filled.Menu,
                 contentDescription = if (isExpanded) "Close menu" else "Open menu",
-                modifier = Modifier.rotate(rotation)
+
             )
         }
     }
