@@ -146,7 +146,7 @@ fun WallpaperDetailScreen(
 fun WallpaperDetailContent(imageItem: ImageItem, modifier: Modifier) {
     Box(modifier = Modifier.fillMaxSize()) {
         AsyncImage(
-            model = ImageRequest.Builder(LocalContext.current).data(imageItem.urlFull)
+            model = ImageRequest.Builder(LocalContext.current).data(imageItem.url)
                 .crossfade(true).build(),
             contentDescription = imageItem.description ?: "Wallpaper Detail",
             contentScale = ContentScale.Fit,

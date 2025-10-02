@@ -19,7 +19,7 @@ import com.ace.wallpaperrex.data.ImageItem
 @Composable
 fun GridImageItem(item: ImageItem, onClick: () -> Unit, modifier: Modifier = Modifier) {
     AsyncImage(
-        model = ImageRequest.Builder(LocalContext.current).data(item.urlFull).crossfade(true)
+        model = ImageRequest.Builder(LocalContext.current).data(item.thumbnail).crossfade(true)
             .build(),
         contentDescription = item.description,
         contentScale = ContentScale.Crop,

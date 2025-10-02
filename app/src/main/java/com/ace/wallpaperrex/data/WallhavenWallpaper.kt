@@ -70,8 +70,8 @@ fun WallhavenWallpaperDetail.toImageItem(): ImageItem {
     return ImageItem(
         id = id,
         aspectRatio = ratio.toFloat(),
-        urlSmall = thumbs.small,
-        urlFull = thumbs.original,
+        url = path,
+        thumbnail = thumbs.original,
         description = source
     )
 }

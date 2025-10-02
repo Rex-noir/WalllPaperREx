@@ -8,8 +8,8 @@ import kotlinx.serialization.Serializable
 @Immutable
 data class ImageItem(
     val id: String,
-    val urlSmall: String,
-    val urlFull: String,
+    val thumbnail: String,
+    val url: String,
     val aspectRatio: Float = 1f,
     val description: String? = null
 )
