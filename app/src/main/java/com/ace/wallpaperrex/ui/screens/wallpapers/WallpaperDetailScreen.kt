@@ -1,26 +1,37 @@
 package com.ace.wallpaperrex.ui.screens.wallpapers
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.filled.Share
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Download
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FavoriteBorder
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Wallpaper
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SmallFloatingActionButton
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -29,33 +40,30 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import coil3.request.crossfade
-import com.ace.wallpaperrex.data.ImageItem
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun WallpaperDetailScreen(
     onNavigateBack: () -> Unit,
     wallpaperListViewModel: WallPaperListViewModel,
     viewModel: WallpaperDetailViewModel = viewModel()
 ) {
-
     val imageItem by viewModel.imageItem.collectAsStateWithLifecycle()
-    val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
-
     val snackbarHostState = remember { SnackbarHostState() }
-
-    var showMenu by remember { mutableStateOf(false) }
+    var isExpanded by remember { mutableStateOf(false) }
+    var isFavorite by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
-        val imageId = viewModel.getImageId();
+        val imageId = viewModel.getImageId()
         imageId?.let {
             viewModel.setImage(wallpaperListViewModel.getImageById(it))
         }
@@ -63,96 +71,201 @@ fun WallpaperDetailScreen(
 
     if (imageItem == null) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            Text("Error : image not found")
+            Text("Error: image not found")
         }
     } else {
         val image = imageItem!!
-        Scaffold(
-            modifier = Modifier.fillMaxSize(),
-            snackbarHost = { SnackbarHost(snackbarHostState) },
-            topBar = {
-                TopAppBar(
-                    title = {
-                        image.description?.let {
-                            Text(it, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                        }
-                    },
-                    navigationIcon = {
-                        IconButton(onNavigateBack) {
-                            Icon(
-                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                contentDescription = "Navigate back"
-                            )
-                        }
-                    },
-                    actions = {
-                        IconButton(onClick = {
-                            /* TODO : Handle share action  */
-                        }) {
-                            Icon(
-                                imageVector = Icons.Filled.Share,
-                                contentDescription = "Share Wallpaper"
-                            )
-                        }
-                        IconButton(onClick = { /* TODO : Handle set wallpaper action  */ }) {
-                            Icon(
-                                imageVector = Icons.Filled.Wallpaper,
-                                contentDescription = "Set as wallpaper"
-                            )
-                        }
-                        IconButton(onClick = { showMenu = !showMenu }) {
-                            Icon(
-                                imageVector = Icons.Filled.MoreVert,
-                                contentDescription = "More options"
-                            )
-                        }
-                        DropdownMenu(
-                            expanded = showMenu,
-                            onDismissRequest = { showMenu = false }
-                        ) {
-                            DropdownMenuItem(
-                                text = { Text("View photographer") },
-                                onClick = {
-                                    /* TODO : Navigate to photographer profile or search */
-                                    showMenu = false
-                                }
-                            )
-                            DropdownMenuItem(
-                                text = { Text("Download") },
-                                onClick = {
-                                    /* TODO: Handle download action */
-                                    showMenu = false
-                                }
-                            )
-                        }
-                    },
-                    scrollBehavior = scrollBehavior,
-                    colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.8f),
-                        scrolledContainerColor = MaterialTheme.colorScheme.surfaceVariant
+        Box(modifier = Modifier.fillMaxSize()) {
+            // Fullscreen wallpaper image
+            AsyncImage(
+                model = ImageRequest.Builder(LocalContext.current)
+                    .data(image.url)
+                    .crossfade(true)
+                    .build(),
+                contentDescription = image.description ?: "Wallpaper Detail",
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.fillMaxSize()
+            )
+
+            // Status bar overlay (simulated)
+            StatusBarOverlay()
+
+            // Back button (top left)
+            Surface(
+                modifier = Modifier
+                    .padding(16.dp)
+                    .align(Alignment.TopStart),
+                shape = CircleShape,
+                color = Color.Black.copy(alpha = 0.5f)
+            ) {
+                IconButton(onClick = onNavigateBack) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = "Navigate back",
+                        tint = Color.White
                     )
-                )
+                }
             }
-        ) { innerPadding ->
-            WallpaperDetailContent(
-                imageItem = image,
-                modifier = Modifier.padding(innerPadding)
+
+            // Snackbar host
+            SnackbarHost(
+                hostState = snackbarHostState,
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .padding(bottom = 100.dp)
+            )
+
+            // Expandable FAB menu (bottom right)
+            ExpandableFabMenu(
+                isExpanded = isExpanded,
+                isFavorite = isFavorite,
+                onExpandClick = { isExpanded = !isExpanded },
+                onFavoriteClick = {
+                    isFavorite = !isFavorite
+                    // TODO: Handle favorite action
+                },
+                onApplyClick = {
+                    // TODO: Handle set wallpaper action
+                    isExpanded = false
+                },
+                onDownloadClick = {
+                    // TODO: Handle download action
+                    isExpanded = false
+                },
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .padding(24.dp)
             )
         }
     }
 }
 
 @Composable
-fun WallpaperDetailContent(imageItem: ImageItem, modifier: Modifier) {
-    Box(modifier = Modifier.fillMaxSize()) {
-        AsyncImage(
-            model = ImageRequest.Builder(LocalContext.current).data(imageItem.url)
-                .crossfade(true).build(),
-            contentDescription = imageItem.description ?: "Wallpaper Detail",
-            contentScale = ContentScale.Fit,
-            modifier = Modifier.fillMaxSize()
+fun StatusBarOverlay() {
+    // Simulated status bar with gradient
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+    ) {
+        Box(
+            modifier = Modifier
+                .matchParentSize()
+                .background(
+                    androidx.compose.ui.graphics.Brush.verticalGradient(
+                        colors = listOf(
+                            Color.Black.copy(alpha = 0.5f),
+                            Color.Transparent
+                        ),
+                        startY = 0f,
+                        endY = 200f
+                    )
+                )
         )
+    }
+}
 
-//        Column {  }
+@Composable
+fun ExpandableFabMenu(
+    isExpanded: Boolean,
+    isFavorite: Boolean,
+    onExpandClick: () -> Unit,
+    onFavoriteClick: () -> Unit,
+    onApplyClick: () -> Unit,
+    onDownloadClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val rotation by animateFloatAsState(
+        targetValue = if (isExpanded) 45f else 0f,
+        label = "rotation"
+    )
+
+    Column(
+        modifier = modifier,
+        horizontalAlignment = Alignment.End,
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        // Expandable menu items
+        AnimatedVisibility(
+            visible = isExpanded,
+            enter = expandVertically(expandFrom = Alignment.Bottom) + fadeIn(),
+            exit = shrinkVertically(shrinkTowards = Alignment.Bottom) + fadeOut()
+        ) {
+            Column(
+                horizontalAlignment = Alignment.End,
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                // Favorite button with label
+                FabMenuItem(
+                    icon = if (isFavorite) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder,
+                    label = "Favorite",
+                    onClick = onFavoriteClick,
+                    containerColor = if (isFavorite) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary
+                )
+
+                // Apply wallpaper button with label
+                FabMenuItem(
+                    icon = Icons.Filled.Wallpaper,
+                    label = "Apply",
+                    onClick = onApplyClick
+                )
+
+                // Download button with label
+                FabMenuItem(
+                    icon = Icons.Filled.Download,
+                    label = "Download",
+                    onClick = onDownloadClick
+                )
+            }
+        }
+
+        // Main FAB
+        FloatingActionButton(
+            onClick = onExpandClick,
+            containerColor = MaterialTheme.colorScheme.primary
+        ) {
+            Icon(
+                imageVector = if (isExpanded) Icons.Filled.Close else Icons.Filled.Menu,
+                contentDescription = if (isExpanded) "Close menu" else "Open menu",
+                modifier = Modifier.rotate(rotation)
+            )
+        }
+    }
+}
+
+@Composable
+fun FabMenuItem(
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    label: String,
+    onClick: () -> Unit,
+    containerColor: Color = MaterialTheme.colorScheme.primary
+) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        // Label
+        Surface(
+            shape = MaterialTheme.shapes.small,
+            color = Color.Black.copy(alpha = 0.7f)
+        ) {
+            Text(
+                text = label,
+                color = Color.White,
+                style = MaterialTheme.typography.labelLarge,
+                modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+            )
+        }
+
+        // Icon button
+        SmallFloatingActionButton(
+            onClick = onClick,
+            containerColor = containerColor
+        ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = label,
+                modifier = Modifier.size(20.dp)
+            )
+        }
     }
 }
