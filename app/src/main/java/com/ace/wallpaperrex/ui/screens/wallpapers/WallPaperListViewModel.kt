@@ -109,4 +109,8 @@ class WallPaperListViewModel(private val wallhavenImageRepository: WallhavenImag
         }
         loadWallpapers(page = 1, query = _uiState.value.currentQuery, isInitialLoad = true)
     }
+
+    fun getImageById(imageId: String): ImageItem? {
+        return _uiState.value.items.find { it.id == imageId }
+    }
 }

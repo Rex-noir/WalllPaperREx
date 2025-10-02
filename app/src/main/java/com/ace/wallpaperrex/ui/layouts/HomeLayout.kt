@@ -158,9 +158,9 @@ fun HomeLayout(
             composable<WallpaperListRoute> { // Use the concrete @Serializable data object
                 WallpaperListScreen(
                     viewModel = wallPaperListViewModelFromActivity,
-                    onWallpaperClick = { wallpaperId ->
+                    onWallpaperClick = { image ->
                         // Use appNavController for navigation outside HomeLayout's NavHost
-                        appNavController.navigate(AppRoute.WallpaperDetailRoute(wallpaperId))
+                        appNavController.navigate(AppRoute.WallpaperDetailRoute(image.id))
                     }
                 )
             }

@@ -5,14 +5,15 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Text
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.ace.wallpaperrex.data.ImageItem
 import com.ace.wallpaperrex.data.repositories.WallhavenImageRepositoryImpl
 import com.ace.wallpaperrex.ui.layouts.HomeLayout
 import com.ace.wallpaperrex.ui.screens.wallpapers.WallPaperListViewModel
+import com.ace.wallpaperrex.ui.screens.wallpapers.WallpaperDetailScreen
 import com.ace.wallpaperrex.ui.theme.AppTheme
 import kotlinx.serialization.Serializable
 
@@ -28,7 +29,7 @@ interface AppRoute {
 
     @Serializable
     data class WallpaperDetailRoute(
-        val imageId: String,
+        val image: String,
         override val titleResId: Int = R.string.wallpaper_detail_title,
     ) : AppRoute
 }
@@ -58,7 +59,9 @@ class MainActivity : ComponentActivity() {
                     }
 
                     composable<AppRoute.WallpaperDetailRoute> {
-                        Text("Wallpaper Detail")
+                        WallpaperDetailScreen(
+                            wallpaperListViewModel = wallpaperListViewModel,
+                            onNavigateBack = { appNavController.popBackStack() })
                     }
                 }
             }

@@ -31,7 +31,7 @@ import com.ace.wallpaperrex.ui.components.wallpaper.SkeletonGridItem
 fun WallpaperListScreen(
     modifier: Modifier = Modifier,
     viewModel: WallPaperListViewModel,
-    onWallpaperClick: (wallpaperId: String) -> Unit
+    onWallpaperClick: (image: ImageItem) -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
@@ -88,7 +88,7 @@ fun WallpaperStaggeredGrid(
     paginationError: String?,
     onLoadMore: () -> Unit,
     onRetryLoadMore: () -> Unit,
-    onWallpaperClick: (wallpaperId: String) -> Unit,
+    onWallpaperClick: (image: ImageItem) -> Unit,
     modifier: Modifier = Modifier
 ) {
     LazyVerticalStaggeredGrid(
@@ -97,7 +97,7 @@ fun WallpaperStaggeredGrid(
         itemsIndexed(
             items = items,
             key = { index: Int, item: ImageItem -> item.id }) { index, item ->
-            GridImageItem(item = item, onClick = { onWallpaperClick(item.id) })
+            GridImageItem(item = item, onClick = { onWallpaperClick(item) })
 
             val loadMoreThreshold = 5
             if (!isLoadingMore && !isEndOfList && index >= items.size - loadMoreThreshold) {
