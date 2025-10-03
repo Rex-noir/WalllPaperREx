@@ -48,6 +48,7 @@ import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ace.wallpaperrex.ui.components.wallpaper.WallpaperApplyDialog
@@ -59,8 +60,10 @@ import kotlinx.coroutines.launch
 fun WallpaperDetailScreen(
     onNavigateBack: () -> Unit,
     wallpaperListViewModel: WallPaperListViewModel,
-    viewModel: WallpaperDetailViewModel = viewModel()
+    viewModelStoreOwner: ViewModelStoreOwner
 ) {
+    val viewModel: WallpaperDetailViewModel = viewModel(viewModelStoreOwner)
+
     val imageItem by viewModel.imageItem.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
     var isExpanded by remember { mutableStateOf(false) }

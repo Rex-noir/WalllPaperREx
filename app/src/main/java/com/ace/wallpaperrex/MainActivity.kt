@@ -58,10 +58,12 @@ class MainActivity : ComponentActivity() {
                         )
                     }
 
-                    composable<AppRoute.WallpaperDetailRoute> {
+                    composable<AppRoute.WallpaperDetailRoute> { backStackEntry ->
                         WallpaperDetailScreen(
                             wallpaperListViewModel = wallpaperListViewModel,
-                            onNavigateBack = { appNavController.popBackStack() })
+                            onNavigateBack = { appNavController.popBackStack() },
+                            viewModelStoreOwner = backStackEntry
+                        )
                     }
                 }
             }
