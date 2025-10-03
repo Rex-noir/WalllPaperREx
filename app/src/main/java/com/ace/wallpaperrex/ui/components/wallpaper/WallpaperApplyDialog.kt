@@ -17,7 +17,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.layout.ModifierLocalBeyondBoundsLayout
 import androidx.compose.ui.unit.dp
 import com.ace.wallpaperrex.utils.WallpaperHelper
 
@@ -38,7 +37,7 @@ fun WallpaperApplyDialog(
                     Text("Choose where to apply the wallpaper:")
                     Spacer(modifier = Modifier.height(8.dp))
 
-                    WallpaperHelper.ScreenTarget.values().forEach { it ->
+                    WallpaperHelper.ScreenTarget.entries.forEach { it ->
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
