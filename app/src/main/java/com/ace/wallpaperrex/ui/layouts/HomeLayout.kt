@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Wallpaper
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.getValue
@@ -47,7 +48,7 @@ val homeBottomNavItems: List<BottomNavigationItemInfo> = listOf(
     BottomNavigationItemInfo(
         routeKClass = WallpaperListRoute::class,
         routeInstance = WallpaperListRoute,
-        icon = Icons.Filled.Home,
+        icon = Icons.Filled.Wallpaper,
         titleResId = R.string.bottom_nav_home
     ),
     BottomNavigationItemInfo(
