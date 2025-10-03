@@ -11,10 +11,14 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
@@ -40,16 +44,17 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
-import coil3.compose.AsyncImage
+import coil3.compose.SubcomposeAsyncImage
 import coil3.request.ImageRequest
 import coil3.request.crossfade
+import com.ace.wallpaperrex.ui.components.wallpaper.shimmerBackground
 
 @Composable
 fun WallpaperDetailScreen(
@@ -77,14 +82,33 @@ fun WallpaperDetailScreen(
         val image = imageItem!!
         Box(modifier = Modifier.fillMaxSize()) {
             // Fullscreen wallpaper image
-            AsyncImage(
+            SubcomposeAsyncImage(
                 model = ImageRequest.Builder(LocalContext.current)
                     .data(image.url)
                     .crossfade(true)
                     .build(),
                 contentDescription = image.description ?: "Wallpaper Detail",
                 contentScale = ContentScale.Crop,
-                modifier = Modifier.fillMaxSize()
+                modifier = Modifier.fillMaxSize(),
+                loading = {
+                    SubcomposeAsyncImage(
+                        model = ImageRequest.Builder(LocalContext.current)
+                            .data(image.thumbnail)
+                            .crossfade(true)
+                            .build(),
+                        contentDescription = image.description ?: "Wallpaper Detail",
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier.fillMaxSize(),
+                        loading = {
+                            Spacer(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .shimmerBackground()
+                            )
+
+                        }
+                    )
+                }
             )
 
             // Status bar overlay (simulated)
@@ -227,7 +251,7 @@ fun ExpandableFabMenu(
                 imageVector = if (isExpanded) Icons.Filled.Close else Icons.Filled.Menu,
                 contentDescription = if (isExpanded) "Close menu" else "Open menu",
 
-            )
+                )
         }
     }
 }
