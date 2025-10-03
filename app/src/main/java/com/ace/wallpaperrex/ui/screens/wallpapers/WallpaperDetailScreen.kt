@@ -50,6 +50,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.ace.wallpaperrex.ui.components.wallpaper.WallpaperApplyDialog
+import com.ace.wallpaperrex.utils.WallpaperHelper
 import com.ace.wallpaperrex.utils.downloadImageRaw
 import kotlinx.coroutines.launch
 
@@ -63,6 +65,8 @@ fun WallpaperDetailScreen(
     val snackbarHostState = remember { SnackbarHostState() }
     var isExpanded by remember { mutableStateOf(false) }
     var isFavorite by remember { mutableStateOf(false) }
+
+    var showDialog by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         val imageId = viewModel.getImageId()
@@ -86,7 +90,6 @@ fun WallpaperDetailScreen(
         } else {
             val image = imageItem!!
 
-
             val context = LocalContext.current
             val scope = rememberCoroutineScope()
 
@@ -106,6 +109,17 @@ fun WallpaperDetailScreen(
                         }
                     }
                 }
+
+            WallpaperApplyDialog(
+                isVisible = showDialog,
+                onDismiss = { showDialog = false },
+                onApply = { target ->
+                    showDialog = false
+                    scope.launch {
+                        WallpaperHelper.applyWallpaperFromUrl(context, image.url, target)
+                    }
+                }
+            )
 
             Box(
                 modifier = Modifier
@@ -140,8 +154,8 @@ fun WallpaperDetailScreen(
                         // TODO: Handle favorite action
                     },
                     onApplyClick = {
-                        // TODO: Handle set wallpaper action
                         isExpanded = false
+                        showDialog = true
                     },
                     onDownloadClick = {
                         isExpanded = false
