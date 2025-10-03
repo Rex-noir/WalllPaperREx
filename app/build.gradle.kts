@@ -57,8 +57,15 @@ dependencies {
     implementation(libs.ktor.client.content.negotiation)
     implementation(libs.ktor.serialization.kotlinx.json)
     implementation(libs.ktor.client.logging)
-    implementation(libs.coil.compose)
+    implementation(libs.accompanist.placeholder.material)
+
+    //Coil
+    implementation(libs.coil)
+    implementation(libs.coil.kt.coil.compose)
+    implementation(libs.coil.gif)
+    implementation(libs.coil.svg)
     implementation(libs.coil.network.okhttp)
+    implementation(libs.lib.zoomable)
 
     // Compose BOM (manages Compose versions)
     val composeBom = platform("androidx.compose:compose-bom:2025.09.01")
