@@ -70,6 +70,7 @@ fun WallpaperDetailScreen(
     var isFavorite by remember { mutableStateOf(false) }
 
     var showDialog by remember { mutableStateOf(false) }
+    var isApplying by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         val imageId = viewModel.getImageId()
@@ -115,11 +116,20 @@ fun WallpaperDetailScreen(
 
             WallpaperApplyDialog(
                 isVisible = showDialog,
+                imageUrl = image.url,
                 onDismiss = { showDialog = false },
-                onApply = { target ->
+                onSuccess = {
                     showDialog = false
+                    // Optionally show success message
                     scope.launch {
-                        WallpaperHelper.applyWallpaperFromUrl(context, image.url, target)
+                        snackbarHostState.showSnackbar("Wallpaper applied successfully")
+                    }
+                },
+                onError = { error ->
+                    scope.launch {
+                        snackbarHostState.showSnackbar(
+                            error.localizedMessage ?: "An unknown error occurred"
+                        )
                     }
                 }
             )
