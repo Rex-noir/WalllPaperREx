@@ -6,19 +6,16 @@ import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
@@ -31,6 +28,7 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SmallFloatingActionButton
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -44,7 +42,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -74,117 +71,78 @@ fun WallpaperDetailScreen(
         }
     }
 
-    if (imageItem == null) {
-        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            Text("Error: image not found")
-        }
-    } else {
-        val image = imageItem!!
-        Box(modifier = Modifier.fillMaxSize()) {
-            // Fullscreen wallpaper image
-            SubcomposeAsyncImage(
-                model = ImageRequest.Builder(LocalContext.current)
-                    .data(image.url)
-                    .crossfade(true)
-                    .build(),
-                contentDescription = image.description ?: "Wallpaper Detail",
-                contentScale = ContentScale.Crop,
-                modifier = Modifier.fillMaxSize(),
-                loading = {
-                    SubcomposeAsyncImage(
-                        model = ImageRequest.Builder(LocalContext.current)
-                            .data(image.thumbnail)
-                            .crossfade(true)
-                            .build(),
-                        contentDescription = image.description ?: "Wallpaper Detail",
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier.fillMaxSize(),
-                        loading = {
-                            Spacer(
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .shimmerBackground()
-                            )
-
-                        }
-                    )
-                }
-            )
-
-            // Status bar overlay (simulated)
-            StatusBarOverlay()
-
-            // Back button (top left)
-            Surface(
-                modifier = Modifier
-                    .padding(16.dp)
-                    .align(Alignment.TopStart),
-                shape = CircleShape,
-                color = Color.Black.copy(alpha = 0.5f)
-            ) {
-                IconButton(onClick = onNavigateBack) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = "Navigate back",
-                        tint = Color.White
-                    )
-                }
-            }
-
-            // Snackbar host
+    Scaffold(
+        snackbarHost = {
             SnackbarHost(
                 hostState = snackbarHostState,
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .padding(bottom = 100.dp)
             )
-
-            // Expandable FAB menu (bottom right)
-            ExpandableFabMenu(
-                isExpanded = isExpanded,
-                isFavorite = isFavorite,
-                onExpandClick = { isExpanded = !isExpanded },
-                onFavoriteClick = {
-                    isFavorite = !isFavorite
-                    // TODO: Handle favorite action
-                },
-                onApplyClick = {
-                    // TODO: Handle set wallpaper action
-                    isExpanded = false
-                },
-                onDownloadClick = {
-                    // TODO: Handle download action
-                    isExpanded = false
-                },
+        },
+        contentWindowInsets = WindowInsets()
+    ) { innerPadding ->
+        if (imageItem == null) {
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                Text("Error: image not found")
+            }
+        } else {
+            val image = imageItem!!
+            Box(
                 modifier = Modifier
-                    .align(Alignment.BottomEnd)
-                    .padding(24.dp)
-            )
-        }
-    }
-}
+                    .fillMaxSize()
+                    .padding(innerPadding)
+            ) {
+                // Fullscreen wallpaper image
+                SubcomposeAsyncImage(
+                    model = ImageRequest.Builder(LocalContext.current)
+                        .data(image.url)
+                        .crossfade(true)
+                        .build(),
+                    contentDescription = image.description ?: "Wallpaper Detail",
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.fillMaxSize(),
+                    loading = {
+                        SubcomposeAsyncImage(
+                            model = ImageRequest.Builder(LocalContext.current)
+                                .data(image.thumbnail)
+                                .crossfade(true)
+                                .build(),
+                            contentDescription = image.description ?: "Wallpaper Detail",
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier.fillMaxSize(),
+                            loading = {
+                                Spacer(
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .shimmerBackground()
+                                )
 
-@Composable
-fun StatusBarOverlay() {
-    // Simulated status bar with gradient
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-    ) {
-        Box(
-            modifier = Modifier
-                .matchParentSize()
-                .background(
-                    androidx.compose.ui.graphics.Brush.verticalGradient(
-                        colors = listOf(
-                            Color.Black.copy(alpha = 0.5f),
-                            Color.Transparent
-                        ),
-                        startY = 0f,
-                        endY = 200f
-                    )
+                            }
+                        )
+                    }
                 )
-        )
+
+                // Expandable FAB menu (bottom right)
+                ExpandableFabMenu(
+                    isExpanded = isExpanded,
+                    isFavorite = isFavorite,
+                    onExpandClick = { isExpanded = !isExpanded },
+                    onFavoriteClick = {
+                        isFavorite = !isFavorite
+                        // TODO: Handle favorite action
+                    },
+                    onApplyClick = {
+                        // TODO: Handle set wallpaper action
+                        isExpanded = false
+                    },
+                    onDownloadClick = {
+                        // TODO: Handle download action
+                        isExpanded = false
+                    },
+                    modifier = Modifier
+                        .align(Alignment.BottomEnd)
+                        .padding(24.dp)
+                )
+            }
+        }
     }
 }
 
