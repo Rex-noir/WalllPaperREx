@@ -4,9 +4,14 @@ import android.util.Log
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.currentComposer
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
+import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.CreationExtras
 import com.ace.wallpaperrex.data.ImageItem
 import com.ace.wallpaperrex.data.repositories.WallhavenImageRepository
+import com.ace.wallpaperrex.data.repositories.WallhavenImageRepositoryImpl
 import com.ace.wallpaperrex.data.toImageItem
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -112,5 +117,15 @@ class WallPaperListViewModel(private val wallhavenImageRepository: WallhavenImag
 
     fun getImageById(imageId: String): ImageItem? {
         return _uiState.value.items.find { it.id == imageId }
+    }
+
+    companion object {
+        val Factory: ViewModelProvider.Factory = object : ViewModelProvider.Factory {
+            @Suppress("UNCHECKED_CAST")
+            override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                val repository = WallhavenImageRepositoryImpl()
+                return WallPaperListViewModel(repository) as T
+            }
+        }
     }
 }

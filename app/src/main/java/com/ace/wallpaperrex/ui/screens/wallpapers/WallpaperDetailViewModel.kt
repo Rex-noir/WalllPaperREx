@@ -9,11 +9,13 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
+
 class WallpaperDetailViewModel(
     private val savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
-    private val _image = MutableStateFlow<ImageItem?>(null)
+    private val _image =
+        MutableStateFlow<ImageItem?>(null)
     val imageItem: StateFlow<ImageItem?> = _image.asStateFlow()
 
     fun getImageId(): String? {
@@ -23,6 +25,7 @@ class WallpaperDetailViewModel(
             null
         }
     }
+
 
     fun setImage(image: ImageItem?) {
         _image.value = image
