@@ -2,6 +2,8 @@ package com.ace.wallpaperrex.ui.screens.wallpapers
 
 import Picture
 import ZoomParams
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.expandVertically
@@ -37,6 +39,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -47,9 +50,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
-import coil.compose.SubcomposeAsyncImage
-import coil3.request.ImageRequest
-import coil3.request.crossfade
+import com.ace.wallpaperrex.utils.downloadImageRaw
+import kotlinx.coroutines.launch
 
 @Composable
 fun WallpaperDetailScreen(
@@ -83,6 +85,28 @@ fun WallpaperDetailScreen(
             }
         } else {
             val image = imageItem!!
+
+
+            val context = LocalContext.current
+            val scope = rememberCoroutineScope()
+
+            val downloadLauncher =
+                rememberLauncherForActivityResult(
+                    contract = ActivityResultContracts.CreateDocument(
+                        "image/*"
+                    )
+                ) { uri ->
+                    uri?.let { destinationUri ->
+                        scope.launch {
+                            downloadImageRaw(
+                                context,
+                                image.url,
+                                destinationUri
+                            )
+                        }
+                    }
+                }
+
             Box(
                 modifier = Modifier
                     .fillMaxSize()
@@ -120,8 +144,8 @@ fun WallpaperDetailScreen(
                         isExpanded = false
                     },
                     onDownloadClick = {
-                        // TODO: Handle download action
                         isExpanded = false
+                        downloadLauncher.launch("${image.id}.${image.extension}")
                     },
                     modifier = Modifier
                         .align(Alignment.BottomEnd)
@@ -146,6 +170,7 @@ fun ExpandableFabMenu(
         targetValue = if (isExpanded) 45f else 0f,
         label = "rotation"
     )
+
 
     Column(
         modifier = modifier,

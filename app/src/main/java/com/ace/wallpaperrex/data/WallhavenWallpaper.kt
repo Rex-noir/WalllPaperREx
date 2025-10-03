@@ -1,5 +1,6 @@
 package com.ace.wallpaperrex.data
 
+import com.ace.wallpaperrex.utils.getExtensionFromString
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -72,7 +73,8 @@ fun WallhavenWallpaperDetail.toImageItem(): ImageItem {
         aspectRatio = ratio.toFloat(),
         url = path,
         thumbnail = thumbs.original,
-        description = source
+        description = source,
+        extension = path.getExtensionFromString
     )
 }
 

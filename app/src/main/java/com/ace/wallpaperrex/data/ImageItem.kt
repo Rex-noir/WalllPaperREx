@@ -11,7 +11,8 @@ data class ImageItem(
     val thumbnail: String,
     val url: String,
     val aspectRatio: Float = 1f,
-    val description: String? = null
+    val description: String? = null,
+    val extension: String
 )
 
 @Serializable
