@@ -75,7 +75,8 @@ fun WallhavenWallpaperDetail.toImageItem(): ImageItem {
         url = path,
         thumbnail = thumbs.original,
         description = source,
-        extension = path.getExtensionFromString
+        extension = path.getExtensionFromString,
+        sourceId = 1
     )
 }
 

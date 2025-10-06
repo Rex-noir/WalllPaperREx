@@ -17,7 +17,8 @@ data class FavoriteImageEntity(
     val description: String? = null,
     val extension: String,
     val localPath: String? = null,
-    val savedAt: Long = System.currentTimeMillis()
+    val savedAt: Long = System.currentTimeMillis(),
+    val sourceId: Int
 )
 
 fun FavoriteImageEntity.toImageItem(): ImageItem {

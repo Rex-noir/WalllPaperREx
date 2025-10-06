@@ -24,6 +24,7 @@ fun ImageItem.toEntity(localPath: String? = null): FavoriteImageEntity {
         aspectRatio = aspectRatio,
         description = description,
         extension = extension,
-        localPath = localPath
+        localPath = localPath,
+        sourceId = sourceId
     );
 }
