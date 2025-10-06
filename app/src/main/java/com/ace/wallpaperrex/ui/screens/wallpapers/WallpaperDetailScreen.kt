@@ -2,6 +2,7 @@ package com.ace.wallpaperrex.ui.screens.wallpapers
 
 import Picture
 import ZoomParams
+import android.app.Application
 import android.graphics.BitmapFactory
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -63,7 +64,10 @@ fun WallpaperDetailScreen(
     wallpaperListViewModel: WallPaperListViewModel,
     viewModelStoreOwner: ViewModelStoreOwner
 ) {
-    val viewModel: WallpaperDetailViewModel = viewModel(viewModelStoreOwner)
+    val viewModel: WallpaperDetailViewModel = viewModel(
+        viewModelStoreOwner = viewModelStoreOwner,
+        factory = WallpaperDetailViewModel.Factory
+    )
 
     val imageItem by viewModel.imageItem.collectAsStateWithLifecycle()
     val bytes by viewModel.imageByes.collectAsState()
