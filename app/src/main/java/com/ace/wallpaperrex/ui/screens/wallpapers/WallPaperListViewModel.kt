@@ -4,10 +4,10 @@ import androidx.compose.runtime.Immutable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.ace.wallpaperrex.data.ImageItem
 import com.ace.wallpaperrex.data.repositories.WallhavenImageRepository
 import com.ace.wallpaperrex.data.repositories.WallhavenImageRepositoryImpl
 import com.ace.wallpaperrex.data.models.toImageItem
+import com.ace.wallpaperrex.ui.models.ImageItem
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
