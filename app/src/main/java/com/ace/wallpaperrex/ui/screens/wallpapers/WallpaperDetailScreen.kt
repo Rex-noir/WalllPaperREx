@@ -54,7 +54,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil3.Bitmap
 import com.ace.wallpaperrex.ui.components.wallpaper.WallpaperApplyDialog
-import com.ace.wallpaperrex.utils.saveRawBytesToUri
+import com.ace.wallpaperrex.utils.ImageFileHelper.saveRawBytesToUri
 import kotlinx.coroutines.launch
 
 @Composable

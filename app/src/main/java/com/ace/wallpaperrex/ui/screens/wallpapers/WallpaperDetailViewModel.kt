@@ -6,7 +6,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import com.ace.wallpaperrex.AppRoute
 import com.ace.wallpaperrex.ui.models.ImageItem
-import com.ace.wallpaperrex.utils.getImageBytesFromUrl
+import com.ace.wallpaperrex.utils.ImageFileHelper.getImageBytesFromUrl
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
