@@ -1,6 +1,9 @@
 package com.ace.wallpaperrex.ui.layouts
 
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
@@ -11,9 +14,14 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavDestination
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavGraph.Companion.findStartDestination
@@ -99,8 +107,38 @@ fun HomeLayout(
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
     var searchQuery by remember { mutableStateOf("") }
 
+    var isBottomBarVisible by remember { mutableStateOf(true) }
+    val bottomBarHeight = 80.dp
+    val bottomBarHeightPx = with(LocalDensity.current) { bottomBarHeight.roundToPx().toFloat() }
+    val bottomBarOffsetHeightPx = remember { mutableFloatStateOf(0f) }
+
+    val nestedScrollConnection = remember {
+        object : NestedScrollConnection {
+            override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
+                val delta = available.y
+                val newOffset = bottomBarOffsetHeightPx.floatValue + delta
+
+                bottomBarOffsetHeightPx.floatValue = newOffset.coerceIn(0f, bottomBarHeightPx)
+
+                if (delta < 0) {
+                    isBottomBarVisible = false
+                } else if (delta > 0) {
+                    isBottomBarVisible = true
+                }
+
+                return Offset.Zero
+            }
+        }
+    }
+
+    val animatedBottomBarHeight by animateDpAsState(
+        targetValue = if (isBottomBarVisible) bottomBarHeight else 0.dp,
+        label = "bottomBarHeightAnimation"
+    )
     Scaffold(
-        modifier = modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
+        modifier = modifier
+            .nestedScroll(scrollBehavior.nestedScrollConnection)
+            .nestedScroll(nestedScrollConnection),
         topBar = {
             // Determine TopAppBar based on the current route type
             // You can also fetch the titleResId from homeBottomNavItems if needed
@@ -143,10 +181,12 @@ fun HomeLayout(
             }
         },
         bottomBar = {
-            AppBottomNavigationBar(
-                homeNavController = homeNavController,
-                currentNavDestination = currentNavDestination
-            )
+            Box(modifier = Modifier.height(animatedBottomBarHeight)) {
+                AppBottomNavigationBar(
+                    homeNavController = homeNavController,
+                    currentNavDestination = currentNavDestination
+                )
+            }
         }
     ) { innerPadding ->
         NavHost(
