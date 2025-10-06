@@ -19,4 +19,7 @@ interface FavoriteImageDao {
     @Query("SELECT * FROM favorite_images")
     fun getAll(): Flow<List<FavoriteImageEntity>>
 
+    @Query("DELETE FROM favorite_images WHERE id = :imageId")
+    suspend fun deleteById(imageId: String)
+
 }

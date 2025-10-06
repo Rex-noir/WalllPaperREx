@@ -14,6 +14,7 @@ import com.ace.wallpaperrex.AppRoute
 import com.ace.wallpaperrex.data.database.AppDatabase
 import com.ace.wallpaperrex.data.repositories.FavoriteImageRepository
 import com.ace.wallpaperrex.ui.models.ImageItem
+import com.ace.wallpaperrex.ui.models.toEntity
 import com.ace.wallpaperrex.utils.ImageFileHelper.getImageBytesFromUrl
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -45,6 +46,23 @@ class WallpaperDetailViewModel(
         }
     }
 
+    fun addToFavorite(localPath: String) {
+        val favImage = _image.value?.toEntity()?.copy(localPath = localPath)
+        if (favImage !== null) {
+            viewModelScope.launch(Dispatchers.IO) {
+                favoriteImageRepository.addFavorite(favImage)
+            }
+        }
+    }
+
+    fun removeFromFavorite() {
+        val favImage = _image.value?.toEntity()
+        if (favImage !== null) {
+            viewModelScope.launch(Dispatchers.IO) {
+                favoriteImageRepository.removeFavorite(favImage)
+            }
+        }
+    }
 
     fun setImage(image: ImageItem?) {
         if (image == null) {

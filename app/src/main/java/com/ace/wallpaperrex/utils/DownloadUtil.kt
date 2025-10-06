@@ -4,6 +4,7 @@ import android.content.Context
 import android.net.Uri
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import java.io.File
 import java.net.URL
 
 
@@ -36,5 +37,32 @@ object ImageFileHelper {
                 e.printStackTrace()
             }
         }
+    }
+
+    private const val CACHE_DIR = "images_cache"
+
+    suspend fun saveBytesToCache(context: Context, name: String, bytes: ByteArray): String {
+        return withContext(Dispatchers.IO) {
+            val cacheDir = File(context.filesDir, CACHE_DIR)
+            if (!cacheDir.exists()) cacheDir.mkdirs()
+
+            val file = File(cacheDir, name)
+
+            file.outputStream().use { it.write(bytes) }
+            file.absolutePath
+        }
+    }
+
+    fun getCachedFilePath(context: Context, name: String): String? {
+        val file = File(File(context.filesDir, CACHE_DIR), name)
+        return if (file.exists()) file.absolutePath else null
+    }
+
+    fun deleteCachedImage(context: Context, name: String): String {
+        val file = File(File(context.filesDir, CACHE_DIR), name)
+        if (file.exists()) {
+            file.delete()
+        }
+        return file.absolutePath
     }
 }

@@ -13,7 +13,7 @@ class FavoriteImageRepository(private val dao: FavoriteImageDao) {
     }
 
     suspend fun removeFavorite(entity: FavoriteImageEntity) {
-        dao.delete(entity)
+        dao.deleteById(entity.id)
     }
 
     suspend fun addMultipleFavorites(entities: List<FavoriteImageEntity>) {

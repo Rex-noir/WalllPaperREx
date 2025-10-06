@@ -55,6 +55,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil3.Bitmap
 import com.ace.wallpaperrex.ui.components.wallpaper.WallpaperApplyDialog
+import com.ace.wallpaperrex.utils.ImageFileHelper
 import com.ace.wallpaperrex.utils.ImageFileHelper.saveRawBytesToUri
 import kotlinx.coroutines.launch
 
@@ -168,6 +169,22 @@ fun WallpaperDetailScreen(
                         onExpandClick = { isExpanded = !isExpanded },
                         onFavoriteClick = {
                             isFavorite = !isFavorite
+                            if (isFavorite) {
+                                scope.launch {
+                                    val localPath = ImageFileHelper.saveBytesToCache(
+                                        context,
+                                        "${image.id}${image.extension}",
+                                        bytes!!
+                                    )
+                                    viewModel.addToFavorite(localPath)
+                                }
+                            } else {
+                             ImageFileHelper.deleteCachedImage(
+                                    context,
+                                    "${image.id}${image.extension}"
+                                )
+                                viewModel.removeFromFavorite()
+                            }
                         },
                         onApplyClick = {
                             isExpanded = false
