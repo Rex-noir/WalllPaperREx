@@ -1,5 +1,6 @@
 package com.ace.wallpaperrex.ui.components.wallpaper
 
+import android.graphics.Bitmap
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -24,12 +25,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.ace.wallpaperrex.utils.WallpaperHelper
+import com.ace.wallpaperrex.utils.convertToWebpBytes
 import kotlinx.coroutines.launch
 
 @Composable
 fun WallpaperApplyDialog(
     isVisible: Boolean,
-    imageBytes: ByteArray?,
+    imageBitmap: Bitmap?,
     onDismiss: () -> Unit,
     onSuccess: () -> Unit,
     onError: (Exception) -> Unit = {}
@@ -80,10 +82,11 @@ fun WallpaperApplyDialog(
                     onClick = {
                         isApplying = true
                         scope.launch {
+                            val bytes = imageBitmap?.convertToWebpBytes()
                             try {
                                 WallpaperHelper.applyWallpaper(
                                     context,
-                                    rawBytes = imageBytes,
+                                    rawBytes = bytes,
                                     target = selectedTarget
                                 )
                                 onSuccess()

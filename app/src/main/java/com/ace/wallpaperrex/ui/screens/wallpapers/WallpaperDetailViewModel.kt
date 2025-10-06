@@ -1,7 +1,7 @@
 package com.ace.wallpaperrex.ui.screens.wallpapers
 
-import android.app.Application
-import androidx.lifecycle.AbstractSavedStateViewModelFactory
+import android.content.Context
+import android.graphics.Bitmap
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -15,13 +15,13 @@ import com.ace.wallpaperrex.data.database.AppDatabase
 import com.ace.wallpaperrex.data.repositories.FavoriteImageRepository
 import com.ace.wallpaperrex.ui.models.ImageItem
 import com.ace.wallpaperrex.ui.models.toEntity
-import com.ace.wallpaperrex.utils.ImageFileHelper.getImageBytesFromUrl
+import com.ace.wallpaperrex.utils.ImageFileHelper
+import com.ace.wallpaperrex.utils.convertToWebpBytes
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 
 class WallpaperDetailViewModel(
@@ -33,6 +33,8 @@ class WallpaperDetailViewModel(
         MutableStateFlow<ImageItem?>(null)
     val imageItem: StateFlow<ImageItem?> = _image.asStateFlow()
 
+    private val _isFavorite = MutableStateFlow(false)
+    val isFavorite: StateFlow<Boolean> = _isFavorite.asStateFlow()
 
     fun getImageId(): String? {
         return try {
@@ -42,7 +44,7 @@ class WallpaperDetailViewModel(
         }
     }
 
-    fun addToFavorite(localPath: String) {
+    private fun addToFavorite(localPath: String) {
         val favImage = _image.value?.toEntity()?.copy(localPath = localPath)
         if (favImage !== null) {
             viewModelScope.launch(Dispatchers.IO) {
@@ -51,7 +53,7 @@ class WallpaperDetailViewModel(
         }
     }
 
-    fun removeFromFavorite() {
+    private fun removeFromFavorite() {
         val favImage = _image.value?.toEntity()
         if (favImage !== null) {
             viewModelScope.launch(Dispatchers.IO) {
@@ -67,6 +69,31 @@ class WallpaperDetailViewModel(
         }
 
         _image.value = image
+        viewModelScope.launch(Dispatchers.IO) {
+            val favImage = favoriteImageRepository.getById(image.id)
+            _isFavorite.value = favImage != null
+        }
+    }
+
+    fun toggleFavoriteState(context: Context, bitmap: Bitmap, name: String) {
+        viewModelScope.launch {
+            val newValue = !_isFavorite.value
+            _isFavorite.value = newValue
+
+            if (newValue) {
+                viewModelScope.launch {
+                    val localPath = ImageFileHelper.saveBytesToCache(
+                        context,
+                        name = name,
+                        bytes = bitmap.convertToWebpBytes()
+                    )
+                    addToFavorite(localPath)
+                }
+            } else {
+                ImageFileHelper.deleteCachedImage(context, name)
+                removeFromFavorite()
+            }
+        }
     }
 
     companion object {

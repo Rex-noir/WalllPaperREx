@@ -2,14 +2,17 @@ package com.ace.wallpaperrex.utils
 
 import android.graphics.Bitmap
 import android.os.Build
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import java.io.ByteArrayOutputStream
 
-fun Bitmap.convertToByteArray(): ByteArray {
+suspend fun Bitmap.convertToWebpBytes(): ByteArray = withContext(Dispatchers.IO) {
     val outputStream = ByteArrayOutputStream()
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-        compress(Bitmap.CompressFormat.WEBP_LOSSLESS, 100, outputStream)
+    val format = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+        Bitmap.CompressFormat.WEBP_LOSSLESS
     } else {
-        compress(Bitmap.CompressFormat.PNG, 100, outputStream)
+        Bitmap.CompressFormat.WEBP
     }
-    return outputStream.toByteArray()
+    compress(format, 100, outputStream)
+    outputStream.toByteArray()
 }

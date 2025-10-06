@@ -2,8 +2,8 @@ package com.ace.wallpaperrex.ui.screens.wallpapers
 
 import Picture
 import ZoomParams
+import android.graphics.Bitmap
 import android.graphics.drawable.BitmapDrawable
-import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
@@ -52,9 +52,8 @@ import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ace.wallpaperrex.ui.components.wallpaper.WallpaperApplyDialog
-import com.ace.wallpaperrex.utils.ImageFileHelper
 import com.ace.wallpaperrex.utils.ImageFileHelper.saveRawBytesToUri
-import com.ace.wallpaperrex.utils.convertToByteArray
+import com.ace.wallpaperrex.utils.convertToWebpBytes
 import kotlinx.coroutines.launch
 
 
@@ -70,13 +69,13 @@ fun WallpaperDetailScreen(
     )
 
     val imageItem by viewModel.imageItem.collectAsStateWithLifecycle()
-    var imageBytes by remember { mutableStateOf<ByteArray?>(null) }
+    var imageBitmap by remember { mutableStateOf<Bitmap?>(null) }
 
     val snackbarHostState = remember { SnackbarHostState() }
     var isExpanded by remember { mutableStateOf(false) }
-    var isFavorite by remember { mutableStateOf(false) }
 
     var showDialog by remember { mutableStateOf(false) }
+    val isFavorite = viewModel.isFavorite.collectAsStateWithLifecycle()
 
     LaunchedEffect(Unit) {
         val imageId = viewModel.getImageId()
@@ -111,14 +110,15 @@ fun WallpaperDetailScreen(
                 ) { uri ->
                     uri?.let { destinationUri ->
                         scope.launch {
-                            saveRawBytesToUri(context, imageBytes!!, uri)
+                            val bytes = imageBitmap?.convertToWebpBytes()
+                            saveRawBytesToUri(context, bytes!!, uri)
                         }
                     }
                 }
 
             WallpaperApplyDialog(
                 isVisible = showDialog,
-                imageBytes = imageBytes,
+                imageBitmap = imageBitmap,
                 onDismiss = { showDialog = false },
                 onSuccess = {
                     showDialog = false
@@ -150,7 +150,7 @@ fun WallpaperDetailScreen(
                     onSuccess = { successState ->
                         val drawable = successState.result.drawable
                         val bitmap = (drawable as BitmapDrawable).bitmap
-                        imageBytes = bitmap.convertToByteArray()
+                        imageBitmap = bitmap
                     },
                     loading = {
                         Picture(
@@ -165,29 +165,17 @@ fun WallpaperDetailScreen(
                     zoomParams = ZoomParams(zoomEnabled = true, hideBarsOnTap = true)
                 )
 
-                if (imageBytes != null) {
+                if (imageBitmap != null) {
                     ExpandableFabMenu(
                         isExpanded = isExpanded,
-                        isFavorite = isFavorite,
+                        isFavorite = isFavorite.value,
                         onExpandClick = { isExpanded = !isExpanded },
                         onFavoriteClick = {
-                            isFavorite = !isFavorite
-                            if (isFavorite) {
-                                scope.launch {
-                                    val localPath = ImageFileHelper.saveBytesToCache(
-                                        context,
-                                        "${image.id}.${image.extension}",
-                                        imageBytes!!
-                                    )
-                                    viewModel.addToFavorite(localPath)
-                                }
-                            } else {
-                                ImageFileHelper.deleteCachedImage(
-                                    context,
-                                    "${image.id}.${image.extension}"
-                                )
-                                viewModel.removeFromFavorite()
-                            }
+                            viewModel.toggleFavoriteState(
+                                context,
+                                imageBitmap!!,
+                                "${image.id}.${image.extension}"
+                            )
                         },
                         onApplyClick = {
                             isExpanded = false

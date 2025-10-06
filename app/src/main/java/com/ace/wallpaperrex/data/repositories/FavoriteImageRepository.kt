@@ -3,7 +3,6 @@ package com.ace.wallpaperrex.data.repositories
 import com.ace.wallpaperrex.data.daos.FavoriteImageDao
 import com.ace.wallpaperrex.data.entities.FavoriteImageEntity
 import kotlinx.coroutines.flow.Flow
-import kotlin.collections.toTypedArray
 
 class FavoriteImageRepository(private val dao: FavoriteImageDao) {
     val allFavorites: Flow<List<FavoriteImageEntity>> = dao.getAll()
@@ -19,4 +18,9 @@ class FavoriteImageRepository(private val dao: FavoriteImageDao) {
     suspend fun addMultipleFavorites(entities: List<FavoriteImageEntity>) {
         dao.insertAll(*entities.toTypedArray())
     }
+
+    suspend fun getById(imageId: String): FavoriteImageEntity? {
+        return dao.getById(imageId)
+    }
+
 }
