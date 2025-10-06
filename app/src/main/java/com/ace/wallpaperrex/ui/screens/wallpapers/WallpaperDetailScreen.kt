@@ -2,6 +2,7 @@ package com.ace.wallpaperrex.ui.screens.wallpapers
 
 import Picture
 import ZoomParams
+import android.graphics.BitmapFactory
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
@@ -36,6 +37,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -45,15 +47,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import coil3.Bitmap
 import com.ace.wallpaperrex.ui.components.wallpaper.WallpaperApplyDialog
-import com.ace.wallpaperrex.utils.WallpaperHelper
-import com.ace.wallpaperrex.utils.downloadImageRaw
+import com.ace.wallpaperrex.utils.saveRawBytesToUri
 import kotlinx.coroutines.launch
 
 @Composable
@@ -65,12 +66,22 @@ fun WallpaperDetailScreen(
     val viewModel: WallpaperDetailViewModel = viewModel(viewModelStoreOwner)
 
     val imageItem by viewModel.imageItem.collectAsStateWithLifecycle()
+    val bytes by viewModel.imageByes.collectAsState()
+
+
+    val bitmap: Bitmap? = bytes?.let { byteArray ->
+        remember(byteArray) { BitmapFactory.decodeByteArray(byteArray, 0, byteArray.size) }
+    }
+
+    val displayModel = remember(imageItem, bitmap) {
+        bitmap ?: imageItem?.thumbnail
+    }
+
     val snackbarHostState = remember { SnackbarHostState() }
     var isExpanded by remember { mutableStateOf(false) }
     var isFavorite by remember { mutableStateOf(false) }
 
     var showDialog by remember { mutableStateOf(false) }
-    var isApplying by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         val imageId = viewModel.getImageId()
@@ -105,22 +116,20 @@ fun WallpaperDetailScreen(
                 ) { uri ->
                     uri?.let { destinationUri ->
                         scope.launch {
-                            downloadImageRaw(
-                                context,
-                                image.url,
-                                destinationUri
-                            )
+                            viewModel.imageByes.value?.let { bytes ->
+                                saveRawBytesToUri(context, bytes, uri)
+                            }
+
                         }
                     }
                 }
 
             WallpaperApplyDialog(
                 isVisible = showDialog,
-                imageUrl = image.url,
+                imageBytes = bytes,
                 onDismiss = { showDialog = false },
                 onSuccess = {
                     showDialog = false
-                    // Optionally show success message
                     scope.launch {
                         snackbarHostState.showSnackbar("Wallpaper applied successfully")
                     }
@@ -140,44 +149,35 @@ fun WallpaperDetailScreen(
                     .padding(innerPadding)
             ) {
                 Picture(
-                    model = image.url,
+                    model = displayModel,
                     shape = RectangleShape,
                     modifier = Modifier.fillMaxSize(),
                     shimmerEnabled = false,
                     crossfadeEnabled = false,
-                    loading = {
-                        Picture(
-                            model = image.thumbnail,
-                            shape = RectangleShape,
-                            modifier = Modifier.fillMaxSize(),
-                            shimmerEnabled = true,
-                            contentScale = ContentScale.Crop
-                        )
-                    },
                     zoomParams = ZoomParams(zoomEnabled = true, hideBarsOnTap = true)
                 )
 
-                // Expandable FAB menu (bottom right)
-                ExpandableFabMenu(
-                    isExpanded = isExpanded,
-                    isFavorite = isFavorite,
-                    onExpandClick = { isExpanded = !isExpanded },
-                    onFavoriteClick = {
-                        isFavorite = !isFavorite
-                        // TODO: Handle favorite action
-                    },
-                    onApplyClick = {
-                        isExpanded = false
-                        showDialog = true
-                    },
-                    onDownloadClick = {
-                        isExpanded = false
-                        downloadLauncher.launch("${image.id}.${image.extension}")
-                    },
-                    modifier = Modifier
-                        .align(Alignment.BottomEnd)
-                        .padding(24.dp)
-                )
+                if (bytes != null) {
+                    ExpandableFabMenu(
+                        isExpanded = isExpanded,
+                        isFavorite = isFavorite,
+                        onExpandClick = { isExpanded = !isExpanded },
+                        onFavoriteClick = {
+                            isFavorite = !isFavorite
+                        },
+                        onApplyClick = {
+                            isExpanded = false
+                            showDialog = true
+                        },
+                        onDownloadClick = {
+                            isExpanded = false
+                            downloadLauncher.launch("${image.id}${image.extension}")
+                        },
+                        modifier = Modifier
+                            .align(Alignment.BottomEnd)
+                            .padding(24.dp)
+                    )
+                }
             }
         }
     }

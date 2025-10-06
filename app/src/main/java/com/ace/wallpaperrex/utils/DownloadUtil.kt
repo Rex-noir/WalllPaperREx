@@ -6,16 +6,20 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.net.URL
 
-suspend fun downloadImageRaw(context: Context, imageUrl: String, destinationUri: Uri) {
-    withContext(Dispatchers.IO) {
-        try {
-            val inputStream = URL(imageUrl).openStream()
 
-            context.contentResolver.openOutputStream(destinationUri)
-                ?.use { outputStream -> inputStream.copyTo(outputStream) }
-            inputStream.close()
-        } catch (e: Exception) {
-            e.printStackTrace()
+fun getImageBytesFromUrl(url: String): ByteArray? {
+    return try {
+        URL(url).readBytes()
+    } catch (e: Exception) {
+        e.printStackTrace()
+        null
+    }
+}
+
+suspend fun saveRawBytesToUri(context: Context, bytes: ByteArray, destinationUri: Uri) {
+    withContext(Dispatchers.IO) {
+        context.contentResolver.openOutputStream(destinationUri)?.use { output ->
+            output.write(bytes)
         }
     }
 }

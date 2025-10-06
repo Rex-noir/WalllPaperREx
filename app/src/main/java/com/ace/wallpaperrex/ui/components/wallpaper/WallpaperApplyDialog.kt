@@ -29,7 +29,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun WallpaperApplyDialog(
     isVisible: Boolean,
-    imageUrl: String,
+    imageBytes: ByteArray?,
     onDismiss: () -> Unit,
     onSuccess: () -> Unit,
     onError: (Exception) -> Unit = {}
@@ -81,10 +81,10 @@ fun WallpaperApplyDialog(
                         isApplying = true
                         scope.launch {
                             try {
-                                WallpaperHelper.applyWallpaperFromUrl(
+                                WallpaperHelper.applyWallpaper(
                                     context,
-                                    imageUrl,
-                                    selectedTarget
+                                    rawBytes = imageBytes,
+                                    target = selectedTarget
                                 )
                                 onSuccess()
                             } catch (e: Exception) {
