@@ -23,7 +23,11 @@ ktorSerializationKotlinxJson = "3.3.0"
 material = "1.9.2"
 materialIconsExtendedAndroid = "1.7.8"
 navigationCompose = "2.9.5"
+roomCompiler = "2.8.1"
+roomKtx = "2.8.1"
+roomRuntime = "2.8.1"
 zoomableVersion = "2.8.1"
+ksp = "2.2.20-2.0.3"
 
 [libraries]
 accompanist-placeholder-material = { module = "com.google.accompanist:accompanist-placeholder-material", version.ref = "accompanistPlaceholderMaterial" }
@@ -34,6 +38,9 @@ androidx-foundation = { module = "androidx.compose.foundation:foundation", versi
 androidx-material-icons-extended-android = { module = "androidx.compose.material:material-icons-extended-android", version.ref = "materialIconsExtendedAndroid" }
 androidx-material3 = { module = "androidx.compose.material3:material3" }
 androidx-navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "navigationCompose" }
+androidx-room-compiler = { module = "androidx.room:room-compiler", version.ref = "roomCompiler" }
+androidx-room-ktx = { module = "androidx.room:room-ktx", version.ref = "roomKtx" }
+androidx-room-runtime = { module = "androidx.room:room-runtime", version.ref = "roomRuntime" }
 androidx-ui = { module = "androidx.compose.ui:ui" }
 androidx-ui-test-junit4 = { module = "androidx.compose.ui:ui-test-junit4" }
 androidx-ui-test-manifest = { module = "androidx.compose.ui:ui-test-manifest" }
@@ -60,3 +67,5 @@ lib-zoomable = { module = "net.engawapg.lib:zoomable", version.ref = "zoomableVe
 android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+devtools-ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
+androidx-room = { id = "androidx.room", version.ref = "roomCompiler" }
