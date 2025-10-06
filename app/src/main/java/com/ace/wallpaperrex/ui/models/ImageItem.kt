@@ -1,7 +1,7 @@
 package com.ace.wallpaperrex.ui.models
 
 import androidx.compose.runtime.Immutable
-import com.ace.wallpaperrex.data.FavoriteImageEntity
+import com.ace.wallpaperrex.data.entities.FavoriteImageEntity
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -25,15 +25,4 @@ fun ImageItem.toEntity(localPath: String? = null): FavoriteImageEntity {
         extension = extension,
         localPath = localPath
     );
-}
-
-fun FavoriteImageEntity.toImageItem(): ImageItem {
-    return ImageItem(
-        id = id,
-        thumbnail = thumbnail,
-        url = url,
-        aspectRatio = aspectRatio,
-        description = description,
-        extension = extension
-    )
 }
