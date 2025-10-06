@@ -11,10 +11,10 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface FavoriteImageDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun insertAll(vararg images: FavoriteImageEntity)
+    suspend fun insertAll(vararg images: FavoriteImageEntity)
 
     @Delete
-    fun delete(image: FavoriteImageEntity)
+    suspend fun delete(image: FavoriteImageEntity)
 
     @Query("SELECT * FROM favorite_images")
     fun getAll(): Flow<List<FavoriteImageEntity>>
