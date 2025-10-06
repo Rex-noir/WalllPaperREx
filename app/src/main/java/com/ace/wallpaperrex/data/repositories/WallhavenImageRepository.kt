@@ -1,9 +1,9 @@
 package com.ace.wallpaperrex.data.repositories
 
 import android.util.Log
-import com.ace.wallpaperrex.data.ImageResponse
-import com.ace.wallpaperrex.data.WallhavenSearchResponse
-import com.ace.wallpaperrex.data.WallhavenWallpaperDetail
+import com.ace.wallpaperrex.data.models.WallhavenSearchResponse
+import com.ace.wallpaperrex.data.models.WallhavenWallpaperDetail
+import com.ace.wallpaperrex.ui.models.ImageResponse
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.engine.cio.CIO

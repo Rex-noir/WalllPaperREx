@@ -1,18 +1,13 @@
 package com.ace.wallpaperrex.ui.screens.wallpapers
 
-import android.util.Log
 import androidx.compose.runtime.Immutable
-import androidx.compose.runtime.currentComposer
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
-import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.CreationExtras
 import com.ace.wallpaperrex.data.ImageItem
 import com.ace.wallpaperrex.data.repositories.WallhavenImageRepository
 import com.ace.wallpaperrex.data.repositories.WallhavenImageRepositoryImpl
-import com.ace.wallpaperrex.data.toImageItem
+import com.ace.wallpaperrex.data.models.toImageItem
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow

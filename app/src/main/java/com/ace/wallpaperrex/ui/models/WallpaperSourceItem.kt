@@ -1,4 +1,4 @@
-package com.ace.wallpaperrex.data
+package com.ace.wallpaperrex.ui.models
 
 data class WallpaperSourceItem(
     val id: Int,

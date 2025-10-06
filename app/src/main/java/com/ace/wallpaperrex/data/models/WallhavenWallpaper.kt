@@ -1,5 +1,7 @@
-package com.ace.wallpaperrex.data
+package com.ace.wallpaperrex.data.models
 
+import com.ace.wallpaperrex.ui.models.ImageItem
+import com.ace.wallpaperrex.ui.models.Meta
 import com.ace.wallpaperrex.utils.getExtensionFromString
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -66,7 +68,6 @@ data class Tag(
     @SerialName("created_at") val createdAt: String
 )
 
-// --- Mapper function to convert API response to your UI model ---
 fun WallhavenWallpaperDetail.toImageItem(): ImageItem {
     return ImageItem(
         id = id,

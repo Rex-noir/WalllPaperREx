@@ -23,9 +23,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.ace.wallpaperrex.data.ImageItem
 import com.ace.wallpaperrex.ui.components.wallpaper.GridImageItem
 import com.ace.wallpaperrex.ui.components.wallpaper.SkeletonGridItem
+import com.ace.wallpaperrex.ui.models.ImageItem
 
 @Composable
 fun WallpaperListScreen(
