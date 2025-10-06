@@ -2,12 +2,11 @@ package com.ace.wallpaperrex.ui.screens.wallpapers
 
 import Picture
 import ZoomParams
-import android.app.Application
-import android.graphics.BitmapFactory
+import android.graphics.drawable.BitmapDrawable
+import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -38,7 +37,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -53,11 +51,12 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
-import coil3.Bitmap
 import com.ace.wallpaperrex.ui.components.wallpaper.WallpaperApplyDialog
 import com.ace.wallpaperrex.utils.ImageFileHelper
 import com.ace.wallpaperrex.utils.ImageFileHelper.saveRawBytesToUri
+import com.ace.wallpaperrex.utils.convertToByteArray
 import kotlinx.coroutines.launch
+
 
 @Composable
 fun WallpaperDetailScreen(
@@ -71,16 +70,7 @@ fun WallpaperDetailScreen(
     )
 
     val imageItem by viewModel.imageItem.collectAsStateWithLifecycle()
-    val bytes by viewModel.imageByes.collectAsState()
-
-
-    val bitmap: Bitmap? = bytes?.let { byteArray ->
-        remember(byteArray) { BitmapFactory.decodeByteArray(byteArray, 0, byteArray.size) }
-    }
-
-    val displayModel = remember(imageItem, bitmap) {
-        bitmap ?: imageItem?.thumbnail
-    }
+    var imageBytes by remember { mutableStateOf<ByteArray?>(null) }
 
     val snackbarHostState = remember { SnackbarHostState() }
     var isExpanded by remember { mutableStateOf(false) }
@@ -121,17 +111,14 @@ fun WallpaperDetailScreen(
                 ) { uri ->
                     uri?.let { destinationUri ->
                         scope.launch {
-                            viewModel.imageByes.value?.let { bytes ->
-                                saveRawBytesToUri(context, bytes, uri)
-                            }
-
+                            saveRawBytesToUri(context, imageBytes!!, uri)
                         }
                     }
                 }
 
             WallpaperApplyDialog(
                 isVisible = showDialog,
-                imageBytes = bytes,
+                imageBytes = imageBytes,
                 onDismiss = { showDialog = false },
                 onSuccess = {
                     showDialog = false
@@ -154,15 +141,31 @@ fun WallpaperDetailScreen(
                     .padding(innerPadding)
             ) {
                 Picture(
-                    model = displayModel,
+                    model = imageItem!!.url,
                     shape = RectangleShape,
                     modifier = Modifier.fillMaxSize(),
                     shimmerEnabled = false,
+                    allowHardware = false,
                     crossfadeEnabled = false,
+                    onSuccess = { successState ->
+                        val drawable = successState.result.drawable
+                        val bitmap = (drawable as BitmapDrawable).bitmap
+                        imageBytes = bitmap.convertToByteArray()
+                    },
+                    loading = {
+                        Picture(
+                            model = imageItem!!.thumbnail,
+                            shape = RectangleShape,
+                            modifier = Modifier.fillMaxSize(),
+                            shimmerEnabled = true,
+                            crossfadeEnabled = false,
+                            zoomParams = ZoomParams(zoomEnabled = true, hideBarsOnTap = true)
+                        )
+                    },
                     zoomParams = ZoomParams(zoomEnabled = true, hideBarsOnTap = true)
                 )
 
-                if (bytes != null) {
+                if (imageBytes != null) {
                     ExpandableFabMenu(
                         isExpanded = isExpanded,
                         isFavorite = isFavorite,
@@ -173,15 +176,15 @@ fun WallpaperDetailScreen(
                                 scope.launch {
                                     val localPath = ImageFileHelper.saveBytesToCache(
                                         context,
-                                        "${image.id}${image.extension}",
-                                        bytes!!
+                                        "${image.id}.${image.extension}",
+                                        imageBytes!!
                                     )
                                     viewModel.addToFavorite(localPath)
                                 }
                             } else {
-                             ImageFileHelper.deleteCachedImage(
+                                ImageFileHelper.deleteCachedImage(
                                     context,
-                                    "${image.id}${image.extension}"
+                                    "${image.id}.${image.extension}"
                                 )
                                 viewModel.removeFromFavorite()
                             }
@@ -192,7 +195,7 @@ fun WallpaperDetailScreen(
                         },
                         onDownloadClick = {
                             isExpanded = false
-                            downloadLauncher.launch("${image.id}${image.extension}")
+                            downloadLauncher.launch("${image.id}.${image.extension}")
                         },
                         modifier = Modifier
                             .align(Alignment.BottomEnd)
@@ -214,12 +217,6 @@ fun ExpandableFabMenu(
     onDownloadClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val rotation by animateFloatAsState(
-        targetValue = if (isExpanded) 45f else 0f,
-        label = "rotation"
-    )
-
-
     Column(
         modifier = modifier,
         horizontalAlignment = Alignment.End,

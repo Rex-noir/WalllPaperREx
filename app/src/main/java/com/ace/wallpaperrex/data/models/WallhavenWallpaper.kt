@@ -2,7 +2,6 @@ package com.ace.wallpaperrex.data.models
 
 import com.ace.wallpaperrex.ui.models.ImageItem
 import com.ace.wallpaperrex.ui.models.Meta
-import com.ace.wallpaperrex.utils.getExtensionFromString
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -75,7 +74,7 @@ fun WallhavenWallpaperDetail.toImageItem(): ImageItem {
         url = path,
         thumbnail = thumbs.original,
         description = source,
-        extension = path.getExtensionFromString,
+        extension = "webp",
         sourceId = 1
     )
 }

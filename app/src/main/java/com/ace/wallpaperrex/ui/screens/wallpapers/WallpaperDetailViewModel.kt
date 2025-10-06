@@ -33,10 +33,6 @@ class WallpaperDetailViewModel(
         MutableStateFlow<ImageItem?>(null)
     val imageItem: StateFlow<ImageItem?> = _image.asStateFlow()
 
-    private val _bytes = MutableStateFlow<ByteArray?>(null)
-
-    val imageByes: StateFlow<ByteArray?> = _bytes.asStateFlow()
-
 
     fun getImageId(): String? {
         return try {
@@ -67,19 +63,10 @@ class WallpaperDetailViewModel(
     fun setImage(image: ImageItem?) {
         if (image == null) {
             _image.value = null
-            _bytes.value = null
             return
         }
 
         _image.value = image
-        viewModelScope.launch(Dispatchers.IO) {
-            val bytes = getImageBytesFromUrl(image.url)
-
-            withContext(Dispatchers.Main) {
-                _bytes.value = bytes
-            }
-        }
-
     }
 
     companion object {
