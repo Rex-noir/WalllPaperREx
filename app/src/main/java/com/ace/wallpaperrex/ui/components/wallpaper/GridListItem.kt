@@ -11,7 +11,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
-import com.ace.wallpaperrex.data.ImageItem
+import com.ace.wallpaperrex.ui.models.ImageItem
 
 
 @Composable
