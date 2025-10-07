@@ -8,7 +8,8 @@ data class WallpaperSourceItem(
     val name: String,
     val description: String,
     val apiKey: String? = "",
-    val apiKeyDataStoreKey: Preferences.Key<String>
+    val apiKeyDataStoreKey: Preferences.Key<String>,
+    val isDefault: Boolean = false,
 )
 
 val wallpaperSources = listOf<WallpaperSourceItem>(
@@ -16,12 +17,13 @@ val wallpaperSources = listOf<WallpaperSourceItem>(
         id = 1,
         name = "Wallhaven",
         description = "A popular source for high-quality desktop wallpapers.",
-        apiKeyDataStoreKey = UserPrefsKeys.WALLHAVEN_API_KEY
+        apiKeyDataStoreKey = UserPrefsKeys.WALLHAVEN_API_KEY,
+        isDefault = true,
     ),
     WallpaperSourceItem(
         id = 2,
         name = "Unsplash",
         description = "A collection of freely-usable high-resolution photos.",
-        apiKeyDataStoreKey = UserPrefsKeys.UNSPLASH_API_KEY
+        apiKeyDataStoreKey = UserPrefsKeys.UNSPLASH_API_KEY,
     ),
 )

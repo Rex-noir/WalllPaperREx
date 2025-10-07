@@ -13,22 +13,22 @@ import kotlinx.coroutines.flow.map
 import kotlinx.io.IOException
 
 object UserPrefsKeys {
-    val SELECTED_WALLPAPER_SOURCE_ID = intPreferencesKey("selected_wallpaper_source_id")
+    val DEFAULT_WALLPAPER_SOURCE_ID = intPreferencesKey("default_wallpaper_id")
     val WALLHAVEN_API_KEY = stringPreferencesKey("wallpaper_api_key")
     val UNSPLASH_API_KEY = stringPreferencesKey("unsplash_api_key")
 }
 
 val Context.userPreferencesDataStore by preferencesDataStore(name = "user_preferences")
 
-suspend fun Context.setSelectedWallpaperSourceId(sourceId: Int) {
+suspend fun Context.setDefaultWallpaperSourceId(sourceId: Int) {
     userPreferencesDataStore.edit { prefs ->
-        prefs[UserPrefsKeys.SELECTED_WALLPAPER_SOURCE_ID] = sourceId
+        prefs[UserPrefsKeys.DEFAULT_WALLPAPER_SOURCE_ID] = sourceId
     }
 }
 
-fun Context.getSelectedWallpaperSourceId(): Flow<Int> {
+fun Context.getDefaultWallpaperSourceId(): Flow<Int> {
     return userPreferencesDataStore.data.catch { e -> if (e is IOException) emit(emptyPreferences()) else e }
-        .map { prefs -> prefs[UserPrefsKeys.SELECTED_WALLPAPER_SOURCE_ID] ?: 1 }
+        .map { prefs -> prefs[UserPrefsKeys.DEFAULT_WALLPAPER_SOURCE_ID] ?: 1 }
 }
 
 

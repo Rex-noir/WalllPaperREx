@@ -5,9 +5,9 @@ import android.app.Application
 import androidx.datastore.preferences.core.Preferences
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import com.ace.wallpaperrex.data.daos.getSelectedWallpaperSourceId
+import com.ace.wallpaperrex.data.daos.getDefaultWallpaperSourceId
 import com.ace.wallpaperrex.data.daos.getWallhavenApiKey
-import com.ace.wallpaperrex.data.daos.setSelectedWallpaperSourceId
+import com.ace.wallpaperrex.data.daos.setDefaultWallpaperSourceId
 import com.ace.wallpaperrex.data.daos.setWallpaperApiKey
 import com.ace.wallpaperrex.ui.models.WallpaperSourceItem
 import com.ace.wallpaperrex.ui.models.wallpaperSources
@@ -24,13 +24,11 @@ class WallpaperSourceViewModel(application: Application) : AndroidViewModel(appl
     private val _sources = MutableStateFlow(wallpaperSources)
     val sources: StateFlow<List<WallpaperSourceItem>> = _sources.asStateFlow()
 
-    private val _selectedSourceId = MutableStateFlow(1)
-    val selectedSourceId: StateFlow<Int> = _selectedSourceId.asStateFlow()
 
     init {
         viewModelScope.launch {
-            context.getSelectedWallpaperSourceId().collect { id ->
-                _selectedSourceId.value = 1
+            context.getDefaultWallpaperSourceId().collect { id ->
+                _sources.value = _sources.value.map { it.copy(isDefault = it.id == id) }
             }
 
             context.getWallhavenApiKey().collect { key ->
@@ -39,9 +37,9 @@ class WallpaperSourceViewModel(application: Application) : AndroidViewModel(appl
         }
     }
 
-    fun selectSource(sourceId: Int) {
+    fun setAsDefault(id: Int) {
         viewModelScope.launch {
-            context.setSelectedWallpaperSourceId(sourceId = sourceId)
+            context.setDefaultWallpaperSourceId(id)
         }
     }
 

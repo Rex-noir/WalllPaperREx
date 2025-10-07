@@ -16,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.ace.wallpaperrex.R
 import com.ace.wallpaperrex.data.daos.UserPrefsKeys
 import com.ace.wallpaperrex.ui.components.sources.SourceSettingCard
 import com.ace.wallpaperrex.ui.components.sources.WallhavenSetting
@@ -69,7 +70,10 @@ fun SettingsScreen(
                             apiKeyDatastoreKey = sourceItem.apiKeyDataStoreKey,
                             apiKey = apiKey
                         )
-                    } // Assuming saveApiKey exists
+                    },
+                    onSetAsDefault = {
+                        wallpaperSourceViewModel.setAsDefault(sourceItem.id)
+                    }
                 )
             }
         }
@@ -98,9 +102,11 @@ fun WallpaperSourceRowPreview() {
             source = WallpaperSourceItem(
                 1, "Unsplash", "Photos",
                 apiKey = null,
-                apiKeyDataStoreKey = UserPrefsKeys.UNSPLASH_API_KEY
+                apiKeyDataStoreKey = UserPrefsKeys.UNSPLASH_API_KEY,
+                isDefault = false,
             ),
             onApiKeySave = { _, _ -> },
+            onSetAsDefault = { _ -> },
         )
     }
 }
@@ -109,11 +115,15 @@ fun WallpaperSourceRowPreview() {
 fun WallpaperSourceRow(
     source: WallpaperSourceItem,
     onApiKeySave: (sourceId: Int, apiKey: String) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onSetAsDefault: (source: WallpaperSourceItem) -> Unit
 ) {
     SourceSettingCard(
         source = source,
-        modifier = modifier
+        modifier = modifier,
+        onSetAsDefault = {
+            onSetAsDefault(source)
+        }
     ) {
         when (source.id) {
             1 -> {
