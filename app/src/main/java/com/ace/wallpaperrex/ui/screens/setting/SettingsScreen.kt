@@ -16,21 +16,22 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.ace.wallpaperrex.ui.models.WallpaperSourceItem
+import com.ace.wallpaperrex.data.daos.UserPrefsKeys
 import com.ace.wallpaperrex.ui.components.sources.SourceSettingCard
 import com.ace.wallpaperrex.ui.components.sources.WallhavenSetting
+import com.ace.wallpaperrex.ui.models.WallpaperSourceItem
+import com.ace.wallpaperrex.ui.screens.wallpapers.WallpaperSourceViewModel
 import com.ace.wallpaperrex.ui.theme.AppTheme
 
 
 @Composable()
 fun SettingsScreen(
-    modifier: Modifier = Modifier, // This modifier will be passed to LazyColumn
-    settingsViewModel: SettingsViewModel = viewModel()
+    modifier: Modifier = Modifier,
+    wallpaperSourceViewModel: WallpaperSourceViewModel = viewModel()
 ) {
-    val wallpaperSources by settingsViewModel.wallpaperSourcesState.collectAsState()
+    val wallpaperSources by wallpaperSourceViewModel.sources.collectAsState()
 
     if (wallpaperSources.isEmpty()) {
-        // Handle empty state - you might want a Column here for centering, or just Text
         Column(
             modifier = modifier // Apply the main modifier here for consistent padding/sizing
                 .fillMaxSize(),
@@ -51,7 +52,7 @@ fun SettingsScreen(
             // Header item for the title
             item {
                 Text(
-                    text = "Sources",
+                    text = "Sources Configurations",
                     style = MaterialTheme.typography.titleMedium,
                 )
             }
@@ -63,11 +64,10 @@ fun SettingsScreen(
             ) { index, sourceItem ->
                 WallpaperSourceRow(
                     source = sourceItem,
-                    onToggleEnabled = { settingsViewModel.toggleSourceEnabled(sourceItem.id) }, // Pass sourceItem.id
                     onApiKeySave = { id, apiKey ->
-                        settingsViewModel.saveApiKey(
-                            id,
-                            apiKey
+                        wallpaperSourceViewModel.updateWallpaperApiKey(
+                            apiKeyDatastoreKey = sourceItem.apiKeyDataStoreKey,
+                            apiKey = apiKey
                         )
                     } // Assuming saveApiKey exists
                 )
@@ -95,22 +95,24 @@ fun SettingsScreenPreview() {
 fun WallpaperSourceRowPreview() {
     AppTheme {
         WallpaperSourceRow(
-            source = WallpaperSourceItem(1, "Unsplash", "Photos", true),
+            source = WallpaperSourceItem(
+                1, "Unsplash", "Photos",
+                apiKey = null,
+                apiKeyDataStoreKey = UserPrefsKeys.UNSPLASH_API_KEY
+            ),
             onApiKeySave = { _, _ -> },
-            onToggleEnabled = {})
+        )
     }
 }
 
 @Composable
 fun WallpaperSourceRow(
     source: WallpaperSourceItem,
-    onToggleEnabled: (id: Int) -> Unit,
     onApiKeySave: (sourceId: Int, apiKey: String) -> Unit,
     modifier: Modifier = Modifier
 ) {
     SourceSettingCard(
         source = source,
-        onToggleEnabled = onToggleEnabled,
         modifier = modifier
     ) {
         when (source.name) {

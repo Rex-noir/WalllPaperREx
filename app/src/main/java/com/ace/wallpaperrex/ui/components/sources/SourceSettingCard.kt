@@ -25,7 +25,6 @@ import com.ace.wallpaperrex.ui.models.WallpaperSourceItem
 @Composable
 fun SourceSettingCard(
     source: WallpaperSourceItem,
-    onToggleEnabled: (id: Int) -> Unit,
     modifier: Modifier = Modifier,
     content: @Composable ColumnScope.() -> Unit // Slot for custom body content
 ) {
@@ -51,17 +50,7 @@ fun SourceSettingCard(
                         style = MaterialTheme.typography.titleMedium,
                         color = MaterialTheme.colorScheme.onSurface
                     )
-                    Text(
-                        text = if (source.isEnabled) "Enabled" else "Disabled",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.padding(top = 2.dp)
-                    )
                 }
-                Switch(
-                    checked = source.isEnabled,
-                    onCheckedChange = { onToggleEnabled(source.id) }
-                )
             }
 
             // Custom content passed via the content lambda

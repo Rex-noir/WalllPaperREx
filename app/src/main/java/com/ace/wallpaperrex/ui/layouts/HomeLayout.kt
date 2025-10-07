@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Wallpaper
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -54,6 +55,10 @@ data object WallpaperListRoute
 @Serializable
 data object SettingsRoute
 
+
+@Serializable
+data object FavoriteListRoute
+
 // 2. Data structure to hold UI metadata (icon, title) for each route KClass
 data class BottomNavigationItemInfo(
     val routeKClass: KClass<*>, // KClass of the @Serializable route data object/class
@@ -71,11 +76,18 @@ val homeBottomNavItems: List<BottomNavigationItemInfo> = listOf(
         titleResId = R.string.bottom_nav_home
     ),
     BottomNavigationItemInfo(
+        routeKClass = FavoriteListRoute::class,
+        routeInstance = FavoriteListRoute,
+        icon = Icons.Filled.Favorite,
+        titleResId = R.string.bottom_nav_favorites
+    ),
+    BottomNavigationItemInfo(
         routeKClass = SettingsRoute::class,
         routeInstance = SettingsRoute,
         icon = Icons.Filled.Settings,
         titleResId = R.string.bottom_nav_settings
     )
+
 )
 
 @Composable
@@ -214,6 +226,9 @@ fun HomeLayout(
             }
             composable<SettingsRoute> { // Use the concrete @Serializable data object
                 SettingsScreen(modifier = Modifier.fillMaxSize())
+            }
+            composable<FavoriteListRoute>{
+
             }
         }
     }

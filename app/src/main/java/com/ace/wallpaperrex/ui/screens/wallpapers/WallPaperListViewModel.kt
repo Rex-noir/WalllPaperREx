@@ -76,7 +76,7 @@ class WallPaperListViewModel(private val wallhavenImageRepository: WallhavenImag
                 _uiState.update {
                     it.copy(
                         isLoading = false,
-                        error = error.localizedMessage ?: "An unknown error occured"
+                        error = error.localizedMessage ?: "An unknown error occurred"
                     )
                 }
             })
