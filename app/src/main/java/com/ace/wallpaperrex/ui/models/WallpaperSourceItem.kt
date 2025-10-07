@@ -22,6 +22,12 @@ val wallpaperSourcesStatic = listOf<WallpaperSourceItem>(
     ),
     WallpaperSourceItem(
         id = 2,
+        name = "Pexels",
+        description = "A collection of freely-usable high-resolution photos.",
+        apiKeyDataStoreKey = UserPrefsKeys.PEXELS_API_KEY
+    ),
+    WallpaperSourceItem(
+        id = 3,
         name = "Unsplash",
         description = "A collection of freely-usable high-resolution photos.",
         apiKeyDataStoreKey = UserPrefsKeys.UNSPLASH_API_KEY,

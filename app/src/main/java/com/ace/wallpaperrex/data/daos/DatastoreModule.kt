@@ -12,7 +12,6 @@ import com.ace.wallpaperrex.ui.models.wallpaperSourcesStatic
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import java.io.IOException
 
@@ -21,6 +20,7 @@ object UserPrefsKeys {
     val LAST_WALLPAPER_SOURCE_ID = intPreferencesKey("last_wallpaper_id")
     val WALLHAVEN_API_KEY = stringPreferencesKey("wallhaven_api_key")
     val UNSPLASH_API_KEY = stringPreferencesKey("unsplash_api_key")
+    val PEXELS_API_KEY = stringPreferencesKey("pexels_api_key")
 }
 
 val Context.userPreferencesDataStore by preferencesDataStore(name = "user_preferences")
