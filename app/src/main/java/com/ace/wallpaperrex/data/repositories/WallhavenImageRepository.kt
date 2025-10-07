@@ -3,8 +3,6 @@ package com.ace.wallpaperrex.data.repositories
 import android.util.Log
 import com.ace.wallpaperrex.data.http.KtorClient
 import com.ace.wallpaperrex.data.models.WallhavenSearchResponse
-import com.ace.wallpaperrex.data.models.WallhavenWallpaperDetail
-import com.ace.wallpaperrex.data.models.toImageItem
 import com.ace.wallpaperrex.ui.models.ImageItem
 import com.ace.wallpaperrex.ui.models.ImageResponse
 import io.ktor.client.HttpClient

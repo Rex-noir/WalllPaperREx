@@ -5,8 +5,6 @@ import androidx.compose.runtime.Immutable
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.ace.wallpaperrex.data.daos.getLastWallpaperSource
-import com.ace.wallpaperrex.data.models.WallhavenWallpaperDetail
-import com.ace.wallpaperrex.data.models.toImageItem
 import com.ace.wallpaperrex.data.repositories.WallpaperListRepository
 import com.ace.wallpaperrex.data.repositories.WallpaperListRepositoryProvider
 import com.ace.wallpaperrex.ui.models.ImageItem

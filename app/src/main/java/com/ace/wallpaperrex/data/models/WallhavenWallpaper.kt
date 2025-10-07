@@ -2,6 +2,7 @@ package com.ace.wallpaperrex.data.models
 
 import com.ace.wallpaperrex.ui.models.ImageItem
 import com.ace.wallpaperrex.ui.models.Meta
+import com.ace.wallpaperrex.ui.models.ToImageItemMapper
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -32,7 +33,19 @@ data class WallhavenWallpaperDetail(
     @SerialName("path") val path: String,
     @SerialName("thumbs") val thumbs: Thumbs,
     @SerialName("tags") val tags: List<Tag> = emptyList()
-)
+) : ToImageItemMapper {
+    override fun toImageItem(): ImageItem {
+        return ImageItem(
+            id = id,
+            aspectRatio = ratio.toFloat(),
+            url = path,
+            thumbnail = thumbs.original,
+            description = source,
+            extension = "webp",
+            sourceId = 1
+        )
+    }
+}
 
 @Serializable
 data class Uploader(
@@ -66,18 +79,6 @@ data class Tag(
     @SerialName("purity") val purity: String,
     @SerialName("created_at") val createdAt: String
 )
-
-fun WallhavenWallpaperDetail.toImageItem(): ImageItem {
-    return ImageItem(
-        id = id,
-        aspectRatio = ratio.toFloat(),
-        url = path,
-        thumbnail = thumbs.original,
-        description = source,
-        extension = "webp",
-        sourceId = 1
-    )
-}
 
 @Serializable
 data class WallhavenSearchResponse(

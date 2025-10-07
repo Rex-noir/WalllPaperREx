@@ -28,3 +28,7 @@ fun ImageItem.toEntity(localPath: String? = null): FavoriteImageEntity {
         sourceId = sourceId
     );
 }
+
+interface ToImageItemMapper {
+    fun toImageItem(): ImageItem
+}
