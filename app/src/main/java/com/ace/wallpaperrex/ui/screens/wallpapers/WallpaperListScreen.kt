@@ -12,18 +12,26 @@ import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.itemsIndexed
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SecondaryTabRow
+import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.ace.wallpaperrex.data.daos.getLastWallpaperSource
+import com.ace.wallpaperrex.data.daos.getWallpaperSourcesFlow
+import com.ace.wallpaperrex.data.daos.setLastWallpaperSourceId
 import com.ace.wallpaperrex.ui.components.wallpaper.GridImageItem
 import com.ace.wallpaperrex.ui.components.wallpaper.SkeletonGridItem
 import com.ace.wallpaperrex.ui.models.ImageItem
+import kotlinx.coroutines.launch
 
 @Composable
 fun WallpaperListScreen(
@@ -31,33 +39,73 @@ fun WallpaperListScreen(
     viewModel: WallPaperListViewModel,
     onWallpaperClick: (image: ImageItem) -> Unit
 ) {
+    val context = LocalContext.current
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val selectedSource by context.getLastWallpaperSource()
+        .collectAsStateWithLifecycle(initialValue = null)
+    val wallpaperSources by context.getWallpaperSourcesFlow()
+        .collectAsStateWithLifecycle(initialValue = emptyList())
+    val scope = rememberCoroutineScope()
 
     Column(modifier = modifier.fillMaxSize()) {
-        if (uiState.isLoading && uiState.items.isEmpty()) {
-            SkeletonWallpaperGrid(modifier = Modifier.fillMaxSize())
-        } else if (uiState.error != null && uiState.items.isEmpty()) {
-            ErrorState(
-                message = uiState.error!!,
-                onRetry = { viewModel.retryInitialLoad() },
-                modifier = Modifier.fillMaxSize(),
-            )
-        } else if (uiState.items.isEmpty()) {
-            EmptyState(
-                message = "No wallpapers found for '${uiState.currentQuery}'.",
-                modifier = Modifier.fillMaxSize()
-            )
-        } else {
-            WallpaperStaggeredGrid(
-                items = uiState.items,
-                isLoadingMore = uiState.isLoading,
-                isEndOfList = uiState.isEndOfList,
-                paginationError = uiState.error,
-                onLoadMore = { viewModel.loadNextPage() },
-                onRetryLoadMore = { viewModel.loadNextPage() },
-                onWallpaperClick = onWallpaperClick,
-                modifier = Modifier.weight(1f)
-            )
+
+
+        if (wallpaperSources.isNotEmpty()) {
+            val selectedIndex = wallpaperSources.indexOf(selectedSource).coerceAtLeast(0)
+
+            SecondaryTabRow(
+                selectedTabIndex = selectedIndex,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                wallpaperSources.forEach { source ->
+                    Tab(
+                        selected = source.id == selectedSource?.id,
+                        onClick = {
+                            if (source.id != selectedSource?.id) {
+                                scope.launch {
+                                    context.setLastWallpaperSourceId(source.id)
+                                }
+                            }
+                        },
+                        text = {
+                            Text(text = source.name)
+                        }
+                    )
+                }
+            }
+        }
+
+        // --- FIX 3: Content area with its own logic ---
+        // The Box takes up the remaining available space.
+        Box(modifier = Modifier.weight(1f)) {
+            // This logic now only controls the content area, not the whole screen.
+            if (uiState.isLoading && uiState.items.isEmpty()) {
+                SkeletonWallpaperGrid(modifier = Modifier.fillMaxSize())
+            } else if (uiState.error != null && uiState.items.isEmpty()) {
+                ErrorState(
+                    message = uiState.error!!, // No need for '!!'
+                    onRetry = { viewModel.retryInitialLoad() },
+                    modifier = Modifier.fillMaxSize(),
+                )
+            } else if (uiState.items.isEmpty()) {
+                EmptyState(
+                    message = "No wallpapers found for '${uiState.currentQuery}'.",
+                    modifier = Modifier.fillMaxSize()
+                )
+            } else {
+                // The grid is only shown when there are items.
+                WallpaperStaggeredGrid(
+                    items = uiState.items,
+                    isLoadingMore = uiState.isLoading,
+                    isEndOfList = uiState.isEndOfList,
+                    paginationError = uiState.error,
+                    onLoadMore = { viewModel.loadNextPage() },
+                    onRetryLoadMore = { viewModel.loadNextPage() },
+                    onWallpaperClick = onWallpaperClick,
+                    // This modifier is important for the grid to fill the Box
+                    modifier = Modifier.fillMaxSize()
+                )
+            }
         }
     }
 }
@@ -70,6 +118,7 @@ fun SkeletonWallpaperGrid(
 ) {
     LazyVerticalStaggeredGrid(
         columns = StaggeredGridCells.Adaptive(minSize = 150.dp),
+        modifier = modifier // Apply modifier here
     ) {
         items(itemCount) {
             SkeletonGridItem() // Uses its internal random aspect ratio
@@ -91,10 +140,11 @@ fun WallpaperStaggeredGrid(
 ) {
     LazyVerticalStaggeredGrid(
         columns = StaggeredGridCells.Adaptive(minSize = 150.dp),
+        modifier = modifier // Apply modifier here
     ) {
         itemsIndexed(
             items = items,
-            key = { index: Int, item: ImageItem -> item.id }) { index, item ->
+            key = { _, item -> item.id }) { index, item ->
             GridImageItem(item = item, onClick = { onWallpaperClick(item) })
 
             val loadMoreThreshold = 5
@@ -107,23 +157,9 @@ fun WallpaperStaggeredGrid(
         }
 
         if (isLoadingMore) {
-            // Show a few skeleton items at the end for pagination loading
-            // You can make these span the full width if you wrap them in a Box
-            // and use item(span = StaggeredGridItemSpan.FullLine)
-            // For now, let's add a few individual skeleton items.
-            items(4) { // Show 3 skeleton items while loading more
+            items(4) {
                 SkeletonGridItem()
             }
-            // Alternatively, for a full-width single shimmer bar:
-            // item(span = StaggeredGridItemSpan.FullLine) {
-            //     Spacer(
-            //         modifier = Modifier
-            //             .fillMaxWidth()
-            //             .height(80.dp) // Or some other appropriate height
-            //             .padding(vertical = 8.dp)
-            //             .shimmerBackground(RoundedCornerShape(4.dp))
-            //     )
-            // }
         }
 
         if (paginationError != null) {

@@ -42,7 +42,6 @@ class WallPaperListViewModel(application: Application) :
                     repository = WallpaperListRepositoryProvider.provide(lastSource)
                     loadWallpapers(page = 1, isInitialLoad = true, isSearchWipe = true)
                 }
-
         }
     }
 

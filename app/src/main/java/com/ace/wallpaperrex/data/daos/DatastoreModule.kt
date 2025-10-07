@@ -63,12 +63,18 @@ fun Context.getWallpaperSourcesFlow(): Flow<List<WallpaperSourceItem>> {
 }
 
 
-suspend fun Context.getLastWallpaperSource(): Flow<WallpaperSourceItem?> {
+fun Context.getLastWallpaperSource(): Flow<WallpaperSourceItem?> {
     return userPreferencesDataStore.data.catch { e -> if (e is IOException) emit(emptyPreferences()) else throw e }
         .combine(getWallpaperSourcesFlow()) { preferences, allSources ->
             val lastSourceId = preferences[UserPrefsKeys.LAST_WALLPAPER_SOURCE_ID] ?: 1
             allSources.find { it.id == lastSourceId }
         }
+}
+
+suspend fun Context.setLastWallpaperSourceId(id: Int) {
+    userPreferencesDataStore.edit {
+        it[UserPrefsKeys.LAST_WALLPAPER_SOURCE_ID] = id
+    }
 }
 
 suspend fun Context.setDefaultWallpaperSourceId(sourceId: Int) {
