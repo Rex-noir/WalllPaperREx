@@ -2,6 +2,7 @@ package com.ace.wallpaperrex.ui.screens.wallpapers
 
 import android.content.Context
 import android.graphics.Bitmap
+import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -36,6 +37,9 @@ class WallpaperDetailViewModel(
     private val _isFavorite = MutableStateFlow(false)
     val isFavorite: StateFlow<Boolean> = _isFavorite.asStateFlow()
 
+    private val _isSavingAsFavorite = MutableStateFlow(false)
+    val isSavingAsFavorite: StateFlow<Boolean> = _isSavingAsFavorite.asStateFlow()
+
     fun getImageId(): String? {
         return try {
             savedStateHandle.toRoute<AppRoute.WallpaperDetailRoute>().image
@@ -46,6 +50,7 @@ class WallpaperDetailViewModel(
 
     private fun addToFavorite(localPath: String) {
         val favImage = _image.value?.toEntity()?.copy(localPath = localPath)
+        Log.d("WallpaperDetailViewModel", "addToFavorite: $favImage")
         if (favImage !== null) {
             viewModelScope.launch(Dispatchers.IO) {
                 favoriteImageRepository.addFavorite(favImage)
@@ -81,6 +86,7 @@ class WallpaperDetailViewModel(
             _isFavorite.value = newValue
 
             if (newValue) {
+                _isSavingAsFavorite.value = true
                 viewModelScope.launch {
                     val localPath = ImageFileHelper.saveBytesToCache(
                         context,
@@ -88,6 +94,7 @@ class WallpaperDetailViewModel(
                         bytes = bitmap.convertToWebpBytes()
                     )
                     addToFavorite(localPath)
+                    _isSavingAsFavorite.value = false
                 }
             } else {
                 ImageFileHelper.deleteCachedImage(context, name)

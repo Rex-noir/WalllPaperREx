@@ -144,7 +144,8 @@ fun WallpaperStaggeredGrid(
     ) {
         itemsIndexed(
             items = items,
-            key = { _, item -> item.id }) { index, item ->
+            key = { _, item -> item.id }
+        ) { index, item ->
             GridImageItem(item = item, onClick = { onWallpaperClick(item) })
 
             val loadMoreThreshold = 5

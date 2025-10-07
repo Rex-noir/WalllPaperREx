@@ -8,26 +8,24 @@ import androidx.lifecycle.viewmodel.CreationExtras
 import com.ace.wallpaperrex.data.database.AppDatabase
 import com.ace.wallpaperrex.data.entities.FavoriteImageEntity
 import com.ace.wallpaperrex.data.repositories.FavoriteImageRepository
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlin.reflect.KClass
 
 class FavoriteListViewModel(private val favoriteImageRepository: FavoriteImageRepository) :
     ViewModel() {
 
-    private val _favorites = MutableStateFlow<List<FavoriteImageEntity>>(mutableListOf())
+    val favorites: StateFlow<List<FavoriteImageEntity>> =
+        favoriteImageRepository.getAllFavorites()
+            .stateIn(
+                scope = viewModelScope,
+                // Keep the upstream flow active for 5 seconds after the last collector disappears
+                started = SharingStarted.WhileSubscribed(5000),
+                // The initial value to be used while waiting for the first value from the flow
+                initialValue = emptyList()
+            )
 
-    val favorites = _favorites.asStateFlow()
-
-    init {
-        favoriteImageRepository.allFavorites.stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
-            initialValue = emptyList()
-        )
-    }
 
     companion object {
         val Factory: ViewModelProvider.Factory = object : ViewModelProvider.Factory {

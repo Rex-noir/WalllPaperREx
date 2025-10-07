@@ -5,7 +5,10 @@ import com.ace.wallpaperrex.data.entities.FavoriteImageEntity
 import kotlinx.coroutines.flow.Flow
 
 class FavoriteImageRepository(private val dao: FavoriteImageDao) {
-    val allFavorites: Flow<List<FavoriteImageEntity>> = dao.getAll()
+
+    fun getAllFavorites(): Flow<List<FavoriteImageEntity>> {
+        return dao.getAll()
+    }
 
     suspend fun addFavorite(entity: FavoriteImageEntity) {
         dao.insertAll(entity)

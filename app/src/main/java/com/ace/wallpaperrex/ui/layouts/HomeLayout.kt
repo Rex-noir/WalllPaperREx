@@ -43,6 +43,7 @@ import com.ace.wallpaperrex.AppRoute
 import com.ace.wallpaperrex.R
 import com.ace.wallpaperrex.ui.components.wallpaper.WallpaperListTopAppBar
 import com.ace.wallpaperrex.ui.screens.setting.SettingsScreen
+import com.ace.wallpaperrex.ui.screens.wallpapers.FavoriteListScreen
 import com.ace.wallpaperrex.ui.screens.wallpapers.WallPaperListViewModel
 import com.ace.wallpaperrex.ui.screens.wallpapers.WallpaperListScreen
 import kotlinx.serialization.Serializable
@@ -227,8 +228,8 @@ fun HomeLayout(
             composable<SettingsRoute> { // Use the concrete @Serializable data object
                 SettingsScreen(modifier = Modifier.fillMaxSize())
             }
-            composable<FavoriteListRoute>{
-
+            composable<FavoriteListRoute> {
+                FavoriteListScreen()
             }
         }
     }

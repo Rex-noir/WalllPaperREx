@@ -26,6 +26,7 @@ import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Wallpaper
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -46,6 +47,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModelStoreOwner
@@ -76,6 +78,8 @@ fun WallpaperDetailScreen(
 
     var showDialog by remember { mutableStateOf(false) }
     val isFavorite = viewModel.isFavorite.collectAsStateWithLifecycle()
+
+    var isTogglingFavorite = viewModel.isSavingAsFavorite.collectAsStateWithLifecycle()
 
     LaunchedEffect(Unit) {
         val imageId = viewModel.getImageId()
@@ -167,15 +171,19 @@ fun WallpaperDetailScreen(
 
                 if (imageBitmap != null) {
                     ExpandableFabMenu(
+                        isFavoriteLoading = isTogglingFavorite.value,
                         isExpanded = isExpanded,
                         isFavorite = isFavorite.value,
                         onExpandClick = { isExpanded = !isExpanded },
                         onFavoriteClick = {
-                            viewModel.toggleFavoriteState(
-                                context,
-                                imageBitmap!!,
-                                "${image.id}.${image.extension}"
-                            )
+                            try {
+                                viewModel.toggleFavoriteState(
+                                    context,
+                                    imageBitmap!!,
+                                    "${image.id}.${image.extension}"
+                                )
+                            } finally {
+                            }
                         },
                         onApplyClick = {
                             isExpanded = false
@@ -198,6 +206,7 @@ fun WallpaperDetailScreen(
 @Composable
 fun ExpandableFabMenu(
     isExpanded: Boolean,
+    isFavoriteLoading: Boolean,
     isFavorite: Boolean,
     onExpandClick: () -> Unit,
     onFavoriteClick: () -> Unit,
@@ -225,6 +234,7 @@ fun ExpandableFabMenu(
                     icon = if (isFavorite) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder,
                     label = "Favorite",
                     onClick = onFavoriteClick,
+                    isLoading = isFavoriteLoading,
                     containerColor = if (isFavorite) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary
                 )
 
@@ -232,14 +242,14 @@ fun ExpandableFabMenu(
                 FabMenuItem(
                     icon = Icons.Filled.Wallpaper,
                     label = "Apply",
-                    onClick = onApplyClick
+                    onClick = onApplyClick,
                 )
 
                 // Download button with label
                 FabMenuItem(
                     icon = Icons.Filled.Download,
                     label = "Download",
-                    onClick = onDownloadClick
+                    onClick = onDownloadClick,
                 )
             }
         }
@@ -260,10 +270,11 @@ fun ExpandableFabMenu(
 
 @Composable
 fun FabMenuItem(
-    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    icon: ImageVector,
     label: String,
     onClick: () -> Unit,
-    containerColor: Color = MaterialTheme.colorScheme.primary
+    containerColor: Color = MaterialTheme.colorScheme.primary,
+    isLoading: Boolean = false
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
@@ -284,14 +295,22 @@ fun FabMenuItem(
 
         // Icon button
         SmallFloatingActionButton(
-            onClick = onClick,
-            containerColor = containerColor
+            onClick = {
+                if (!isLoading) {
+                    onClick()
+                }
+            },
+            containerColor = containerColor,
         ) {
-            Icon(
-                imageVector = icon,
-                contentDescription = label,
-                modifier = Modifier.size(20.dp)
-            )
+            if (isLoading) {
+                CircularProgressIndicator(modifier = Modifier.size(20.dp))
+            } else {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = label,
+                    modifier = Modifier.size(20.dp)
+                )
+            }
         }
     }
 }
