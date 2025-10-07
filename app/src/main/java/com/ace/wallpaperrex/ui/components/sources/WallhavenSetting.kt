@@ -38,8 +38,6 @@ fun WallhavenSetting(
     var isInEditMode by rememberSaveable { mutableStateOf(false) }
     val focusRequester = remember { FocusRequester() }
 
-    Spacer(modifier = Modifier.height(12.dp))
-
     OutlinedTextField(
         state = apiKeyTextFieldState, // Use the state from rememberTextFieldState
         label = { Text("API Key") },
