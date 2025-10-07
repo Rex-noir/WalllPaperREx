@@ -173,14 +173,17 @@ fun HomeLayout(
                     )
                 }
 
-                currentNavDestination?.hasRoute<SettingsRoute>() == true -> {
-                    val settingsItemInfo =
-                        homeBottomNavItems.find { it.routeKClass == SettingsRoute::class }
+                else -> {
+                    val currentNavItem = homeBottomNavItems.find {
+                        currentNavDestination?.hasRoute(it.routeKClass) == true
+                    }
+
                     TopAppBar(
                         title = {
                             Text(
                                 stringResource(
-                                    settingsItemInfo?.titleResId ?: R.string.bottom_nav_settings
+                                    // Use the item's title, or fallback to the app name
+                                    currentNavItem?.titleResId ?: R.string.app_name
                                 )
                             )
                         },
@@ -188,13 +191,6 @@ fun HomeLayout(
                             containerColor = MaterialTheme.colorScheme.primaryContainer,
                             titleContentColor = MaterialTheme.colorScheme.primary
                         ),
-                        scrollBehavior = scrollBehavior
-                    )
-                }
-
-                else -> { // Fallback or initial state (e.g., when NavHost is first composed)
-                    TopAppBar(
-                        title = { Text(stringResource(R.string.app_name)) },
                         scrollBehavior = scrollBehavior
                     )
                 }
