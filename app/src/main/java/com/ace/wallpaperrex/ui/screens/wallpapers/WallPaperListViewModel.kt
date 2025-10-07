@@ -5,6 +5,7 @@ import androidx.compose.runtime.Immutable
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.ace.wallpaperrex.data.daos.getLastWallpaperSource
+import com.ace.wallpaperrex.data.models.WallhavenWallpaperDetail
 import com.ace.wallpaperrex.data.models.toImageItem
 import com.ace.wallpaperrex.data.repositories.WallpaperListRepository
 import com.ace.wallpaperrex.data.repositories.WallpaperListRepositoryProvider
@@ -65,9 +66,11 @@ class WallPaperListViewModel(application: Application) :
         }
 
         viewModelScope.launch {
-            val result = repository.getImages(page = page, query = query);
+            val result = repository.getImages(
+                page = page
+            );
             result.fold(onSuccess = { imageResponse ->
-                val newUiItems = imageResponse.data.map { detail -> detail.toImageItem() }
+                val newUiItems = imageResponse.data
 
                 _uiState.update { currentState ->
                     val combinedItems = if (isInitialLoad || isSearchWipe) {

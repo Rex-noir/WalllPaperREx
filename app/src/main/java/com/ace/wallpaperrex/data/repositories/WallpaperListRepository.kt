@@ -2,20 +2,35 @@ package com.ace.wallpaperrex.data.repositories
 
 import com.ace.wallpaperrex.data.http.KtorClient
 import com.ace.wallpaperrex.data.models.WallhavenWallpaperDetail
+import com.ace.wallpaperrex.ui.models.ImageItem
 import com.ace.wallpaperrex.ui.models.ImageResponse
 import com.ace.wallpaperrex.ui.models.WallpaperSourceItem
 import io.ktor.client.HttpClient
 
 interface WallpaperListRepository {
+    /**
+     * Searches for images based on a user-provided query.
+     *
+     * @param query The search term.
+     * @return A [Result] containing an [ImageResponse] on success, or an [Exception] on failure.
+     */
+    suspend fun searchImages(
+        page: Int,
+        query: String,
+        pageSize: Int = 20,
+    ): Result<ImageResponse<ImageItem>>
+
+    /**
+     * Fetches a list of the latest or trending images, without a specific search query.
+     *
+     * @param sorting Defines the order of the images (e.g., "date_added", "toplist").
+     * @return A [Result] containing an [ImageResponse] on success, or an [Exception] on failure.
+     */
     suspend fun getImages(
         page: Int,
-        pageSize: Int = 20,
-        query: String? = null, // Optional: for search queries
-        categories: String? = null, // Optional: e.g., "110" (General, Anime, People)
-        purity: String? = null, // Optional: e.g., "100" (SFW)
-        sorting: String? = "date_added", // Optional: e.g., "relevance", "random", "views", "favorites"
-        order: String? = "desc", // Optional: "asc" or "desc"
-    ): Result<ImageResponse<WallhavenWallpaperDetail>>
+        sorting: String? = null,
+        pageSize: Int = 20
+    ): Result<ImageResponse<ImageItem>>
 }
 
 object WallpaperListRepositoryProvider {
