@@ -5,15 +5,13 @@ import android.app.Application
 import androidx.datastore.preferences.core.Preferences
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import com.ace.wallpaperrex.data.daos.getDefaultWallpaperSourceId
-import com.ace.wallpaperrex.data.daos.getWallhavenApiKey
+import com.ace.wallpaperrex.data.daos.getWallpaperSourcesFlow
 import com.ace.wallpaperrex.data.daos.setDefaultWallpaperSourceId
 import com.ace.wallpaperrex.data.daos.setWallpaperApiKey
 import com.ace.wallpaperrex.ui.models.WallpaperSourceItem
-import com.ace.wallpaperrex.ui.models.wallpaperSources
-import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 class WallpaperSourceViewModel(application: Application) : AndroidViewModel(application) {
@@ -21,21 +19,17 @@ class WallpaperSourceViewModel(application: Application) : AndroidViewModel(appl
     @SuppressLint("StaticFieldLeak")
     private val context = application.applicationContext
 
-    private val _sources = MutableStateFlow(wallpaperSources)
-    val sources: StateFlow<List<WallpaperSourceItem>> = _sources.asStateFlow()
-
-
-    init {
-        viewModelScope.launch {
-            context.getDefaultWallpaperSourceId().collect { id ->
-                _sources.value = _sources.value.map { it.copy(isDefault = it.id == id) }
-            }
-
-            context.getWallhavenApiKey().collect { key ->
-                _sources.value = _sources.value.map { it.copy(apiKey = key) }
-            }
-        }
-    }
+    // The ViewModel now has a single source of truth for its state.
+    val sources: StateFlow<List<WallpaperSourceItem>> =
+        context.getWallpaperSourcesFlow()
+            .stateIn(
+                scope = viewModelScope,
+                // The flow starts when the UI is visible and stops 5s after it's gone.
+                // This is efficient and handles configuration changes.
+                started = SharingStarted.WhileSubscribed(5000),
+                // The initial value before the flow emits its first list.
+                initialValue = emptyList()
+            )
 
     fun setAsDefault(id: Int) {
         viewModelScope.launch {
