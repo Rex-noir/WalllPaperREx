@@ -85,6 +85,9 @@ dependencies {
     implementation(kotlin("reflect"))
     implementation(libs.kotlinx.serialization.json)
 
+    // Datastore preference
+    implementation(libs.androidx.datastore.preferences)
+
     // Compose UI libraries
     implementation(libs.androidx.ui)
     implementation(libs.androidx.material3)
