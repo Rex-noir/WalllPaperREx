@@ -20,6 +20,7 @@ import com.ace.wallpaperrex.data.daos.UserPrefsKeys
 import com.ace.wallpaperrex.ui.components.sources.SourceSettingCard
 import com.ace.wallpaperrex.ui.components.sources.WallhavenSetting
 import com.ace.wallpaperrex.ui.models.WallpaperSourceItem
+import com.ace.wallpaperrex.ui.models.wallpaperSourcesStatic
 import com.ace.wallpaperrex.ui.screens.wallpapers.WallpaperSourceViewModel
 import com.ace.wallpaperrex.ui.theme.AppTheme
 
@@ -59,11 +60,12 @@ fun SettingsScreen(
 
             // List items
             itemsIndexed( // Using itemsIndexed if you use index as key, or items with key lambda
-                items = wallpaperSources,
+                items = wallpaperSourcesStatic,
                 key = { _, source -> source.id } // Use source.id for stable keys
             ) { index, sourceItem ->
+                val sourceModel = wallpaperSources.find { it.id == sourceItem.id };
                 WallpaperSourceRow(
-                    source = sourceItem,
+                    source = sourceModel!!,
                     onApiKeySave = { id, apiKey ->
                         wallpaperSourceViewModel.updateWallpaperApiKey(
                             apiKeyDatastoreKey = sourceItem.apiKeyDataStoreKey,

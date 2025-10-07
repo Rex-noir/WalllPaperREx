@@ -8,7 +8,7 @@ import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import com.ace.wallpaperrex.ui.models.WallpaperSourceItem
-import com.ace.wallpaperrex.ui.models.wallpaperSources // We'll still use this as a template
+import com.ace.wallpaperrex.ui.models.wallpaperSourcesStatic
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
@@ -41,7 +41,7 @@ fun Context.getWallpaperSourcesFlow(): Flow<List<WallpaperSourceItem>> {
             val unsplashKey = preferences[UserPrefsKeys.UNSPLASH_API_KEY] ?: ""
 
             // Use the hardcoded list as a template to construct the final list
-            wallpaperSources.map { source ->
+            wallpaperSourcesStatic.map { source ->
                 when (source.id) {
                     1 -> source.copy(
                         isDefault = source.id == defaultId,
@@ -55,7 +55,7 @@ fun Context.getWallpaperSourcesFlow(): Flow<List<WallpaperSourceItem>> {
 
                     else -> source
                 }
-            }
+            }.sortedByDescending { it.isDefault }
         }
 }
 

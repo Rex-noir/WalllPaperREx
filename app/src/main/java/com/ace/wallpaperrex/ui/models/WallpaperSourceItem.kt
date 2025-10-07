@@ -12,7 +12,7 @@ data class WallpaperSourceItem(
     val isDefault: Boolean = false,
 )
 
-val wallpaperSources = listOf<WallpaperSourceItem>(
+val wallpaperSourcesStatic = listOf<WallpaperSourceItem>(
     WallpaperSourceItem(
         id = 1,
         name = "Wallhaven",
