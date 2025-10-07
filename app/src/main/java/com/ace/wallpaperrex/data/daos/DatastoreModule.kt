@@ -11,11 +11,14 @@ import com.ace.wallpaperrex.ui.models.WallpaperSourceItem
 import com.ace.wallpaperrex.ui.models.wallpaperSourcesStatic
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import java.io.IOException
 
 object UserPrefsKeys {
     val DEFAULT_WALLPAPER_SOURCE_ID = intPreferencesKey("default_wallpaper_id")
+    val LAST_WALLPAPER_SOURCE_ID = intPreferencesKey("last_wallpaper_id")
     val WALLHAVEN_API_KEY = stringPreferencesKey("wallhaven_api_key")
     val UNSPLASH_API_KEY = stringPreferencesKey("unsplash_api_key")
 }
@@ -56,6 +59,15 @@ fun Context.getWallpaperSourcesFlow(): Flow<List<WallpaperSourceItem>> {
                     else -> source
                 }
             }.sortedByDescending { it.isDefault }
+        }
+}
+
+
+suspend fun Context.getLastWallpaperSource(): Flow<WallpaperSourceItem?> {
+    return userPreferencesDataStore.data.catch { e -> if (e is IOException) emit(emptyPreferences()) else throw e }
+        .combine(getWallpaperSourcesFlow()) { preferences, allSources ->
+            val lastSourceId = preferences[UserPrefsKeys.LAST_WALLPAPER_SOURCE_ID] ?: 1
+            allSources.find { it.id == lastSourceId }
         }
 }
 

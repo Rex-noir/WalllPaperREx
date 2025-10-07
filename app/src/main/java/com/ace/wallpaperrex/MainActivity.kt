@@ -10,7 +10,6 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.ace.wallpaperrex.data.repositories.WallhavenImageRepositoryImpl
 import com.ace.wallpaperrex.ui.layouts.HomeLayout
 import com.ace.wallpaperrex.ui.screens.wallpapers.WallPaperListViewModel
 import com.ace.wallpaperrex.ui.screens.wallpapers.WallpaperDetailScreen
@@ -42,9 +41,7 @@ class MainActivity : ComponentActivity() {
             AppTheme {
                 val appNavController = rememberNavController()
 
-                val wallpaperListViewModel: WallPaperListViewModel =
-                    viewModel(factory = WallPaperListViewModel.Factory)
-
+                val wallpaperListViewModel: WallPaperListViewModel = viewModel()
 
                 NavHost(
                     navController = appNavController,

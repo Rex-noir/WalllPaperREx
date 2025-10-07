@@ -1,16 +1,19 @@
 package com.ace.wallpaperrex.ui.screens.wallpapers
 
+import android.app.Application
 import androidx.compose.runtime.Immutable
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import com.ace.wallpaperrex.data.repositories.WallhavenImageRepository
-import com.ace.wallpaperrex.data.repositories.WallhavenImageRepositoryImpl
+import com.ace.wallpaperrex.data.daos.getLastWallpaperSource
 import com.ace.wallpaperrex.data.models.toImageItem
+import com.ace.wallpaperrex.data.repositories.WallpaperListRepository
+import com.ace.wallpaperrex.data.repositories.WallpaperListRepositoryProvider
 import com.ace.wallpaperrex.ui.models.ImageItem
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -24,14 +27,23 @@ data class WallpaperListUiState(
     val currentQuery: String = "nature"
 )
 
-class WallPaperListViewModel(private val wallhavenImageRepository: WallhavenImageRepository) :
-    ViewModel() {
+class WallPaperListViewModel(application: Application) :
+    AndroidViewModel(application) {
 
     private val _uiState = MutableStateFlow(WallpaperListUiState())
+    private lateinit var repository: WallpaperListRepository
     val uiState: StateFlow<WallpaperListUiState> = _uiState.asStateFlow();
 
     init {
-        loadWallpapers(page = 1, query = _uiState.value.currentQuery, isInitialLoad = true);
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true) }
+            application.applicationContext.getLastWallpaperSource().filterNotNull()
+                .distinctUntilChanged().collect { lastSource ->
+                    repository = WallpaperListRepositoryProvider.provide(lastSource)
+                    loadWallpapers(page = 1, isInitialLoad = true, isSearchWipe = true)
+                }
+
+        }
     }
 
     fun loadWallpapers(
@@ -41,7 +53,7 @@ class WallPaperListViewModel(private val wallhavenImageRepository: WallhavenImag
         isSearchWipe: Boolean = false
     ) {
 
-        if (_uiState.value.isLoading || (_uiState.value.isEndOfList && !isInitialLoad && isSearchWipe)) {
+        if (_uiState.value.isLoading && (_uiState.value.isEndOfList && !isInitialLoad && isSearchWipe)) {
             return
         }
 
@@ -54,7 +66,7 @@ class WallPaperListViewModel(private val wallhavenImageRepository: WallhavenImag
         }
 
         viewModelScope.launch {
-            val result = wallhavenImageRepository.getImages(page = page, query = query);
+            val result = repository.getImages(page = page, query = query);
             result.fold(onSuccess = { imageResponse ->
                 val newUiItems = imageResponse.data.map { detail -> detail.toImageItem() }
 
@@ -112,15 +124,5 @@ class WallPaperListViewModel(private val wallhavenImageRepository: WallhavenImag
 
     fun getImageById(imageId: String): ImageItem? {
         return _uiState.value.items.find { it.id == imageId }
-    }
-
-    companion object {
-        val Factory: ViewModelProvider.Factory = object : ViewModelProvider.Factory {
-            @Suppress("UNCHECKED_CAST")
-            override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                val repository = WallhavenImageRepositoryImpl()
-                return WallPaperListViewModel(repository) as T
-            }
-        }
     }
 }
