@@ -115,13 +115,16 @@ fun WallpaperSourceRow(
         source = source,
         modifier = modifier
     ) {
-        when (source.name) {
-            "Wallhaven" -> {
+        when (source.id) {
+            1 -> {
                 WallhavenSetting(source = source, onApiKeySave = onApiKeySave)
             }
 
             else -> {
-//                Text("No configuration needed", style = MaterialTheme.typography.bodySmall)
+                Text(
+                    "No configuration needed/supported currently",
+                    style = MaterialTheme.typography.bodySmall
+                )
             }
         }
     }
