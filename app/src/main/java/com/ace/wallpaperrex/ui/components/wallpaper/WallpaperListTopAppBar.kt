@@ -94,7 +94,11 @@ fun WallpaperListTopAppBar(
                     )
                 }
             } else {
-                IconButton(onClick = { onSearchSubmit(query) }) {
+                IconButton(onClick = {
+                    if (query.isNotEmpty()) {
+                        onSearchSubmit(query)
+                    }
+                }) {
                     Icon(
                         imageVector = Icons.Filled.Search,
                         contentDescription = "Search"
