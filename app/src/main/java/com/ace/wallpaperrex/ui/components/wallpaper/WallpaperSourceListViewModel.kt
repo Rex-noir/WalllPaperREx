@@ -1,18 +1,29 @@
-package com.ace.wallpaperrex.ui.screens.wallpapers
+package com.ace.wallpaperrex.ui.components.wallpaper
 
 import android.app.Application
 import androidx.compose.runtime.Immutable
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.navigation.toRoute
 import com.ace.wallpaperrex.data.daos.getLastWallpaperSource
+import com.ace.wallpaperrex.data.daos.getWallpaperSourcesFlow
 import com.ace.wallpaperrex.data.repositories.WallpaperRepository
 import com.ace.wallpaperrex.data.repositories.WallpaperRepositoryProvider
 import com.ace.wallpaperrex.ui.models.ImageItem
+import com.ace.wallpaperrex.ui.models.WallpaperSourceItem
+import com.ace.wallpaperrex.ui.screens.wallpapers.WallpaperSingleListRoute
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.WhileSubscribed
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -26,28 +37,29 @@ data class WallpaperListUiState(
     val currentQuery: String = "nature"
 )
 
-class WallPaperListViewModel(application: Application) :
+class WallpaperSourceListViewModel(application: Application, savedStateHandle: SavedStateHandle) :
     AndroidViewModel(application) {
 
     private val _uiState = MutableStateFlow(WallpaperListUiState())
+    val uiState: StateFlow<WallpaperListUiState> = _uiState.asStateFlow()
     private lateinit var repository: WallpaperRepository
-    val uiState: StateFlow<WallpaperListUiState> = _uiState.asStateFlow();
 
     init {
+        val sourceId = savedStateHandle.toRoute<WallpaperSingleListRoute>().sourceId
         viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true) }
-            application.applicationContext.getLastWallpaperSource().filterNotNull()
-                .distinctUntilChanged().collect { lastSource ->
-                    repository = WallpaperRepositoryProvider.provide(lastSource)
-                    _uiState.update {
-                        it.copy(
-                            items = emptyList(),
-                        )
+            application.getWallpaperSourcesFlow()
+                .map { sources -> sources.find { it.id == sourceId } }
+                .distinctUntilChanged()
+                .collect { sourceItem ->
+                    sourceItem?.let {
+                        repository = WallpaperRepositoryProvider.provide(it)
+                        loadWallpapers(page = 1, query = "nature", isInitialLoad = true)
                     }
-                    loadWallpapers(page = 1, isInitialLoad = true, isSearchWipe = true)
                 }
+
         }
     }
+
 
     fun loadWallpapers(
         page: Int,

@@ -46,7 +46,8 @@ import com.ace.wallpaperrex.ui.components.wallpaper.WallpaperListTopAppBar
 import com.ace.wallpaperrex.ui.models.ImageItem
 import com.ace.wallpaperrex.ui.screens.setting.SettingsScreen
 import com.ace.wallpaperrex.ui.screens.wallpapers.FavoriteListScreen
-import com.ace.wallpaperrex.ui.screens.wallpapers.WallPaperListViewModel
+import com.ace.wallpaperrex.ui.components.wallpaper.WallpaperSourceListViewModel
+import com.ace.wallpaperrex.ui.components.wallpaper.WallpaperSourceList
 import com.ace.wallpaperrex.ui.screens.wallpapers.WallpaperListScreen
 import kotlinx.serialization.Serializable
 import kotlin.reflect.KClass
@@ -123,7 +124,6 @@ fun AppBottomNavigationBar(
 @Composable
 fun HomeLayout(
     modifier: Modifier = Modifier,
-    wallPaperListViewModelFromActivity: WallPaperListViewModel,
     appNavController: NavHostController, // For navigating outside HomeLayout's scope
     favoriteImageList: List<ImageItem>
 ) {
@@ -163,14 +163,14 @@ fun HomeLayout(
             .nestedScroll(scrollBehavior.nestedScrollConnection)
             .nestedScroll(nestedScrollConnection),
         topBar = {
-            // Determine TopAppBar based on the current route type
-            // You can also fetch the titleResId from homeBottomNavItems if needed
             when {
                 currentNavDestination?.hasRoute<WallpaperListRoute>() == true -> {
                     WallpaperListTopAppBar(
                         query = searchQuery,
                         onQueryChange = { searchQuery = it },
-                        onSearchSubmit = { wallPaperListViewModelFromActivity.searchWallpapers(it) },
+                        onSearchSubmit = {
+                            // TODO
+                        },
                         scrollBehavior = scrollBehavior,
                         onClearClicked = { searchQuery = "" }
                     )
@@ -217,7 +217,6 @@ fun HomeLayout(
         ) {
             composable<WallpaperListRoute> { // Use the concrete @Serializable data object
                 WallpaperListScreen(
-                    viewModel = wallPaperListViewModelFromActivity,
                     onWallpaperClick = { image ->
                         appNavController.navigate(AppRoute.WallpaperDetailRoute(image.id))
                     }
