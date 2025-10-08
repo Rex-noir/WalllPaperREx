@@ -1,5 +1,6 @@
 package com.ace.wallpaperrex.ui.components.wallpaper
 
+import android.content.Intent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
@@ -15,7 +16,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat.startActivity
+import coil3.Uri
+import androidx.core.net.toUri
 
 @Composable
 fun CreditBar(
@@ -23,6 +28,7 @@ fun CreditBar(
     uploaderUrl: String?,
     modifier: Modifier = Modifier,
 ) {
+    val context = LocalContext.current
     Row(
         modifier = modifier
             .background(
@@ -41,7 +47,8 @@ fun CreditBar(
 
         if (uploaderUrl != null) {
             IconButton(onClick = {
-                // Open browser
+                val intent = Intent(Intent.ACTION_VIEW, uploaderUrl.toUri())
+                context.startActivity(intent)
             }) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Outlined.NavigateNext,
