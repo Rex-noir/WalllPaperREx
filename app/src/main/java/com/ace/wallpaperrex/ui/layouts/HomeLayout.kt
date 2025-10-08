@@ -1,5 +1,6 @@
 package com.ace.wallpaperrex.ui.layouts
 
+import android.util.Log
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -42,6 +43,7 @@ import androidx.navigation.compose.rememberNavController
 import com.ace.wallpaperrex.AppRoute
 import com.ace.wallpaperrex.R
 import com.ace.wallpaperrex.ui.components.wallpaper.WallpaperListTopAppBar
+import com.ace.wallpaperrex.ui.models.ImageItem
 import com.ace.wallpaperrex.ui.screens.setting.SettingsScreen
 import com.ace.wallpaperrex.ui.screens.wallpapers.FavoriteListScreen
 import com.ace.wallpaperrex.ui.screens.wallpapers.WallPaperListViewModel
@@ -122,7 +124,8 @@ fun AppBottomNavigationBar(
 fun HomeLayout(
     modifier: Modifier = Modifier,
     wallPaperListViewModelFromActivity: WallPaperListViewModel,
-    appNavController: NavHostController // For navigating outside HomeLayout's scope
+    appNavController: NavHostController, // For navigating outside HomeLayout's scope
+    favoriteImageList: List<ImageItem>
 ) {
     val homeNavController = rememberNavController() // For navigation within HomeLayout
     val currentHomeBackStackEntry by homeNavController.currentBackStackEntryAsState()
@@ -216,7 +219,6 @@ fun HomeLayout(
                 WallpaperListScreen(
                     viewModel = wallPaperListViewModelFromActivity,
                     onWallpaperClick = { image ->
-                        // Use appNavController for navigation outside HomeLayout's NavHost
                         appNavController.navigate(AppRoute.WallpaperDetailRoute(image.id))
                     }
                 )
@@ -225,7 +227,13 @@ fun HomeLayout(
                 SettingsScreen(modifier = Modifier.fillMaxSize())
             }
             composable<FavoriteListRoute> {
-                FavoriteListScreen()
+                FavoriteListScreen(
+                    favorites = favoriteImageList,
+                    onWallpaperClick = { image ->
+                        Log.d("HomeLayout", "onWallpaperClick: $image")
+                        appNavController.navigate(AppRoute.WallpaperDetailRoute(image.id))
+                    }
+                )
             }
         }
     }

@@ -27,7 +27,8 @@ import kotlinx.coroutines.launch
 
 class WallpaperDetailViewModel(
     private val favoriteImageRepository: FavoriteImageRepository,
-    private val savedStateHandle: SavedStateHandle
+    images: List<ImageItem>,
+    private val savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
 
     private val _image =
@@ -40,10 +41,21 @@ class WallpaperDetailViewModel(
     private val _isSavingAsFavorite = MutableStateFlow(false)
     val isSavingAsFavorite: StateFlow<Boolean> = _isSavingAsFavorite.asStateFlow()
 
+    init {
+        val imageId = getImageId()
+        Log.d("WallpaperDetailViewModel", "Image count ${images.size} and id $imageId")
+        if (imageId != null) {
+            val image = images.find { it.id == imageId }
+            setImage(image)
+        }
+    }
+
     fun getImageId(): String? {
         return try {
             savedStateHandle.toRoute<AppRoute.WallpaperDetailRoute>().image
         } catch (e: Exception) {
+            e.printStackTrace()
+            Log.d("WallpaperDetailViewModel", "Error getting image id ${e.localizedMessage}")
             null
         }
     }
@@ -104,6 +116,8 @@ class WallpaperDetailViewModel(
     }
 
     companion object {
+
+        val IMAGE_LIST_KEY = object : CreationExtras.Key<List<ImageItem>> {}
         val Factory: ViewModelProvider.Factory = object : ViewModelProvider.Factory {
             @Suppress("UNCHECKED_CAST")
             override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
@@ -112,7 +126,8 @@ class WallpaperDetailViewModel(
                 val repository = FavoriteImageRepository(
                     dao = AppDatabase.getDatabase(application).favoriteImageDao()
                 )
-                return WallpaperDetailViewModel(repository, savedStateHandle) as T
+                val imageList = checkNotNull(extras[IMAGE_LIST_KEY])
+                return WallpaperDetailViewModel(repository, imageList, savedStateHandle) as T
             }
         }
     }

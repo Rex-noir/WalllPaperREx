@@ -25,7 +25,7 @@ fun FavoriteImageEntity.toImageItem(): ImageItem {
     return ImageItem(
         id = id,
         thumbnail = thumbnail,
-        url = url,
+        url = localPath!!,
         aspectRatio = aspectRatio,
         description = description,
         extension = extension,

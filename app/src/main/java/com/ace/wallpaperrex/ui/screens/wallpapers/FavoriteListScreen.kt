@@ -9,29 +9,28 @@ import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import com.ace.wallpaperrex.ui.models.ImageItem
 
 @Composable
 fun FavoriteListScreen(
+    favorites: List<ImageItem>,
+    onWallpaperClick: (ImageItem) -> Unit,
     modifier: Modifier = Modifier,
-    viewModel: FavoriteListViewModel = viewModel(factory = FavoriteListViewModel.Factory)
 ) {
-    val favorites = viewModel.favorites.collectAsState()
 
     LazyVerticalStaggeredGrid(
         columns = StaggeredGridCells.Adaptive(minSize = 150.dp),
         modifier = Modifier.fillMaxSize()
     ) {
-        itemsIndexed(items = favorites.value, key = { _, item -> item.id }) { index, item ->
+        itemsIndexed(items = favorites, key = { _, item -> item.id }) { index, item ->
 
             Picture(
-                model = item.localPath,
+                model = item.url,
                 contentDescription = item.description,
                 contentScale = ContentScale.Crop,
                 shape = RectangleShape,
@@ -40,7 +39,7 @@ fun FavoriteListScreen(
                     .aspectRatio(item.aspectRatio.takeIf { it > 0 } ?: (3f / 4f))
                     .clip(RoundedCornerShape(size = 0.dp))
                     .clickable(onClick = {
-
+                        onWallpaperClick(item)
                     })
             )
         }

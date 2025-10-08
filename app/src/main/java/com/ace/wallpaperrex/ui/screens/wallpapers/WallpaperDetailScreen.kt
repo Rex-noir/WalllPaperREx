@@ -37,7 +37,6 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -50,10 +49,12 @@ import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.MutableCreationExtras
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavBackStackEntry
 import com.ace.wallpaperrex.ui.components.wallpaper.WallpaperApplyDialog
+import com.ace.wallpaperrex.ui.models.ImageItem
 import com.ace.wallpaperrex.utils.ImageFileHelper.saveRawBytesToUri
 import com.ace.wallpaperrex.utils.convertToWebpBytes
 import kotlinx.coroutines.launch
@@ -62,13 +63,18 @@ import kotlinx.coroutines.launch
 @Composable
 fun WallpaperDetailScreen(
     onNavigateBack: () -> Unit,
-    wallpaperListViewModel: WallPaperListViewModel,
-    viewModelStoreOwner: ViewModelStoreOwner
+    viewModelStoreOwner: NavBackStackEntry,
+    imageList: List<ImageItem>
 ) {
+
     val viewModel: WallpaperDetailViewModel = viewModel(
         viewModelStoreOwner = viewModelStoreOwner,
-        factory = WallpaperDetailViewModel.Factory
+        factory = WallpaperDetailViewModel.Factory,
+        extras = MutableCreationExtras(initialExtras = viewModelStoreOwner.defaultViewModelCreationExtras).apply {
+            set(WallpaperDetailViewModel.IMAGE_LIST_KEY, imageList)
+        }
     )
+
 
     val imageItem by viewModel.imageItem.collectAsStateWithLifecycle()
     var imageBitmap by remember { mutableStateOf<Bitmap?>(null) }
@@ -81,12 +87,6 @@ fun WallpaperDetailScreen(
 
     var isTogglingFavorite = viewModel.isSavingAsFavorite.collectAsStateWithLifecycle()
 
-    LaunchedEffect(Unit) {
-        val imageId = viewModel.getImageId()
-        imageId?.let {
-            viewModel.setImage(wallpaperListViewModel.getImageById(it))
-        }
-    }
 
     Scaffold(
         snackbarHost = {
