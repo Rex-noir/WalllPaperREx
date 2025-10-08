@@ -15,7 +15,7 @@ data class PexelsWallpaperPhoto(
     val url: String,
     val photographer: String,
     val photographer_url: String,
-    val photographer_id: Int,
+    val photographer_id: Long,
     val avg_color: String,
     val src: PexelsWallpaperSource,
 ) : ToImageItemMapper {
@@ -52,8 +52,8 @@ data class PexelsPaginatedResponse(
     val page: Int,
     val per_page: Int,
     val total_results: Int,
-    val prev_page: String?,
-    val next_page: String?
+    val prev_page: String? = null,
+    val next_page: String? = null
 ) : PaginatedResponseMapper<ImageItem> {
     override fun toPaginatedResponse(): PaginatedResponse<ImageItem> {
         return PaginatedResponse<ImageItem>(
