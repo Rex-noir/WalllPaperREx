@@ -27,5 +27,9 @@ class PexelsWallpaperRepository(
         TODO("Not yet implemented")
     }
 
+    override suspend fun getSingleImage(id: String): Result<ImageItem> {
+        TODO("Not yet implemented")
+    }
+
 
 }

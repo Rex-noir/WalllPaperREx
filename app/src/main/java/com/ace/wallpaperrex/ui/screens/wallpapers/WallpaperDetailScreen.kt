@@ -88,7 +88,7 @@ fun WallpaperDetailScreen(
     var showDialog by remember { mutableStateOf(false) }
     val isFavorite = viewModel.isFavorite.collectAsStateWithLifecycle()
 
-    var isTogglingFavorite = viewModel.isSavingAsFavorite.collectAsStateWithLifecycle()
+    val isTogglingFavorite = viewModel.isSavingAsFavorite.collectAsStateWithLifecycle()
 
 
     val context = LocalContext.current
@@ -177,22 +177,7 @@ fun WallpaperDetailScreen(
                     .fillMaxSize()
                     .padding(innerPadding)
             ) {
-                val image = imageItem!!
-                Log.d("WallpaperDetailScreen", "image: $image")
-                if (image.uploader != null) {
-                    AnimatedVisibility(
-                        visible = imageBitmap != null,
-                        enter = fadeIn() + expandVertically(),
-                        exit = fadeOut() + shrinkVertically(),
-                        modifier = Modifier.align(Alignment.TopCenter)
-                    ) {
-                        CreditBar(
-                            uploaderName = image.uploader,
-                            uploaderUrl = image.uploaderUrl,
-                            modifier = Modifier.fillMaxWidth()
-                        )
-                    }
-                }
+
                 Picture(
                     model = imageItem!!.url,
                     shape = RectangleShape,
@@ -218,7 +203,22 @@ fun WallpaperDetailScreen(
                     zoomParams = ZoomParams(zoomEnabled = true, hideBarsOnTap = true)
                 )
 
-
+                val image = imageItem!!
+                Log.d("WallpaperDetailScreen", "image: $image")
+                if (image.uploader != null) {
+                    AnimatedVisibility(
+                        visible = imageBitmap != null,
+                        enter = fadeIn() + expandVertically(),
+                        exit = fadeOut() + shrinkVertically(),
+                        modifier = Modifier.align(Alignment.BottomCenter)
+                    ) {
+                        CreditBar(
+                            uploaderName = image.uploader,
+                            uploaderUrl = image.uploaderUrl,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    }
+                }
             }
         }
     }

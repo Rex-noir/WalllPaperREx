@@ -30,6 +30,8 @@ interface WallpaperRepository {
         sorting: String? = null,
         pageSize: Int = 20
     ): Result<ImageResponse<ImageItem>>
+
+    suspend fun getSingleImage(id: String): Result<ImageItem>
 }
 
 object WallpaperRepositoryProvider {

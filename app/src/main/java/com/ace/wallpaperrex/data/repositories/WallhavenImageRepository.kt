@@ -2,6 +2,7 @@ package com.ace.wallpaperrex.data.repositories
 
 import android.util.Log
 import com.ace.wallpaperrex.data.http.KtorClient
+import com.ace.wallpaperrex.data.models.WallhavenApiResponse
 import com.ace.wallpaperrex.data.models.WallhavenSearchResponse
 import com.ace.wallpaperrex.ui.models.ImageItem
 import com.ace.wallpaperrex.ui.models.ImageResponse
@@ -43,6 +44,26 @@ class WallhavenImageRepository(
         pageSize: Int
     ): Result<ImageResponse<ImageItem>> {
         return fetch(page = page, query = null, sorting = sorting ?: "date_added")
+    }
+
+    override suspend fun getSingleImage(id: String): Result<ImageItem> {
+        return try {
+            val response: WallhavenApiResponse = client.get {
+                url {
+                    protocol = URLProtocol.HTTPS
+                    host = baseUrl
+                    path("/api/v1/w/$id")
+                    if (!apiKey.isNullOrBlank()) {
+                        parameter("apikey", apiKey)
+                    }
+                }
+            }.body()
+
+            Result.success(response.data.toImageItem())
+        } catch (e: Exception) {
+            Log.e("WallhavenRepo", "Error fetching images: ${e.localizedMessage}", e)
+            Result.failure(e)
+        }
     }
 
     /**
