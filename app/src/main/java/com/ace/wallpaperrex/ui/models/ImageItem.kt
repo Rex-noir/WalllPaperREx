@@ -13,7 +13,9 @@ data class ImageItem(
     val aspectRatio: Float = 0f,
     val description: String? = null,
     val extension: String,
-    val sourceId: Int
+    val sourceId: Int,
+    val uploader: String? = null,
+    val uploaderUrl: String? = null
 )
 
 fun ImageItem.toEntity(localPath: String? = null): FavoriteImageEntity {
@@ -25,7 +27,9 @@ fun ImageItem.toEntity(localPath: String? = null): FavoriteImageEntity {
         description = description,
         extension = extension,
         localPath = localPath,
-        sourceId = sourceId
+        sourceId = sourceId,
+        uploader = uploader,
+        uploaderUrl = uploaderUrl
     );
 }
 

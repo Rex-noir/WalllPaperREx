@@ -42,7 +42,8 @@ data class WallhavenWallpaperDetail(
             thumbnail = thumbs.original,
             description = source,
             extension = "webp",
-            sourceId = 1
+            sourceId = 1,
+            uploader = uploader?.username
         )
     }
 }
