@@ -14,6 +14,7 @@ import androidx.navigation.toRoute
 import com.ace.wallpaperrex.AppRoute
 import com.ace.wallpaperrex.data.database.AppDatabase
 import com.ace.wallpaperrex.data.repositories.FavoriteImageRepository
+import com.ace.wallpaperrex.data.repositories.WallpaperRepository
 import com.ace.wallpaperrex.ui.models.ImageItem
 import com.ace.wallpaperrex.ui.models.toEntity
 import com.ace.wallpaperrex.utils.ImageFileHelper
@@ -27,12 +28,12 @@ import kotlinx.coroutines.launch
 
 class WallpaperDetailViewModel(
     private val favoriteImageRepository: FavoriteImageRepository,
-    images: List<ImageItem>,
+    private val image: ImageItem?,
     private val savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
 
     private val _image =
-        MutableStateFlow<ImageItem?>(null)
+        MutableStateFlow(image)
     val imageItem: StateFlow<ImageItem?> = _image.asStateFlow()
 
     private val _isFavorite = MutableStateFlow(false)
@@ -41,22 +42,14 @@ class WallpaperDetailViewModel(
     private val _isSavingAsFavorite = MutableStateFlow(false)
     val isSavingAsFavorite: StateFlow<Boolean> = _isSavingAsFavorite.asStateFlow()
 
-    init {
-        val imageId = getImageId()
-        Log.d("WallpaperDetailViewModel", "Image count ${images.size} and id $imageId")
-        if (imageId != null) {
-            val image = images.find { it.id == imageId }
-            setImage(image)
-        }
-    }
+    private lateinit var repository: WallpaperRepository
 
-    fun getImageId(): String? {
-        return try {
-            savedStateHandle.toRoute<AppRoute.WallpaperDetailRoute>().image
-        } catch (e: Exception) {
-            e.printStackTrace()
-            Log.d("WallpaperDetailViewModel", "Error getting image id ${e.localizedMessage}")
-            null
+    init {
+        if (image != null) {
+            viewModelScope.launch(Dispatchers.IO) {
+                val favImage = favoriteImageRepository.getById(image.id)
+                _isFavorite.value = favImage != null
+            }
         }
     }
 
@@ -76,19 +69,6 @@ class WallpaperDetailViewModel(
             viewModelScope.launch(Dispatchers.IO) {
                 favoriteImageRepository.removeFavorite(favImage)
             }
-        }
-    }
-
-    fun setImage(image: ImageItem?) {
-        if (image == null) {
-            _image.value = null
-            return
-        }
-
-        _image.value = image
-        viewModelScope.launch(Dispatchers.IO) {
-            val favImage = favoriteImageRepository.getById(image.id)
-            _isFavorite.value = favImage != null
         }
     }
 
@@ -127,7 +107,10 @@ class WallpaperDetailViewModel(
                     dao = AppDatabase.getDatabase(application).favoriteImageDao()
                 )
                 val imageList = checkNotNull(extras[IMAGE_LIST_KEY])
-                return WallpaperDetailViewModel(repository, imageList, savedStateHandle) as T
+                val imageId = savedStateHandle.toRoute<AppRoute.WallpaperDetailRoute>().image
+                val image = imageList.find { it.id == imageId }
+
+                return WallpaperDetailViewModel(repository, image, savedStateHandle) as T
             }
         }
     }
