@@ -1,5 +1,7 @@
 package com.ace.wallpaperrex.ui.components.sources
 
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.input.TextFieldLineLimits
@@ -35,51 +37,55 @@ fun WallhavenSetting(
     var isInEditMode by rememberSaveable { mutableStateOf(false) }
     val focusRequester = remember { FocusRequester() }
 
-    if (source.needsApiKey) {
-        Text("API Key is required for this source", style = MaterialTheme.typography.bodySmall)
-    }
-    OutlinedTextField(
-        state = apiKeyTextFieldState, // Use the state from rememberTextFieldState
-        label = { Text("API Key") },
-        modifier = Modifier
-            .fillMaxWidth()
-            .focusRequester(focusRequester),
-        shape = RoundedCornerShape(12.dp),
-        lineLimits = TextFieldLineLimits.SingleLine,
-        enabled = isInEditMode,
-        leadingIcon = {
-            Icon(
-                imageVector = Icons.Default.Key,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        },
-        trailingIcon = {
-            IconButton(onClick = {
-                if (isInEditMode) {
-                    onApiKeySave(source.id, apiKeyTextFieldState.text.toString())
-                    isInEditMode = false
-                } else {
-                    isInEditMode = true
-                }
-            }) {
+    Column(
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        if (source.needsApiKey) {
+            Text("API Key is required for this source", style = MaterialTheme.typography.bodySmall)
+        }
+        OutlinedTextField(
+            state = apiKeyTextFieldState, // Use the state from rememberTextFieldState
+            label = { Text("API Key") },
+            modifier = Modifier
+                .fillMaxWidth()
+                .focusRequester(focusRequester),
+            shape = RoundedCornerShape(12.dp),
+            lineLimits = TextFieldLineLimits.SingleLine,
+            enabled = isInEditMode,
+            leadingIcon = {
                 Icon(
-                    imageVector = if (isInEditMode) Icons.Default.Save else Icons.Default.Edit,
-                    contentDescription = if (isInEditMode) "Save API Key" else "Edit API Key",
-                    tint = MaterialTheme.colorScheme.primary
+                    imageVector = Icons.Default.Key,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
                 )
+            },
+            trailingIcon = {
+                IconButton(onClick = {
+                    if (isInEditMode) {
+                        onApiKeySave(source.id, apiKeyTextFieldState.text.toString())
+                        isInEditMode = false
+                    } else {
+                        isInEditMode = true
+                    }
+                }) {
+                    Icon(
+                        imageVector = if (isInEditMode) Icons.Default.Save else Icons.Default.Edit,
+                        contentDescription = if (isInEditMode) "Save API Key" else "Edit API Key",
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                }
             }
-        }
-    )
+        )
 
-    if (isInEditMode) {
-        LaunchedEffect(Unit) {
-            focusRequester.requestFocus()
+        if (isInEditMode) {
+            LaunchedEffect(Unit) {
+                focusRequester.requestFocus()
+            }
+        } else {
+            // Optionally clear focus when not in edit mode
+            // LaunchedEffect(Unit) { // Or key on isInEditMode if needed
+            //     focusRequester.freeFocus()
+            // }
         }
-    } else {
-        // Optionally clear focus when not in edit mode
-        // LaunchedEffect(Unit) { // Or key on isInEditMode if needed
-        //     focusRequester.freeFocus()
-        // }
     }
 }
