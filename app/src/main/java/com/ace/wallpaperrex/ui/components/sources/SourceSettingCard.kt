@@ -62,8 +62,7 @@ fun SourceSettingCard(
                             Text(text = "Default")
                         }
                     } else {
-                        // A simple TextButton is clean and effective for this action.
-                        TextButton(onClick = onSetAsDefault) {
+                        TextButton(onClick = onSetAsDefault, enabled = source.isConfigured) {
                             Text(text = "Set as default")
                         }
                     }
