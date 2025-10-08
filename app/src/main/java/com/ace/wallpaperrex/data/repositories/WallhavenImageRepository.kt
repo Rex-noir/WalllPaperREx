@@ -5,7 +5,7 @@ import com.ace.wallpaperrex.data.http.KtorClient
 import com.ace.wallpaperrex.data.models.WallhavenApiResponse
 import com.ace.wallpaperrex.data.models.WallhavenSearchResponse
 import com.ace.wallpaperrex.ui.models.ImageItem
-import com.ace.wallpaperrex.ui.models.ImageResponse
+import com.ace.wallpaperrex.ui.models.PaginatedResponse
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.get
@@ -29,7 +29,7 @@ class WallhavenImageRepository(
         page: Int,
         query: String,
         pageSize: Int
-    ): Result<ImageResponse<ImageItem>> {
+    ): Result<PaginatedResponse<ImageItem>> {
         // For search, sorting by "relevance" is often a good default.
         return fetch(page = page, query = query, sorting = "relevance")
     }
@@ -42,7 +42,7 @@ class WallhavenImageRepository(
         page: Int,
         sorting: String?,
         pageSize: Int
-    ): Result<ImageResponse<ImageItem>> {
+    ): Result<PaginatedResponse<ImageItem>> {
         return fetch(page = page, query = null, sorting = sorting ?: "date_added")
     }
 
@@ -74,7 +74,7 @@ class WallhavenImageRepository(
         page: Int,
         query: String?,
         sorting: String?
-    ): Result<ImageResponse<ImageItem>> {
+    ): Result<PaginatedResponse<ImageItem>> {
         return try {
             val response: WallhavenSearchResponse = client.get {
                 url {
@@ -99,7 +99,7 @@ class WallhavenImageRepository(
             }.body()
 
             Result.success(
-                ImageResponse(
+                PaginatedResponse(
                     data = response.data.map { it.toImageItem() },
                     meta = response.meta
                 )

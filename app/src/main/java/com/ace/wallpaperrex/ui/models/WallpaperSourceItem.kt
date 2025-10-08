@@ -10,7 +10,12 @@ data class WallpaperSourceItem(
     val apiKey: String? = "",
     val apiKeyDataStoreKey: Preferences.Key<String>,
     val isDefault: Boolean = false,
-)
+    val needsApiKey: Boolean = false
+) {
+    val hasApiKey: Boolean
+        get() = !apiKey.isNullOrBlank()
+    val isConfigured: Boolean get() = needsApiKey && hasApiKey || !needsApiKey
+}
 
 val wallpaperSourcesStatic = listOf<WallpaperSourceItem>(
     WallpaperSourceItem(
@@ -24,12 +29,14 @@ val wallpaperSourcesStatic = listOf<WallpaperSourceItem>(
         id = 2,
         name = "Pexels",
         description = "A collection of freely-usable high-resolution photos.",
-        apiKeyDataStoreKey = UserPrefsKeys.PEXELS_API_KEY
+        apiKeyDataStoreKey = UserPrefsKeys.PEXELS_API_KEY,
+        needsApiKey = true
     ),
     WallpaperSourceItem(
         id = 3,
         name = "Unsplash",
         description = "A collection of freely-usable high-resolution photos.",
         apiKeyDataStoreKey = UserPrefsKeys.UNSPLASH_API_KEY,
+        needsApiKey = true
     ),
 )

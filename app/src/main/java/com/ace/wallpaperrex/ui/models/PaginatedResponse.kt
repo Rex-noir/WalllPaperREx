@@ -15,7 +15,11 @@ data class Meta(
 
 @Serializable
 @Immutable
-data class ImageResponse<T>(
+data class PaginatedResponse<T>(
     val data: List<T>,
     val meta: Meta?
 )
+
+interface PaginatedResponseMapper<T> {
+    fun toPaginatedResponse(): PaginatedResponse<T>
+}
