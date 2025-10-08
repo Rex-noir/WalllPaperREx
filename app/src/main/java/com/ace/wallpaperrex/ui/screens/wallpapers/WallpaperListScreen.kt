@@ -59,7 +59,7 @@ fun WallpaperListScreen(
     Column(modifier = modifier.fillMaxSize()) {
 
 
-        if (wallpaperSources.isNotEmpty()) {
+        if (wallpaperSources.isNotEmpty() && wallpaperSources.size > 1) {
             val selectedIndex = wallpaperSources.indexOf(selectedSource).coerceAtLeast(0)
 
             SecondaryTabRow(
