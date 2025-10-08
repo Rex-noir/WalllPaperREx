@@ -43,7 +43,8 @@ data class WallhavenWallpaperDetail(
             description = source,
             extension = "webp",
             sourceId = 1,
-            uploader = uploader?.username
+            uploader = uploader?.username,
+            uploaderUrl = null
         )
     }
 }
