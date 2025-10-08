@@ -33,7 +33,7 @@ interface WallpaperListRepository {
     ): Result<ImageResponse<ImageItem>>
 }
 
-object WallpaperListRepositoryProvider {
+object WallpaperRepositoryProvider {
     fun provide(
         source: WallpaperSourceItem,
         client: HttpClient = KtorClient.instance

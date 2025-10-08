@@ -6,7 +6,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.ace.wallpaperrex.data.daos.getLastWallpaperSource
 import com.ace.wallpaperrex.data.repositories.WallpaperListRepository
-import com.ace.wallpaperrex.data.repositories.WallpaperListRepositoryProvider
+import com.ace.wallpaperrex.data.repositories.WallpaperRepositoryProvider
 import com.ace.wallpaperrex.ui.models.ImageItem
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -38,7 +38,7 @@ class WallPaperListViewModel(application: Application) :
             _uiState.update { it.copy(isLoading = true) }
             application.applicationContext.getLastWallpaperSource().filterNotNull()
                 .distinctUntilChanged().collect { lastSource ->
-                    repository = WallpaperListRepositoryProvider.provide(lastSource)
+                    repository = WallpaperRepositoryProvider.provide(lastSource)
                     loadWallpapers(page = 1, isInitialLoad = true, isSearchWipe = true)
                 }
         }
