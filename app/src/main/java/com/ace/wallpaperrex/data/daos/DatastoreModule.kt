@@ -42,6 +42,7 @@ fun Context.getWallpaperSourcesFlow(): Flow<List<WallpaperSourceItem>> {
             val defaultId = preferences[UserPrefsKeys.DEFAULT_WALLPAPER_SOURCE_ID] ?: 1
             val wallhavenKey = preferences[UserPrefsKeys.WALLHAVEN_API_KEY] ?: ""
             val unsplashKey = preferences[UserPrefsKeys.UNSPLASH_API_KEY] ?: ""
+            val pexelsKey = preferences[UserPrefsKeys.PEXELS_API_KEY] ?: ""
 
             // Use the hardcoded list as a template to construct the final list
             wallpaperSourcesStatic.map { source ->
@@ -53,7 +54,7 @@ fun Context.getWallpaperSourcesFlow(): Flow<List<WallpaperSourceItem>> {
 
                     2 -> source.copy(
                         isDefault = source.id == defaultId,
-                        apiKey = unsplashKey
+                        apiKey = pexelsKey
                     )
 
                     else -> source
