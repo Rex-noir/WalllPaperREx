@@ -4,6 +4,7 @@ import Picture
 import ZoomParams
 import android.graphics.Bitmap
 import android.graphics.drawable.BitmapDrawable
+import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
@@ -17,6 +18,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
@@ -53,6 +55,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.MutableCreationExtras
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavBackStackEntry
+import com.ace.wallpaperrex.ui.components.wallpaper.CreditBar
 import com.ace.wallpaperrex.ui.components.wallpaper.WallpaperApplyDialog
 import com.ace.wallpaperrex.ui.models.ImageItem
 import com.ace.wallpaperrex.utils.ImageFileHelper.saveRawBytesToUri
@@ -150,8 +153,6 @@ fun WallpaperDetailScreen(
                 Text("Error: image not found")
             }
         } else {
-
-
             WallpaperApplyDialog(
                 isVisible = showDialog,
                 imageBitmap = imageBitmap,
@@ -176,6 +177,22 @@ fun WallpaperDetailScreen(
                     .fillMaxSize()
                     .padding(innerPadding)
             ) {
+                val image = imageItem!!
+                Log.d("WallpaperDetailScreen", "image: $image")
+                if (image.uploader != null) {
+                    AnimatedVisibility(
+                        visible = imageBitmap != null,
+                        enter = fadeIn() + expandVertically(),
+                        exit = fadeOut() + shrinkVertically(),
+                        modifier = Modifier.align(Alignment.TopCenter)
+                    ) {
+                        CreditBar(
+                            uploaderName = image.uploader,
+                            uploaderUrl = image.uploaderUrl,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    }
+                }
                 Picture(
                     model = imageItem!!.url,
                     shape = RectangleShape,
