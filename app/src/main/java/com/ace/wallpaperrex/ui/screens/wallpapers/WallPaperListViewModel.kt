@@ -116,6 +116,7 @@ class WallPaperListViewModel(application: Application) :
                 items = emptyList(),
                 currentPage = 1,
                 isEndOfList = false,
+                isLoading = true,
                 error = null
             )
         }

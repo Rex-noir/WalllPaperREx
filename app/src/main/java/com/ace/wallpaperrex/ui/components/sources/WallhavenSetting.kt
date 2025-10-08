@@ -1,8 +1,6 @@
 package com.ace.wallpaperrex.ui.components.sources
 
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.input.TextFieldLineLimits
 import androidx.compose.foundation.text.input.rememberTextFieldState
@@ -30,14 +28,16 @@ import com.ace.wallpaperrex.ui.models.WallpaperSourceItem
 
 @Composable
 fun WallhavenSetting(
-    source: WallpaperSourceItem, // Pass the specific source item
+    source: WallpaperSourceItem,
     onApiKeySave: (sourceId: Int, apiKey: String) -> Unit
 ) {
-    // This logic is specific to Wallhaven's API key field
     val apiKeyTextFieldState = rememberTextFieldState(initialText = source.apiKey ?: "")
     var isInEditMode by rememberSaveable { mutableStateOf(false) }
     val focusRequester = remember { FocusRequester() }
 
+    if (source.needsApiKey) {
+        Text("API Key is required for this source", style = MaterialTheme.typography.bodySmall)
+    }
     OutlinedTextField(
         state = apiKeyTextFieldState, // Use the state from rememberTextFieldState
         label = { Text("API Key") },

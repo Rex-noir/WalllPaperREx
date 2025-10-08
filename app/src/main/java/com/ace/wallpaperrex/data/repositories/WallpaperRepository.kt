@@ -5,6 +5,10 @@ import com.ace.wallpaperrex.ui.models.ImageItem
 import com.ace.wallpaperrex.ui.models.PaginatedResponse
 import com.ace.wallpaperrex.ui.models.WallpaperSourceItem
 import io.ktor.client.HttpClient
+import io.ktor.client.plugins.ClientRequestException
+import io.ktor.client.plugins.ServerResponseException
+import io.ktor.http.HttpStatusCode
+import java.io.IOException
 
 interface WallpaperRepository {
     /**
@@ -32,6 +36,56 @@ interface WallpaperRepository {
     ): Result<PaginatedResponse<ImageItem>>
 
     suspend fun getSingleImage(id: String): Result<ImageItem>
+
+    suspend fun <T> safeApiCall(block: suspend () -> T): Result<T> {
+        return try {
+            Result.success(block())
+        } catch (e: Exception) {
+            Result.failure(mapToSpecificException(e))
+        }
+    }
+
+    private fun mapToSpecificException(e: Exception): Exception {
+        return when (e) {
+            is ClientRequestException -> {
+                when (e.response.status) {
+                    HttpStatusCode.Unauthorized -> Exception(
+                        "Invalid API Key. Please check your credentials.",
+                        e
+                    )
+
+                    HttpStatusCode.BadRequest -> Exception(
+                        "Invalid request. Please check the search query or parameters.",
+                        e
+                    )
+
+                    HttpStatusCode.TooManyRequests -> Exception(
+                        "You have exceeded the API rate limit.",
+                        e
+                    )
+
+                    else -> Exception(
+                        "Client error: ${e.response.status.description}. Please try again.",
+                        e
+                    )
+                }
+            }
+
+            is ServerResponseException -> Exception(
+                "Server error (${e.response.status.value}). Please try again later.",
+                e
+            )
+
+            is IOException -> Exception(
+                "Network error. Please check your internet connection.",
+                e
+            ) // For no internet
+            else -> Exception(
+                "An unexpected error occurred: ${e.message}",
+                e
+            ) // Fallback for other errors
+        }
+    }
 }
 
 object WallpaperRepositoryProvider {

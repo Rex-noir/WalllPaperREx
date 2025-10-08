@@ -127,7 +127,7 @@ fun WallpaperSourceRow(
         }
     ) {
         when (source.id) {
-            1 -> {
+            1, 2 -> {
                 WallhavenSetting(source = source, onApiKeySave = onApiKeySave)
             }
 

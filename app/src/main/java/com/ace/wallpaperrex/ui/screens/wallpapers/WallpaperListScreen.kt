@@ -1,5 +1,6 @@
 package com.ace.wallpaperrex.ui.screens.wallpapers
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -7,10 +8,14 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.itemsIndexed
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.CloudOff
 import androidx.compose.material3.Button
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SecondaryTabRow
 import androidx.compose.material3.Tab
@@ -198,18 +203,39 @@ fun WallpaperStaggeredGrid(
 
 @Composable
 fun ErrorState(message: String, onRetry: () -> Unit, modifier: Modifier = Modifier) {
-    Box(modifier = modifier, contentAlignment = Alignment.Center) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+    Box(
+        modifier = modifier.padding(16.dp), // Add padding for better spacing from edges
+        contentAlignment = Alignment.Center
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            // Use Arrangement.spacedBy for consistent vertical spacing
+            verticalArrangement = Arrangement.spacedBy(24.dp)
+        ) {
+            // Add a relevant icon for a network or general error
+            Icon(
+                imageVector = Icons.Outlined.CloudOff,
+                contentDescription = null, // The text describes the state, so icon is decorative
+                modifier = Modifier.size(80.dp),
+                tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+            )
+
+            // Use a more prominent headline style for the message
             Text(
                 text = message,
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.error
+                style = MaterialTheme.typography.headlineSmall,
+                textAlign = TextAlign.Center,
+                color = MaterialTheme.colorScheme.onSurface
             )
-            Spacer(modifier = Modifier.height(8.dp))
-            Button(onClick = onRetry) { Text("Retry") }
+
+            // The retry button remains a clear call to action
+            Button(onClick = onRetry) {
+                Text("Try Again")
+            }
         }
     }
 }
+
 
 
 @Composable
