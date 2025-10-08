@@ -40,7 +40,7 @@ object WallpaperListRepositoryProvider {
     ): WallpaperListRepository {
         return when (source.id) {
             1 -> WallhavenImageRepository(client, apiKey = source.apiKey)
-            else -> throw IllegalArgumentException("Unknown source ID: ${source.id}")
+            else -> throw IllegalArgumentException("Unknown source ID: ${source.id}. No repository for the given source id")
         }
     }
 }
