@@ -5,7 +5,7 @@ import androidx.compose.runtime.Immutable
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.ace.wallpaperrex.data.daos.getLastWallpaperSource
-import com.ace.wallpaperrex.data.repositories.WallpaperListRepository
+import com.ace.wallpaperrex.data.repositories.WallpaperRepository
 import com.ace.wallpaperrex.data.repositories.WallpaperRepositoryProvider
 import com.ace.wallpaperrex.ui.models.ImageItem
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -30,7 +30,7 @@ class WallPaperListViewModel(application: Application) :
     AndroidViewModel(application) {
 
     private val _uiState = MutableStateFlow(WallpaperListUiState())
-    private lateinit var repository: WallpaperListRepository
+    private lateinit var repository: WallpaperRepository
     val uiState: StateFlow<WallpaperListUiState> = _uiState.asStateFlow();
 
     init {

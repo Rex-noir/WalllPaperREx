@@ -1,13 +1,12 @@
 package com.ace.wallpaperrex.data.repositories
 
 import com.ace.wallpaperrex.data.http.KtorClient
-import com.ace.wallpaperrex.data.models.WallhavenWallpaperDetail
 import com.ace.wallpaperrex.ui.models.ImageItem
 import com.ace.wallpaperrex.ui.models.ImageResponse
 import com.ace.wallpaperrex.ui.models.WallpaperSourceItem
 import io.ktor.client.HttpClient
 
-interface WallpaperListRepository {
+interface WallpaperRepository {
     /**
      * Searches for images based on a user-provided query.
      *
@@ -37,7 +36,7 @@ object WallpaperRepositoryProvider {
     fun provide(
         source: WallpaperSourceItem,
         client: HttpClient = KtorClient.instance
-    ): WallpaperListRepository {
+    ): WallpaperRepository {
         return when (source.id) {
             1 -> WallhavenImageRepository(client, apiKey = source.apiKey)
             else -> throw IllegalArgumentException("Unknown source ID: ${source.id}. No repository for the given source id")

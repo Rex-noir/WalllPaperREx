@@ -15,7 +15,7 @@ import io.ktor.http.path
 class WallhavenImageRepository(
     private val client: HttpClient = KtorClient.instance,
     private val apiKey: String?
-) : WallpaperListRepository {
+) : WallpaperRepository {
 
     private val baseUrl = "wallhaven.cc"
     private val apiPath = "/api/v1/search"

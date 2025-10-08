@@ -4,10 +4,10 @@ import com.ace.wallpaperrex.ui.models.ImageItem
 import com.ace.wallpaperrex.ui.models.ImageResponse
 import io.ktor.client.HttpClient
 
-class PexelsWallpaperListRepository(
+class PexelsWallpaperRepository(
     private val client: HttpClient,
     private val apiKey: String?
-) : WallpaperListRepository {
+) : WallpaperRepository {
 
     private val baseUrl = "api.pexels.com"
     private val apiPath = "/v1"
