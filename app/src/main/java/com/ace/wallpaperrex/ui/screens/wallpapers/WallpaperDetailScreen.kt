@@ -29,6 +29,7 @@ import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Wallpaper
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.FabPosition
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -142,10 +143,11 @@ fun WallpaperDetailScreen(
                         downloadLauncher.launch("${image.id}.${image.extension}")
                     },
                     modifier = Modifier
-                        .padding(24.dp)
+                        .padding(vertical = 70.dp)
                 )
             }
         },
+        floatingActionButtonPosition = FabPosition.End,
         contentWindowInsets = WindowInsets()
     ) { innerPadding ->
         if (imageItem == null) {
