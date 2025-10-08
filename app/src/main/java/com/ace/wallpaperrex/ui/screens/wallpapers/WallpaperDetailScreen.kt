@@ -5,6 +5,7 @@ import ZoomParams
 import android.graphics.Bitmap
 import android.graphics.drawable.BitmapDrawable
 import android.util.Log
+import android.widget.ProgressBar
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
@@ -33,6 +34,7 @@ import androidx.compose.material3.FabPosition
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ProgressIndicatorDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SmallFloatingActionButton
 import androidx.compose.material3.SnackbarHost
@@ -125,14 +127,11 @@ fun WallpaperDetailScreen(
                     isFavorite = isFavorite.value,
                     onExpandClick = { isExpanded = !isExpanded },
                     onFavoriteClick = {
-                        try {
-                            viewModel.toggleFavoriteState(
-                                context,
-                                imageBitmap!!,
-                                "${image.id}.${image.extension}"
-                            )
-                        } finally {
-                        }
+                        viewModel.toggleFavoriteState(
+                            context,
+                            imageBitmap!!,
+                            "${image.id}.${image.extension}"
+                        )
                     },
                     onApplyClick = {
                         isExpanded = false
@@ -254,11 +253,11 @@ fun ExpandableFabMenu(
             ) {
                 // Favorite button with label
                 FabMenuItem(
-                    icon = if (isFavorite) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder,
+                    icon = if (isFavorite && !isFavoriteLoading) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder,
                     label = "Favorite",
                     onClick = onFavoriteClick,
                     isLoading = isFavoriteLoading,
-                    containerColor = if (isFavorite) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary
+                    containerColor = if (isFavorite && !isFavoriteLoading) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary
                 )
 
                 // Apply wallpaper button with label
@@ -326,7 +325,10 @@ fun FabMenuItem(
             containerColor = containerColor,
         ) {
             if (isLoading) {
-                CircularProgressIndicator(modifier = Modifier.size(20.dp))
+                CircularProgressIndicator(
+                    modifier = Modifier.size(20.dp),
+                    color = ProgressIndicatorDefaults.linearTrackColor
+                )
             } else {
                 Icon(
                     imageVector = icon,
