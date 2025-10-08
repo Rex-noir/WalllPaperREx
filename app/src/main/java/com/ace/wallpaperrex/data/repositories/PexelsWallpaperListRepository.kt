@@ -6,6 +6,7 @@ import com.ace.wallpaperrex.ui.models.ImageItem
 import com.ace.wallpaperrex.ui.models.PaginatedResponse
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
+import io.ktor.client.plugins.expectSuccess
 import io.ktor.client.request.get
 import io.ktor.client.request.headers
 import io.ktor.http.HttpHeaders
@@ -27,8 +28,9 @@ class PexelsWallpaperRepository(
         query: String,
         pageSize: Int
     ): Result<PaginatedResponse<ImageItem>> {
-        return try {
+        return safeApiCall {
             val response: PexelsPaginatedResponse = client.get {
+                expectSuccess = true
                 url {
                     host = baseUrl
                     protocol = URLProtocol.HTTPS
@@ -42,11 +44,7 @@ class PexelsWallpaperRepository(
                     append(HttpHeaders.Authorization, apiKey)
                 }
             }.body()
-            Result.success(
-                response.toPaginatedResponse()
-            )
-        } catch (e: Exception) {
-            Result.failure(e)
+            response.toPaginatedResponse()
         }
     }
 
@@ -55,8 +53,9 @@ class PexelsWallpaperRepository(
         sorting: String?,
         pageSize: Int
     ): Result<PaginatedResponse<ImageItem>> {
-        return try {
+        return safeApiCall {
             val response: PexelsPaginatedResponse = client.get {
+                expectSuccess = true
                 url {
                     host = baseUrl
                     protocol = URLProtocol.HTTPS
@@ -69,18 +68,14 @@ class PexelsWallpaperRepository(
                     append(HttpHeaders.Authorization, apiKey)
                 }
             }.body()
-            Result.success(
-                response.toPaginatedResponse()
-            )
-        } catch (e: Exception) {
-            Result.failure(e)
+            response.toPaginatedResponse()
         }
-
     }
 
     override suspend fun getSingleImage(id: String): Result<ImageItem> {
-        return try {
+        return safeApiCall {
             val response: PexelsWallpaperPhoto = client.get {
+                expectSuccess = true
                 url {
                     host = baseUrl
                     protocol = URLProtocol.HTTPS
@@ -90,11 +85,9 @@ class PexelsWallpaperRepository(
                     append(HttpHeaders.Authorization, apiKey)
                 }
             }.body()
-            Result.success(response.toImageItem())
-        } catch (e: Exception) {
-            Result.failure(e)
+            response.toImageItem()
+
         }
     }
-
 
 }

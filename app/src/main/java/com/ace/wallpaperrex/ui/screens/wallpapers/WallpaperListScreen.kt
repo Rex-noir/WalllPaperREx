@@ -3,14 +3,13 @@ package com.ace.wallpaperrex.ui.screens.wallpapers
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
+import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
 import androidx.compose.foundation.lazy.staggeredgrid.itemsIndexed
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.CloudOff
@@ -62,8 +61,6 @@ fun WallpaperListScreen(
     val scope = rememberCoroutineScope()
 
     Column(modifier = modifier.fillMaxSize()) {
-
-
         if (wallpaperSources.isNotEmpty() && wallpaperSources.size > 1) {
             val selectedIndex = wallpaperSources.indexOf(selectedSource).coerceAtLeast(0)
 
@@ -163,7 +160,7 @@ fun WallpaperStaggeredGrid(
             GridImageItem(item = item, onClick = { onWallpaperClick(item) })
 
             val loadMoreThreshold = 5
-            if (!isLoadingMore && !isEndOfList && index >= items.size - loadMoreThreshold) {
+            if (!isLoadingMore && paginationError == null && !isEndOfList && index >= items.size - loadMoreThreshold) {
                 LaunchedEffect(key1 = items.size) {
                     onLoadMore()
                 }
@@ -171,14 +168,16 @@ fun WallpaperStaggeredGrid(
 
         }
 
-        if (isLoadingMore) {
+        if (isLoadingMore && paginationError == null) {
             items(4) {
                 SkeletonGridItem()
             }
         }
 
         if (paginationError != null) {
-            item {
+            item(
+                span = StaggeredGridItemSpan.FullLine
+            ) {
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -235,7 +234,6 @@ fun ErrorState(message: String, onRetry: () -> Unit, modifier: Modifier = Modifi
         }
     }
 }
-
 
 
 @Composable
