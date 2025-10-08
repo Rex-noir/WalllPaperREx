@@ -39,6 +39,11 @@ class WallPaperListViewModel(application: Application) :
             application.applicationContext.getLastWallpaperSource().filterNotNull()
                 .distinctUntilChanged().collect { lastSource ->
                     repository = WallpaperRepositoryProvider.provide(lastSource)
+                    _uiState.update {
+                        it.copy(
+                            items = emptyList(),
+                        )
+                    }
                     loadWallpapers(page = 1, isInitialLoad = true, isSearchWipe = true)
                 }
         }
