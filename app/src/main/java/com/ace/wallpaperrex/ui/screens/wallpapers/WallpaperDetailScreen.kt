@@ -88,11 +88,60 @@ fun WallpaperDetailScreen(
     var isTogglingFavorite = viewModel.isSavingAsFavorite.collectAsStateWithLifecycle()
 
 
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+
+
     Scaffold(
         snackbarHost = {
             SnackbarHost(
                 hostState = snackbarHostState,
             )
+        },
+        floatingActionButton = {
+            if (imageBitmap != null) {
+                val image = imageItem!!
+
+                val downloadLauncher =
+                    rememberLauncherForActivityResult(
+                        contract = ActivityResultContracts.CreateDocument(
+                            "image/*"
+                        )
+                    ) { uri ->
+                        uri?.let { destinationUri ->
+                            scope.launch {
+                                val bytes = imageBitmap?.convertToWebpBytes()
+                                saveRawBytesToUri(context, bytes!!, uri)
+                            }
+                        }
+                    }
+                ExpandableFabMenu(
+                    isFavoriteLoading = isTogglingFavorite.value,
+                    isExpanded = isExpanded,
+                    isFavorite = isFavorite.value,
+                    onExpandClick = { isExpanded = !isExpanded },
+                    onFavoriteClick = {
+                        try {
+                            viewModel.toggleFavoriteState(
+                                context,
+                                imageBitmap!!,
+                                "${image.id}.${image.extension}"
+                            )
+                        } finally {
+                        }
+                    },
+                    onApplyClick = {
+                        isExpanded = false
+                        showDialog = true
+                    },
+                    onDownloadClick = {
+                        isExpanded = false
+                        downloadLauncher.launch("${image.id}.${image.extension}")
+                    },
+                    modifier = Modifier
+                        .padding(24.dp)
+                )
+            }
         },
         contentWindowInsets = WindowInsets()
     ) { innerPadding ->
@@ -101,24 +150,7 @@ fun WallpaperDetailScreen(
                 Text("Error: image not found")
             }
         } else {
-            val image = imageItem!!
 
-            val context = LocalContext.current
-            val scope = rememberCoroutineScope()
-
-            val downloadLauncher =
-                rememberLauncherForActivityResult(
-                    contract = ActivityResultContracts.CreateDocument(
-                        "image/*"
-                    )
-                ) { uri ->
-                    uri?.let { destinationUri ->
-                        scope.launch {
-                            val bytes = imageBitmap?.convertToWebpBytes()
-                            saveRawBytesToUri(context, bytes!!, uri)
-                        }
-                    }
-                }
 
             WallpaperApplyDialog(
                 isVisible = showDialog,
@@ -169,35 +201,7 @@ fun WallpaperDetailScreen(
                     zoomParams = ZoomParams(zoomEnabled = true, hideBarsOnTap = true)
                 )
 
-                if (imageBitmap != null) {
-                    ExpandableFabMenu(
-                        isFavoriteLoading = isTogglingFavorite.value,
-                        isExpanded = isExpanded,
-                        isFavorite = isFavorite.value,
-                        onExpandClick = { isExpanded = !isExpanded },
-                        onFavoriteClick = {
-                            try {
-                                viewModel.toggleFavoriteState(
-                                    context,
-                                    imageBitmap!!,
-                                    "${image.id}.${image.extension}"
-                                )
-                            } finally {
-                            }
-                        },
-                        onApplyClick = {
-                            isExpanded = false
-                            showDialog = true
-                        },
-                        onDownloadClick = {
-                            isExpanded = false
-                            downloadLauncher.launch("${image.id}.${image.extension}")
-                        },
-                        modifier = Modifier
-                            .align(Alignment.BottomEnd)
-                            .padding(24.dp)
-                    )
-                }
+
             }
         }
     }
