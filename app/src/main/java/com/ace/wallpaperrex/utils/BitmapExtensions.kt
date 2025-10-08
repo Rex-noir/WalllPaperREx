@@ -9,7 +9,7 @@ import java.io.ByteArrayOutputStream
 suspend fun Bitmap.convertToWebpBytes(): ByteArray = withContext(Dispatchers.IO) {
     val outputStream = ByteArrayOutputStream()
     val format = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-        Bitmap.CompressFormat.WEBP_LOSSLESS
+        Bitmap.CompressFormat.WEBP_LOSSY
     } else {
         Bitmap.CompressFormat.WEBP
     }
