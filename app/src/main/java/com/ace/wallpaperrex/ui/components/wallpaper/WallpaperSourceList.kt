@@ -36,15 +36,15 @@ fun WallpaperSourceList(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     Column(modifier = modifier.fillMaxSize()) {
         Box(modifier = Modifier.weight(1f)) {
-            if (uiState.isLoading && uiState.items == null) {
+            if (uiState.isLoading && uiState.items.isEmpty()) {
                 SkeletonWallpaperGrid(modifier = Modifier.fillMaxSize())
-            } else if (uiState.error != null && uiState.items?.isEmpty() == true) {
+            } else if (uiState.error != null && uiState.items.isEmpty()) {
                 ErrorState(
                     message = uiState.error!!, // No need for '!!'
                     onRetry = { viewModel.retryInitialLoad() },
                     modifier = Modifier.fillMaxSize(),
                 )
-            } else if (uiState.items!!.isEmpty()) {
+            } else if (uiState.items.isEmpty()) {
                 EmptyState(
                     message = "No wallpapers found for '${uiState.currentQuery}'.",
                     modifier = Modifier.fillMaxSize()

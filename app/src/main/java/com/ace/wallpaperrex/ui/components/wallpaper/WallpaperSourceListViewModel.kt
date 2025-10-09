@@ -2,30 +2,27 @@ package com.ace.wallpaperrex.ui.components.wallpaper
 
 import android.app.Application
 import androidx.compose.runtime.Immutable
-import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
-import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
-import androidx.navigation.toRoute
 import com.ace.wallpaperrex.data.daos.getWallpaperSourcesFlow
 import com.ace.wallpaperrex.data.repositories.WallpaperRepository
 import com.ace.wallpaperrex.data.repositories.WallpaperRepositoryProvider
 import com.ace.wallpaperrex.ui.models.ImageItem
-import com.ace.wallpaperrex.ui.screens.wallpapers.WallpaperSingleListRoute
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 @Immutable
 data class WallpaperListUiState(
-    val items: List<ImageItem>? = null,
+    val items: List<ImageItem> = emptyList(),
     val isLoading: Boolean = true,
     val error: String? = null,
     val currentPage: Int = 1,
@@ -35,15 +32,27 @@ data class WallpaperListUiState(
 
 class WallpaperSourceListViewModel(
     val sourceId: Int,
-    val repository: WallpaperRepository,
+    private val application: Application,
 ) :
     ViewModel() {
 
     private val _uiState = MutableStateFlow(WallpaperListUiState())
     val uiState: StateFlow<WallpaperListUiState> = _uiState.asStateFlow()
 
+    private lateinit var repository: WallpaperRepository
+
     init {
-        loadWallpapers(page = 1, isInitialLoad = true)
+        viewModelScope.launch {
+            application.getWallpaperSourcesFlow().stateIn(
+                scope = viewModelScope,
+                started = kotlinx.coroutines.flow.SharingStarted.WhileSubscribed(5000),
+                initialValue = emptyList()
+            ).map { sources -> sources.find { it.id == sourceId } }.filterNotNull().collect {
+                repository = WallpaperRepositoryProvider.provide(it)
+                loadWallpapers(page = 1, query = null, isInitialLoad = true)
+            }
+        }
+
     }
 
 
@@ -133,8 +142,7 @@ class WallpaperSourceListViewModel(
 
     companion object {
         fun createFactory(
-            sourceId: Int,
-            repository: WallpaperRepository
+            sourceId: Int
         ): ViewModelProvider.Factory =
             object : ViewModelProvider.Factory {
                 @Suppress("UNCHECKED_CAST")
@@ -143,7 +151,7 @@ class WallpaperSourceListViewModel(
                     extras: CreationExtras
                 ): T {
                     val application = checkNotNull(extras[APPLICATION_KEY])
-                    return WallpaperSourceListViewModel(sourceId, repository) as T
+                    return WallpaperSourceListViewModel(sourceId, application) as T
                 }
             }
     }
