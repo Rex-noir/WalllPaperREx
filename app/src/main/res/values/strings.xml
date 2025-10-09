@@ -7,4 +7,5 @@
     <string name="bottom_nav_settings">Setting</string>
     <string name="bottom_nav_search">Search</string>
     <string name="bottom_nav_favorites">Favorites</string>
+    <string name="bottom_nav_sources_setting">Sources</string>
 </resources>

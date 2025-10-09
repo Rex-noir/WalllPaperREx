@@ -1,12 +1,12 @@
 package com.ace.wallpaperrex.ui.layouts
 
-import android.util.Log
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Api
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Wallpaper
@@ -40,14 +40,10 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.ace.wallpaperrex.AppRoute
 import com.ace.wallpaperrex.R
-import com.ace.wallpaperrex.ui.components.wallpaper.WallpaperListTopAppBar
 import com.ace.wallpaperrex.ui.models.ImageItem
-import com.ace.wallpaperrex.ui.screens.setting.SettingsScreen
+import com.ace.wallpaperrex.ui.screens.setting.SourcesSettingsScreen
 import com.ace.wallpaperrex.ui.screens.wallpapers.FavoriteListScreen
-import com.ace.wallpaperrex.ui.components.wallpaper.WallpaperSourceListViewModel
-import com.ace.wallpaperrex.ui.components.wallpaper.WallpaperSourceList
 import com.ace.wallpaperrex.ui.screens.wallpapers.WallpaperListScreen
 import kotlinx.serialization.Serializable
 import kotlin.reflect.KClass
@@ -59,9 +55,11 @@ data object WallpaperListRoute
 @Serializable
 data object SettingsRoute
 
-
 @Serializable
 data object FavoriteListRoute
+
+@Serializable
+data object SourcesSettingsRoute
 
 // 2. Data structure to hold UI metadata (icon, title) for each route KClass
 data class BottomNavigationItemInfo(
@@ -84,6 +82,12 @@ val homeBottomNavItems: List<BottomNavigationItemInfo> = listOf(
         routeInstance = FavoriteListRoute,
         icon = Icons.Filled.Favorite,
         titleResId = R.string.bottom_nav_favorites
+    ),
+    BottomNavigationItemInfo(
+        routeKClass = SourcesSettingsRoute::class,
+        routeInstance = SourcesSettingsRoute,
+        icon = Icons.Filled.Api,
+        titleResId = R.string.bottom_nav_sources_setting
     ),
     BottomNavigationItemInfo(
         routeKClass = SettingsRoute::class,
@@ -221,8 +225,11 @@ fun HomeLayout(
                     }
                 )
             }
+            composable<SourcesSettingsRoute> {
+                SourcesSettingsScreen()
+            }
             composable<SettingsRoute> { // Use the concrete @Serializable data object
-                SettingsScreen(modifier = Modifier.fillMaxSize())
+                Text("This is settings screen")
             }
             composable<FavoriteListRoute> {
                 FavoriteListScreen(

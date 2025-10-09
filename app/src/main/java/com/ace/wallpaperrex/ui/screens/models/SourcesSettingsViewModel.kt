@@ -8,28 +8,19 @@ import androidx.lifecycle.viewModelScope
 import com.ace.wallpaperrex.data.daos.getWallpaperSourcesFlow
 import com.ace.wallpaperrex.data.daos.setDefaultWallpaperSourceId
 import com.ace.wallpaperrex.data.daos.setWallpaperApiKey
-import com.ace.wallpaperrex.ui.models.WallpaperSourceItem
 import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
-class WallpaperSourceViewModel(application: Application) : AndroidViewModel(application) {
-
+class SourcesSettingsViewModel(application: Application) : AndroidViewModel(application) {
     @SuppressLint("StaticFieldLeak")
     private val context = application.applicationContext
 
-    // The ViewModel now has a single source of truth for its state.
-    val sources: StateFlow<List<WallpaperSourceItem>> =
-        context.getWallpaperSourcesFlow()
-            .stateIn(
-                scope = viewModelScope,
-                // The flow starts when the UI is visible and stops 5s after it's gone.
-                // This is efficient and handles configuration changes.
-                started = SharingStarted.WhileSubscribed(5000),
-                // The initial value before the flow emits its first list.
-                initialValue = emptyList()
-            )
+    val sources = context.getWallpaperSourcesFlow().stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = emptyList()
+    )
 
     fun setAsDefault(id: Int) {
         viewModelScope.launch {
@@ -37,7 +28,7 @@ class WallpaperSourceViewModel(application: Application) : AndroidViewModel(appl
         }
     }
 
-    fun updateWallpaperApiKey(apiKeyDatastoreKey: Preferences.Key<String>, apiKey: String) {
+    fun updateSourceApiKey(apiKeyDatastoreKey: Preferences.Key<String>, apiKey: String) {
         viewModelScope.launch {
             context.setWallpaperApiKey(apiKeyDatastoreKey, apiKey)
         }
