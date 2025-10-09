@@ -27,7 +27,6 @@ data class WallpaperListUiState(
     val error: String? = null,
     val currentPage: Int = 1,
     val isEndOfList: Boolean = true,
-    val currentQuery: String = "nature"
 )
 
 class WallpaperSourceListViewModel(
@@ -49,7 +48,7 @@ class WallpaperSourceListViewModel(
                 initialValue = emptyList()
             ).map { sources -> sources.find { it.id == sourceId } }.filterNotNull().collect {
                 repository = WallpaperRepositoryProvider.provide(it)
-                loadWallpapers(page = 1, query = null, isInitialLoad = true)
+                loadWallpapers(page = 1, isInitialLoad = true)
             }
         }
 
@@ -58,7 +57,6 @@ class WallpaperSourceListViewModel(
 
     fun loadWallpapers(
         page: Int,
-        query: String? = "nature",
         isInitialLoad: Boolean = false,
         isSearchWipe: Boolean = false
     ) {
@@ -71,7 +69,6 @@ class WallpaperSourceListViewModel(
             it.copy(
                 isLoading = true,
                 error = null,
-                currentQuery = query ?: it.currentQuery
             )
         }
 
@@ -86,7 +83,8 @@ class WallpaperSourceListViewModel(
                     val combinedItems = if (isInitialLoad || isSearchWipe) {
                         newUiItems
                     } else {
-                        currentState.items?.plus(newUiItems) ?: newUiItems
+                        val items = currentState.items.plus(newUiItems)
+                        items
                     }
                     currentState.copy(
                         items = combinedItems,
@@ -107,15 +105,6 @@ class WallpaperSourceListViewModel(
         }
     }
 
-    fun searchWallpapers(query: String) {
-        _uiState.update {
-            it.copy(
-                items = emptyList(), currentPage = 1, isEndOfList = false, currentQuery = query,
-            )
-        }
-        loadWallpapers(page = 1, query = query, isInitialLoad = true, isSearchWipe = true)
-    }
-
     fun loadNextPage() {
         if (!_uiState.value.isLoading && !_uiState.value.isEndOfList) {
             loadWallpapers(page = _uiState.value.currentPage)
@@ -132,11 +121,11 @@ class WallpaperSourceListViewModel(
                 error = null
             )
         }
-        loadWallpapers(page = 1, query = _uiState.value.currentQuery, isInitialLoad = true)
+        loadWallpapers(page = 1, isInitialLoad = true)
     }
 
     fun getImageById(imageId: String): ImageItem? {
-        return _uiState.value.items?.find { it.id == imageId }
+        return _uiState.value.items.find { it.id == imageId }
     }
 
 
