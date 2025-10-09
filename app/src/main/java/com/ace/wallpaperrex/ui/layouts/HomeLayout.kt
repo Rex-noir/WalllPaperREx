@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Api
 import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Wallpaper
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -44,6 +45,7 @@ import com.ace.wallpaperrex.R
 import com.ace.wallpaperrex.ui.models.ImageItem
 import com.ace.wallpaperrex.ui.screens.setting.SourcesSettingsScreen
 import com.ace.wallpaperrex.ui.screens.wallpapers.FavoriteListScreen
+import com.ace.wallpaperrex.ui.screens.wallpapers.SearchWallpapersScreen
 import com.ace.wallpaperrex.ui.screens.wallpapers.WallpaperListScreen
 import kotlinx.serialization.Serializable
 import kotlin.reflect.KClass
@@ -60,6 +62,9 @@ data object FavoriteListRoute
 
 @Serializable
 data object SourcesSettingsRoute
+
+@Serializable
+data object SearchWallpapersRoute
 
 // 2. Data structure to hold UI metadata (icon, title) for each route KClass
 data class BottomNavigationItemInfo(
@@ -82,6 +87,12 @@ val homeBottomNavItems: List<BottomNavigationItemInfo> = listOf(
         routeInstance = FavoriteListRoute,
         icon = Icons.Filled.Favorite,
         titleResId = R.string.bottom_nav_favorites
+    ),
+    BottomNavigationItemInfo(
+        routeKClass = SearchWallpapersRoute::class,
+        routeInstance = SearchWallpapersRoute,
+        icon = Icons.Filled.Search,
+        titleResId = R.string.bottom_nav_search
     ),
     BottomNavigationItemInfo(
         routeKClass = SourcesSettingsRoute::class,
@@ -108,7 +119,7 @@ fun AppBottomNavigationBar(
             val selected = currentNavDestination?.hasRoute(navItemInfo.routeKClass) == true
             NavigationBarItem(
                 icon = { Icon(navItemInfo.icon, contentDescription = null) },
-                label = { Text(stringResource(navItemInfo.titleResId)) },
+//                label = { Text(stringResource(navItemInfo.titleResId)) },
                 selected = selected,
                 onClick = {
                     homeNavController.navigate(navItemInfo.routeInstance) { // Navigate to the serializable object instance
@@ -237,6 +248,9 @@ fun HomeLayout(
                         onWallpaperClick(image)
                     }
                 )
+            }
+            composable<SearchWallpapersRoute> {
+                SearchWallpapersScreen()
             }
         }
     }
