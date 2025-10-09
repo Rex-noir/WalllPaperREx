@@ -25,34 +25,33 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ace.wallpaperrex.ui.models.ImageItem
 
 @Composable
 fun WallpaperSourceList(
     modifier: Modifier = Modifier,
-    viewModel: WallpaperSourceListViewModel = viewModel(),
+    viewModel: WallpaperSourceListViewModel,
     onWallpaperClick: (image: ImageItem) -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     Column(modifier = modifier.fillMaxSize()) {
         Box(modifier = Modifier.weight(1f)) {
-            if (uiState.isLoading && uiState.items.isEmpty()) {
+            if (uiState.isLoading && uiState.items == null) {
                 SkeletonWallpaperGrid(modifier = Modifier.fillMaxSize())
-            } else if (uiState.error != null && uiState.items.isEmpty()) {
+            } else if (uiState.error != null && uiState.items?.isEmpty() == true) {
                 ErrorState(
                     message = uiState.error!!, // No need for '!!'
                     onRetry = { viewModel.retryInitialLoad() },
                     modifier = Modifier.fillMaxSize(),
                 )
-            } else if (uiState.items.isEmpty()) {
+            } else if (uiState.items!!.isEmpty()) {
                 EmptyState(
                     message = "No wallpapers found for '${uiState.currentQuery}'.",
                     modifier = Modifier.fillMaxSize()
                 )
             } else {
                 WallpaperStaggeredGrid(
-                    items = uiState.items,
+                    items = uiState.items!!,
                     isLoadingMore = uiState.isLoading,
                     isEndOfList = uiState.isEndOfList,
                     paginationError = uiState.error,

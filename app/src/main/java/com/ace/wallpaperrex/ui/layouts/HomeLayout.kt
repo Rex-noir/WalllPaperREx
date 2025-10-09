@@ -165,15 +165,16 @@ fun HomeLayout(
         topBar = {
             when {
                 currentNavDestination?.hasRoute<WallpaperListRoute>() == true -> {
-                    WallpaperListTopAppBar(
-                        query = searchQuery,
-                        onQueryChange = { searchQuery = it },
-                        onSearchSubmit = {
-                            // TODO
-                        },
-                        scrollBehavior = scrollBehavior,
-                        onClearClicked = { searchQuery = "" }
-                    )
+//                    WallpaperListTopAppBar(
+//                        query = searchQuery,
+//                        onQueryChange = { searchQuery = it },
+//                        onSearchSubmit = {
+//                            // TODO
+//                        },
+//                        scrollBehavior = scrollBehavior,
+//                        onClearClicked = { searchQuery = "" }
+//                    )
+                    null
                 }
 
                 else -> {
