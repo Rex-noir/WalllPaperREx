@@ -35,26 +35,15 @@ data class WallpaperListUiState(
 
 class WallpaperSourceListViewModel(
     val sourceId: Int,
-    application: Application,
+    val repository: WallpaperRepository,
 ) :
-    AndroidViewModel(application) {
+    ViewModel() {
 
     private val _uiState = MutableStateFlow(WallpaperListUiState())
     val uiState: StateFlow<WallpaperListUiState> = _uiState.asStateFlow()
-    private lateinit var repository: WallpaperRepository
 
     init {
-        viewModelScope.launch {// Use .first() to get the single, most recent list of sources
-            val sourceItem = application.getWallpaperSourcesFlow()
-                .map { sources -> sources.find { it.id == sourceId } }
-                .first() // This gets the first non-null emission and cancels the flow
-
-            // Now use the retrieved sourceItem
-            sourceItem?.let {
-                repository = WallpaperRepositoryProvider.provide(it)
-                loadWallpapers(page = 1, query = "nature", isInitialLoad = true)
-            }
-        }
+        loadWallpapers(page = 1, isInitialLoad = true)
     }
 
 
@@ -143,7 +132,10 @@ class WallpaperSourceListViewModel(
 
 
     companion object {
-        fun createFactory(sourceId: Int): ViewModelProvider.Factory =
+        fun createFactory(
+            sourceId: Int,
+            repository: WallpaperRepository
+        ): ViewModelProvider.Factory =
             object : ViewModelProvider.Factory {
                 @Suppress("UNCHECKED_CAST")
                 override fun <T : ViewModel> create(
@@ -151,7 +143,7 @@ class WallpaperSourceListViewModel(
                     extras: CreationExtras
                 ): T {
                     val application = checkNotNull(extras[APPLICATION_KEY])
-                    return WallpaperSourceListViewModel(sourceId, application) as T
+                    return WallpaperSourceListViewModel(sourceId, repository) as T
                 }
             }
     }

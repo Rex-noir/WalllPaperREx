@@ -26,10 +26,12 @@ import androidx.navigation.toRoute
 import com.ace.wallpaperrex.data.daos.getLastWallpaperSource
 import com.ace.wallpaperrex.data.daos.getWallpaperSourcesFlow
 import com.ace.wallpaperrex.data.daos.setLastWallpaperSourceId
+import com.ace.wallpaperrex.data.repositories.WallpaperRepositoryProvider
 import com.ace.wallpaperrex.ui.components.wallpaper.WallpaperSourceList
 import com.ace.wallpaperrex.ui.components.wallpaper.WallpaperSourceListViewModel
 import com.ace.wallpaperrex.ui.models.ImageItem
 import com.ace.wallpaperrex.ui.models.WallpaperSourceItem
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -72,10 +74,14 @@ fun WallpaperListScreen(
                 wallpaperSources.forEach { source ->
                     composable<WallpaperSingleListRoute> { backStackEntry ->
                         val currentId = backStackEntry.toRoute<WallpaperSingleListRoute>().sourceId
+                        val repository = WallpaperRepositoryProvider.provide(source)
                         key(currentId) {
                             WallpaperSourceList(
                                 viewModel = viewModel(
-                                    factory = WallpaperSourceListViewModel.createFactory(currentId),
+                                    factory = WallpaperSourceListViewModel.createFactory(
+                                        currentId,
+                                        repository
+                                    ),
                                     key = "source-$currentId",
                                     viewModelStoreOwner = backStackEntry
                                 ),
