@@ -177,7 +177,7 @@ fun HomeLayout(
             .nestedScroll(nestedScrollConnection),
         topBar = {
             when {
-                currentNavDestination?.hasRoute<WallpaperListRoute>() == true -> {
+                currentNavDestination?.hasRoute<WallpaperListRoute>() == true || currentNavDestination?.hasRoute<SearchWallpapersRoute>() == true -> {
 //                    WallpaperListTopAppBar(
 //                        query = searchQuery,
 //                        onQueryChange = { searchQuery = it },

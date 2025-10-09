@@ -5,11 +5,18 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import com.ace.wallpaperrex.data.daos.FavoriteImageDao
+import com.ace.wallpaperrex.data.daos.SearchHistoryDao
 import com.ace.wallpaperrex.data.entities.FavoriteImageEntity
+import com.ace.wallpaperrex.data.entities.SearchHistoryItem
 
-@Database(entities = [FavoriteImageEntity::class], version = 1, exportSchema = true)
+@Database(
+    entities = [FavoriteImageEntity::class, SearchHistoryItem::class],
+    version = 1,
+    exportSchema = true
+)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun favoriteImageDao(): FavoriteImageDao
+    abstract fun searchHistoryDao(): SearchHistoryDao
 
     companion object {
         @Volatile
