@@ -5,7 +5,6 @@ import ZoomParams
 import android.graphics.Bitmap
 import android.graphics.drawable.BitmapDrawable
 import android.util.Log
-import android.widget.ProgressBar
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
@@ -61,6 +60,7 @@ import androidx.navigation.NavBackStackEntry
 import com.ace.wallpaperrex.ui.components.wallpaper.CreditBar
 import com.ace.wallpaperrex.ui.components.wallpaper.WallpaperApplyDialog
 import com.ace.wallpaperrex.ui.models.ImageItem
+import com.ace.wallpaperrex.ui.screens.models.WallpaperDetailViewModel
 import com.ace.wallpaperrex.utils.ImageFileHelper.saveRawBytesToUri
 import com.ace.wallpaperrex.utils.convertToWebpBytes
 import kotlinx.coroutines.launch
@@ -70,15 +70,12 @@ import kotlinx.coroutines.launch
 fun WallpaperDetailScreen(
     onNavigateBack: () -> Unit,
     viewModelStoreOwner: NavBackStackEntry,
-    imageList: List<ImageItem>
+    imageItem: ImageItem?
 ) {
 
     val viewModel: WallpaperDetailViewModel = viewModel(
         viewModelStoreOwner = viewModelStoreOwner,
-        factory = WallpaperDetailViewModel.Factory,
-        extras = MutableCreationExtras(initialExtras = viewModelStoreOwner.defaultViewModelCreationExtras).apply {
-            set(WallpaperDetailViewModel.IMAGE_LIST_KEY, imageList)
-        }
+        factory = WallpaperDetailViewModel.createFactory(imageItem!!)
     )
 
 

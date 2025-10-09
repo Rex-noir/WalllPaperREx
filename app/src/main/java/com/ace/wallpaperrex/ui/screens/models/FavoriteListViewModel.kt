@@ -1,4 +1,4 @@
-package com.ace.wallpaperrex.ui.screens.wallpapers
+package com.ace.wallpaperrex.ui.screens.models
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -6,7 +6,6 @@ import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.AP
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
 import com.ace.wallpaperrex.data.database.AppDatabase
-import com.ace.wallpaperrex.data.entities.FavoriteImageEntity
 import com.ace.wallpaperrex.data.entities.toImageItem
 import com.ace.wallpaperrex.data.repositories.FavoriteImageRepository
 import com.ace.wallpaperrex.ui.models.ImageItem

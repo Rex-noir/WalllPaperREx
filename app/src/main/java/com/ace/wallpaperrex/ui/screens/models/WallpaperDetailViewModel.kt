@@ -1,11 +1,10 @@
-package com.ace.wallpaperrex.ui.screens.wallpapers
+package com.ace.wallpaperrex.ui.screens.models
 
 import android.app.Application
 import android.content.Context
 import android.graphics.Bitmap
 import android.util.Log
 import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
@@ -27,7 +26,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.last
 import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.launch
@@ -115,20 +113,15 @@ class WallpaperDetailViewModel(
 
     companion object {
 
-        val IMAGE_LIST_KEY = object : CreationExtras.Key<List<ImageItem>> {}
-        val Factory: ViewModelProvider.Factory = object : ViewModelProvider.Factory {
+        fun createFactory(imageItem: ImageItem) = object : ViewModelProvider.Factory {
             @Suppress("UNCHECKED_CAST")
             override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
                 val application = checkNotNull(extras[APPLICATION_KEY])
-                val savedStateHandle = extras.createSavedStateHandle()
                 val repository = FavoriteImageRepository(
                     dao = AppDatabase.getDatabase(application).favoriteImageDao()
                 )
-                val imageList = checkNotNull(extras[IMAGE_LIST_KEY])
-                val imageId = savedStateHandle.toRoute<AppRoute.WallpaperDetailRoute>().image
-                val image = imageList.find { it.id == imageId }
 
-                return WallpaperDetailViewModel(repository, image, application) as T
+                return WallpaperDetailViewModel(repository, imageItem, application) as T
             }
         }
     }

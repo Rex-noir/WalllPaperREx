@@ -21,7 +21,7 @@ import com.ace.wallpaperrex.ui.components.sources.SourceSettingCard
 import com.ace.wallpaperrex.ui.components.sources.WallhavenSetting
 import com.ace.wallpaperrex.ui.models.WallpaperSourceItem
 import com.ace.wallpaperrex.ui.models.wallpaperSourcesStatic
-import com.ace.wallpaperrex.ui.screens.wallpapers.WallpaperSourceViewModel
+import com.ace.wallpaperrex.ui.screens.models.WallpaperSourceViewModel
 import com.ace.wallpaperrex.ui.theme.AppTheme
 
 

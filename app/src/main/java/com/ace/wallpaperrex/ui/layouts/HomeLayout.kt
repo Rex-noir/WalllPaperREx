@@ -123,16 +123,14 @@ fun AppBottomNavigationBar(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeLayout(
+    onWallpaperClick: (image: ImageItem) -> Unit,
     modifier: Modifier = Modifier,
-    appNavController: NavHostController, // For navigating outside HomeLayout's scope
-    favoriteImageList: List<ImageItem>
 ) {
     val homeNavController = rememberNavController() // For navigation within HomeLayout
     val currentHomeBackStackEntry by homeNavController.currentBackStackEntryAsState()
     val currentNavDestination = currentHomeBackStackEntry?.destination
 
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
-    var searchQuery by remember { mutableStateOf("") }
 
     var isBottomBarVisible by remember { mutableStateOf(true) }
     val bottomBarHeight = 80.dp
@@ -219,7 +217,7 @@ fun HomeLayout(
             composable<WallpaperListRoute> { // Use the concrete @Serializable data object
                 WallpaperListScreen(
                     onWallpaperClick = { image ->
-                        appNavController.navigate(AppRoute.WallpaperDetailRoute(image.id))
+                        onWallpaperClick(image)
                     }
                 )
             }
@@ -228,10 +226,8 @@ fun HomeLayout(
             }
             composable<FavoriteListRoute> {
                 FavoriteListScreen(
-                    favorites = favoriteImageList,
                     onWallpaperClick = { image ->
-                        Log.d("HomeLayout", "onWallpaperClick: $image")
-                        appNavController.navigate(AppRoute.WallpaperDetailRoute(image.id))
+                        onWallpaperClick(image)
                     }
                 )
             }

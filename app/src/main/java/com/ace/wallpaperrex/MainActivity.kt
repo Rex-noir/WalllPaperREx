@@ -6,13 +6,14 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.ace.wallpaperrex.ui.layouts.HomeLayout
-import com.ace.wallpaperrex.ui.screens.wallpapers.FavoriteListViewModel
+import com.ace.wallpaperrex.ui.screens.models.SharedViewModel
 import com.ace.wallpaperrex.ui.screens.wallpapers.WallpaperDetailScreen
 import com.ace.wallpaperrex.ui.theme.AppTheme
 import kotlinx.serialization.Serializable
@@ -41,11 +42,8 @@ class MainActivity : ComponentActivity() {
         setContent {
             AppTheme {
                 val appNavController = rememberNavController()
-
-
-                val favoriteImageList: FavoriteListViewModel =
-                    viewModel(factory = FavoriteListViewModel.Factory)
-                val favorites = favoriteImageList.favorites.collectAsState().value
+                val sharedViewModel: SharedViewModel = viewModel()
+                val sharedState by sharedViewModel.uiState.collectAsState()
 
                 NavHost(
                     navController = appNavController,
@@ -55,16 +53,18 @@ class MainActivity : ComponentActivity() {
                     composable<AppRoute.HomeRoute> {
                         HomeLayout(
                             modifier = Modifier.fillMaxSize(),
-                            favoriteImageList = favorites,
-                            appNavController = appNavController
+                            onWallpaperClick = { imageItem ->
+                                sharedViewModel.setSelectedImage(imageItem)
+                                appNavController.navigate(AppRoute.WallpaperDetailRoute(imageItem.id))
+                            },
                         )
                     }
 
                     composable<AppRoute.WallpaperDetailRoute> { backStackEntry ->
                         WallpaperDetailScreen(
                             onNavigateBack = { appNavController.popBackStack() },
-                            imageList = favorites,
-                            viewModelStoreOwner = backStackEntry
+                            viewModelStoreOwner = backStackEntry,
+                            imageItem = sharedState.selectedImage,
                         )
                     }
                 }

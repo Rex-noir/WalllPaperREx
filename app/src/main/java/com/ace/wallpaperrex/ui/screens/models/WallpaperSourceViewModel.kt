@@ -1,4 +1,4 @@
-package com.ace.wallpaperrex.ui.screens.wallpapers
+package com.ace.wallpaperrex.ui.screens.models
 
 import android.annotation.SuppressLint
 import android.app.Application
