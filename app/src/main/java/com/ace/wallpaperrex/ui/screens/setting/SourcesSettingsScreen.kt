@@ -36,20 +36,17 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ace.wallpaperrex.data.daos.getWallpaperSourcesFlow
 import com.ace.wallpaperrex.data.daos.setDefaultWallpaperSourceId
 import com.ace.wallpaperrex.data.daos.setWallpaperApiKey
 import com.ace.wallpaperrex.ui.components.sources.SourceSettingCard
 import com.ace.wallpaperrex.ui.models.WallpaperSourceItem
 import com.ace.wallpaperrex.ui.models.wallpaperSourcesStatic
-import com.ace.wallpaperrex.ui.screens.models.SourcesSettingsViewModel
 import kotlinx.coroutines.launch
 
 @Composable
 fun SourcesSettingsScreen(
     modifier: Modifier = Modifier,
-    viewModel: SourcesSettingsViewModel = viewModel()
 ) {
 
     val context = LocalContext.current
