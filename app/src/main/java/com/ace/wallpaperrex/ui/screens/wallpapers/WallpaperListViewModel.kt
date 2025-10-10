@@ -1,4 +1,4 @@
-package com.ace.wallpaperrex.ui.components.wallpaper
+package com.ace.wallpaperrex.ui.screens.wallpapers
 
 import android.app.Application
 import androidx.compose.runtime.Immutable
@@ -12,6 +12,7 @@ import com.ace.wallpaperrex.data.repositories.WallpaperRepository
 import com.ace.wallpaperrex.data.repositories.WallpaperRepositoryProvider
 import com.ace.wallpaperrex.ui.models.ImageItem
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.filterNotNull
@@ -29,7 +30,7 @@ data class WallpaperListUiState(
     val isEndOfList: Boolean = true,
 )
 
-class WallpaperSourceListViewModel(
+class WallpaperListViewModel(
     val sourceId: Int,
     private val application: Application,
 ) :
@@ -44,7 +45,7 @@ class WallpaperSourceListViewModel(
         viewModelScope.launch {
             application.getWallpaperSourcesFlow().stateIn(
                 scope = viewModelScope,
-                started = kotlinx.coroutines.flow.SharingStarted.WhileSubscribed(5000),
+                started = SharingStarted.WhileSubscribed(5000),
                 initialValue = emptyList()
             ).map { sources -> sources.find { it.id == sourceId } }.filterNotNull().collect {
                 repository = WallpaperRepositoryProvider.provide(it)
@@ -140,7 +141,7 @@ class WallpaperSourceListViewModel(
                     extras: CreationExtras
                 ): T {
                     val application = checkNotNull(extras[APPLICATION_KEY])
-                    return WallpaperSourceListViewModel(sourceId, application) as T
+                    return WallpaperListViewModel(sourceId, application) as T
                 }
             }
     }

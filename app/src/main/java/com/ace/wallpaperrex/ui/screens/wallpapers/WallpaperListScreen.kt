@@ -1,6 +1,7 @@
 package com.ace.wallpaperrex.ui.screens.wallpapers
 
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -19,12 +20,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.compose.rememberNavController
 import com.ace.wallpaperrex.data.daos.getLastWallpaperSource
 import com.ace.wallpaperrex.data.daos.getWallpaperSourcesFlow
 import com.ace.wallpaperrex.data.daos.setLastWallpaperSourceId
-import com.ace.wallpaperrex.ui.components.wallpaper.WallpaperSourceList
-import com.ace.wallpaperrex.ui.components.wallpaper.WallpaperSourceListViewModel
+import com.ace.wallpaperrex.ui.components.wallpaper.EmptyState
+import com.ace.wallpaperrex.ui.components.wallpaper.ErrorState
+import com.ace.wallpaperrex.ui.components.wallpaper.SkeletonWallpaperGrid
+import com.ace.wallpaperrex.ui.components.wallpaper.WallpaperStaggeredGrid
 import com.ace.wallpaperrex.ui.models.ImageItem
 import com.ace.wallpaperrex.ui.models.WallpaperSourceItem
 import kotlinx.coroutines.flow.first
@@ -96,17 +98,44 @@ fun WallpaperListScreen(
                 modifier = Modifier
                     .fillMaxSize()
                     .weight(1f),
-                // Use a key to ensure states (like scroll position) are not shared between pages
                 key = { pageIndex -> wallpaperSources[pageIndex].id }
             ) { pageIndex ->
                 val source = wallpaperSources[pageIndex]
-                WallpaperSourceList(
-                    viewModel = viewModel(
-                        factory = WallpaperSourceListViewModel.createFactory(source.id),
-                        key = "source-${source.id}",
-                    ),
-                    onWallpaperClick = onWallpaperClick,
+                val viewModel: WallpaperListViewModel = viewModel(
+                    factory = WallpaperListViewModel.createFactory(source.id),
+                    key = "source-${source.id}"
                 )
+                val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+                Column(modifier = Modifier.fillMaxSize()) {
+                    Box(modifier = Modifier.weight(1f)) {
+                        if (uiState.isLoading && uiState.items.isEmpty()) {
+                            SkeletonWallpaperGrid(modifier = Modifier.fillMaxSize())
+                        } else if (uiState.error != null && uiState.items.isEmpty()) {
+                            ErrorState(
+                                message = uiState.error!!, // No need for '!!'
+                                onRetry = { viewModel.retryInitialLoad() },
+                                modifier = Modifier.fillMaxSize(),
+                            )
+                        } else if (uiState.items.isEmpty()) {
+                            EmptyState(
+                                message = "Looks like there are no wallpapers from this source.",
+                                modifier = Modifier.fillMaxSize()
+                            )
+                        } else {
+                            WallpaperStaggeredGrid(
+                                items = uiState.items,
+                                isLoadingMore = uiState.isLoading,
+                                isEndOfList = uiState.isEndOfList,
+                                error = uiState.error,
+                                onLoadMore = { viewModel.loadNextPage() },
+                                onRetryLoadMore = { viewModel.loadNextPage() },
+                                onWallpaperClick = onWallpaperClick,
+                                // This modifier is important for the grid to fill the Box
+                                modifier = Modifier.fillMaxSize()
+                            )
+                        }
+                    }
+                }
             }
 
             // 5. Persist the last viewed page's source ID whenever the page changes
