@@ -33,6 +33,7 @@ fun FavoriteImageEntity.toImageItem(): ImageItem {
         extension = extension,
         sourceId = 1,
         uploader = uploader,
-        uploaderUrl = uploaderUrl
+        uploaderUrl = uploaderUrl,
+        placeHolderColor = null
     )
 }

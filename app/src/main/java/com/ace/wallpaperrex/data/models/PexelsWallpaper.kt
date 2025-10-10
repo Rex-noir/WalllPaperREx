@@ -1,5 +1,7 @@
 package com.ace.wallpaperrex.data.models
 
+import androidx.compose.ui.graphics.Color
+import androidx.core.graphics.toColorInt
 import com.ace.wallpaperrex.ui.models.ImageItem
 import com.ace.wallpaperrex.ui.models.Meta
 import com.ace.wallpaperrex.ui.models.PaginatedResponse
@@ -29,7 +31,8 @@ data class PexelsWallpaperPhoto(
             extension = "webp",
             sourceId = 2,
             uploader = photographer,
-            uploaderUrl = photographer_url
+            uploaderUrl = photographer_url,
+            placeHolderColor = Color(avg_color.toColorInt()),
         )
     }
 }

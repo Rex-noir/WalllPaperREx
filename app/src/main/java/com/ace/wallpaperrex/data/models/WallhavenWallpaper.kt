@@ -3,6 +3,7 @@ package com.ace.wallpaperrex.data.models
 import com.ace.wallpaperrex.ui.models.ImageItem
 import com.ace.wallpaperrex.ui.models.Meta
 import com.ace.wallpaperrex.ui.models.ToImageItemMapper
+import com.ace.wallpaperrex.utils.WallpaperHelper
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -44,7 +45,8 @@ data class WallhavenWallpaperDetail(
             extension = "webp",
             sourceId = 1,
             uploader = uploader?.username,
-            uploaderUrl = null
+            uploaderUrl = null,
+            placeHolderColor = WallpaperHelper.calculateAverageColor(colors)
         )
     }
 }

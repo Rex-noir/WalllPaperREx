@@ -1,7 +1,9 @@
 package com.ace.wallpaperrex.ui.models
 
 import androidx.compose.runtime.Immutable
+import androidx.compose.ui.graphics.Color
 import com.ace.wallpaperrex.data.entities.FavoriteImageEntity
+import com.ace.wallpaperrex.utils.WallpaperHelper
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -15,7 +17,9 @@ data class ImageItem(
     val extension: String,
     val sourceId: Int,
     val uploader: String? = null,
-    val uploaderUrl: String? = null
+    val uploaderUrl: String? = null,
+    @Serializable(with = WallpaperHelper.ColorSerializer::class)
+    val placeHolderColor: Color?
 )
 
 fun ImageItem.toEntity(localPath: String? = null): FavoriteImageEntity {
