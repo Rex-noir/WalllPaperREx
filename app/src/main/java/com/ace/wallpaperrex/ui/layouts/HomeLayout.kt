@@ -250,7 +250,9 @@ fun HomeLayout(
                 )
             }
             composable<SearchWallpapersRoute> {
-                SearchWallpapersScreen()
+                SearchWallpapersScreen(
+                    onWallpaperClick = onWallpaperClick
+                )
             }
         }
     }

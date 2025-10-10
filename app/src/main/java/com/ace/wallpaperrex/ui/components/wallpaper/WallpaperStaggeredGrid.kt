@@ -1,19 +1,26 @@
 package com.ace.wallpaperrex.ui.components.wallpaper
 
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
 import androidx.compose.foundation.lazy.staggeredgrid.itemsIndexed
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.CloudOff
 import androidx.compose.material3.Button
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.ace.wallpaperrex.ui.models.ImageItem
 
@@ -22,13 +29,26 @@ fun WallpaperStaggeredGrid(
     items: List<ImageItem>,
     isLoadingMore: Boolean,
     isEndOfList: Boolean,
-    paginationError: String?,
+    error: String?,
     onLoadMore: () -> Unit,
     onRetryLoadMore: () -> Unit,
     onWallpaperClick: (image: ImageItem) -> Unit,
-    modifier: Modifier = Modifier.Companion
+    modifier: Modifier = Modifier
 ) {
-    LazyVerticalStaggeredGrid(
+    if (items.isEmpty() && !isLoadingMore) {
+        EmptyState(
+            message = "Looks like there are no wallpapers from this source.",
+            modifier = modifier.fillMaxWidth()
+        )
+    } else if (isLoadingMore && items.isEmpty()) {
+        SkeletonWallpaperGrid(modifier = modifier)
+    } else if (!isLoadingMore && error != null) {
+        ErrorState(
+            message = error,
+            onRetry = onRetryLoadMore,
+            modifier = modifier.fillMaxWidth()
+        )
+    } else LazyVerticalStaggeredGrid(
         columns = StaggeredGridCells.Adaptive(minSize = 150.dp),
         modifier = modifier // Apply modifier here
     ) {
@@ -39,7 +59,7 @@ fun WallpaperStaggeredGrid(
             GridImageItem(item = item, onClick = { onWallpaperClick(item) })
 
             val loadMoreThreshold = 5
-            if (!isLoadingMore && paginationError == null && !isEndOfList && index >= items.size - loadMoreThreshold) {
+            if (!isLoadingMore && error == null && !isEndOfList && index >= items.size - loadMoreThreshold) {
                 LaunchedEffect(key1 = items.size) {
                     onLoadMore()
                 }
@@ -47,13 +67,12 @@ fun WallpaperStaggeredGrid(
 
         }
 
-        if (isLoadingMore && paginationError == null) {
+        if (isLoadingMore && error == null && items.isNotEmpty()) {
             items(4) {
                 SkeletonGridItem()
             }
         }
-
-        if (paginationError != null) {
+        if (error != null) {
             item(
                 span = StaggeredGridItemSpan.Companion.FullLine
             ) {
@@ -64,7 +83,7 @@ fun WallpaperStaggeredGrid(
                     horizontalAlignment = Alignment.Companion.CenterHorizontally
                 ) {
                     Text(
-                        "Error loading more : $paginationError",
+                        "Error loading more : $error",
                         color = MaterialTheme.colorScheme.error
                     )
 
@@ -75,5 +94,51 @@ fun WallpaperStaggeredGrid(
             }
         }
 
+    }
+}
+
+@Composable
+fun EmptyState(message: String, modifier: Modifier = Modifier) {
+    Box(modifier = modifier, contentAlignment = Alignment.Center) {
+        Text(
+            text = message,
+            style = MaterialTheme.typography.titleMedium,
+            textAlign = TextAlign.Center
+        )
+    }
+}
+
+@Composable
+fun ErrorState(message: String, onRetry: () -> Unit, modifier: Modifier = Modifier) {
+    Box(
+        modifier = modifier.padding(16.dp), // Add padding for better spacing from edges
+        contentAlignment = Alignment.Center
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            // Use Arrangement.spacedBy for consistent vertical spacing
+            verticalArrangement = Arrangement.spacedBy(24.dp)
+        ) {
+            // Add a relevant icon for a network or general error
+            Icon(
+                imageVector = Icons.Outlined.CloudOff,
+                contentDescription = null, // The text describes the state, so icon is decorative
+                modifier = Modifier.size(80.dp),
+                tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+            )
+
+            // Use a more prominent headline style for the message
+            Text(
+                text = message,
+                style = MaterialTheme.typography.headlineSmall,
+                textAlign = TextAlign.Center,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+
+            // The retry button remains a clear call to action
+            Button(onClick = onRetry) {
+                Text("Try Again")
+            }
+        }
     }
 }

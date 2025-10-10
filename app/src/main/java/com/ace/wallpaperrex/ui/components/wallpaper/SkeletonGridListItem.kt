@@ -4,6 +4,8 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
+import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -13,6 +15,22 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import shimmer
+
+
+@Composable
+fun SkeletonWallpaperGrid(
+    modifier: Modifier = Modifier,
+    itemCount: Int = 12 // Number of skeleton items to show
+) {
+    LazyVerticalStaggeredGrid(
+        columns = StaggeredGridCells.Adaptive(minSize = 150.dp),
+        modifier = modifier // Apply modifier here
+    ) {
+        items(itemCount) {
+            SkeletonGridItem() // Uses its internal random aspect ratio
+        }
+    }
+}
 
 @Composable
 fun SkeletonGridItem(

@@ -47,23 +47,26 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ace.wallpaperrex.data.daos.getWallpaperSourcesFlow
+import com.ace.wallpaperrex.ui.components.wallpaper.WallpaperStaggeredGrid
+import com.ace.wallpaperrex.ui.models.ImageItem
 import com.ace.wallpaperrex.ui.screens.models.SearchWallpaperViewModel
 import kotlinx.coroutines.flow.map
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SearchWallpapersScreen(
-    searchViewModel: SearchWallpaperViewModel = viewModel(factory = SearchWallpaperViewModel.Factory)
+    searchViewModel: SearchWallpaperViewModel = viewModel(factory = SearchWallpaperViewModel.Factory),
+    onWallpaperClick: (ImageItem) -> Unit
 ) {
 
     // --- State Management ---
     val textFieldState: TextFieldState = rememberTextFieldState()
     var expanded by rememberSaveable { mutableStateOf(false) }
-    var activeSearchQuery by rememberSaveable { mutableStateOf<String?>(null) }
     val selectedSource by searchViewModel.selectedSource.collectAsState()
 
     // --- Data from ViewModel ---
     val searchHistory by searchViewModel.searchHistory.collectAsState()
+    val activeSearchQuery by searchViewModel.searchQuery.collectAsState()
 
     val context = LocalContext.current
 
@@ -71,6 +74,11 @@ fun SearchWallpapersScreen(
         .map { sourceItems -> sourceItems.filter { it.isConfigured } }
         .collectAsStateWithLifecycle(initialValue = emptyList())
 
+
+    val isLoading by searchViewModel.isLoading.collectAsState()
+    val images by searchViewModel.images.collectAsState()
+    val error by searchViewModel.error.collectAsState()
+    val isEndOfList by searchViewModel.isEndOfList.collectAsState()
 
     Box(
         modifier = Modifier
@@ -87,8 +95,7 @@ fun SearchWallpapersScreen(
                     query = textFieldState.text.toString(),
                     onQueryChange = { textFieldState.edit { replace(0, length, it) } },
                     onSearch = { query ->
-                        searchViewModel.addSearchQuery(query)
-                        activeSearchQuery = query
+                        searchViewModel.performSearch(query)
                         expanded = false
                     },
                     expanded = expanded,
@@ -157,10 +164,8 @@ fun SearchWallpapersScreen(
                             }
                         },
                         modifier = Modifier.clickable {
-                            // On click, perform the search with the history item's query
                             textFieldState.edit { append(item.query) }
-                            searchViewModel.addSearchQuery(item.query)
-                            activeSearchQuery = item.query
+                            searchViewModel.performSearch(item.query)
                             expanded = false
                         },
                         colors = ListItemDefaults.colors().copy(containerColor = Color.Transparent)
@@ -179,8 +184,7 @@ fun SearchWallpapersScreen(
                                 )
                             },
                             modifier = Modifier.clickable {
-                                searchViewModel.addSearchQuery(currentQuery)
-                                activeSearchQuery = currentQuery
+                                searchViewModel.performSearch(currentQuery)
                                 expanded = false
                             },
                             colors = ListItemDefaults.colors()
@@ -210,26 +214,18 @@ fun SearchWallpapersScreen(
                         label = { Text(source.name) }
                     )
                 }
+
             }
+            WallpaperStaggeredGrid(
+                items = images,
+                isLoadingMore = isLoading,
+                isEndOfList = isEndOfList,
+                error = error,
+                onLoadMore = { searchViewModel.loadMore() },
+                onRetryLoadMore = { searchViewModel.loadMore() },
+                onWallpaperClick = onWallpaperClick
+            )
         }
-        if (activeSearchQuery == null) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(top = SearchBarDefaults.InputFieldHeight),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(text = "Search for wallpapers")
-            }
-        } else {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(top = SearchBarDefaults.InputFieldHeight),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(text = "Showing results for: $activeSearchQuery")
-            }
-        }
+
     }
 }

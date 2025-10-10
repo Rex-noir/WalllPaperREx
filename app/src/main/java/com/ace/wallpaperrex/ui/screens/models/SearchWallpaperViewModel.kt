@@ -9,10 +9,12 @@ import androidx.lifecycle.viewmodel.CreationExtras
 import com.ace.wallpaperrex.data.daos.getDefaultWallpaperSource
 import com.ace.wallpaperrex.data.database.AppDatabase
 import com.ace.wallpaperrex.data.entities.SearchHistoryItem
+import com.ace.wallpaperrex.data.repositories.WallpaperRepository
+import com.ace.wallpaperrex.data.repositories.WallpaperRepositoryProvider
+import com.ace.wallpaperrex.ui.models.ImageItem
 import com.ace.wallpaperrex.ui.models.WallpaperSourceItem
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.WhileSubscribed
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
@@ -31,17 +33,31 @@ class SearchWallpaperViewModel(application: Application) : AndroidViewModel(appl
     private val _selectedSource = MutableStateFlow<WallpaperSourceItem?>(null);
     val selectedSource = _selectedSource.asStateFlow()
 
+    private lateinit var repository: WallpaperRepository
     private val _searchQuery = MutableStateFlow("")
     val searchQuery = _searchQuery.asStateFlow()
 
     private val _isLoading = MutableStateFlow(false)
     val isLoading = _isLoading.asStateFlow()
 
+    private val _images = MutableStateFlow<List<ImageItem>>(emptyList())
+    val images = _images.asStateFlow()
+
+    private val _error = MutableStateFlow<String?>(null)
+    val error = _error.asStateFlow()
+
+    private val _isEndOfList = MutableStateFlow(false)
+    val isEndOfList = _isEndOfList.asStateFlow()
+
+    private val _page = MutableStateFlow(1)
+    val page = _page.asStateFlow()
+
     init {
         viewModelScope.launch {
             _selectedSource.update {
                 application.getDefaultWallpaperSource().first()
             }
+            repository = WallpaperRepositoryProvider.provide(selectedSource.value!!)
         }
     }
 
@@ -64,8 +80,92 @@ class SearchWallpaperViewModel(application: Application) : AndroidViewModel(appl
         }
     }
 
+    /**
+     * Called when the user submits a new search query from the search bar.
+     * This is the primary entry point for a NEW search.
+     */
+    fun performSearch(query: String) {
+        // A new search always starts from page 1 and clears old results.
+        resetSearch()
+        _searchQuery.update { query }
+
+        // Add to history and then fetch the first page of data.
+        addSearchQuery(query)
+        fetchNextPage()
+    }
+
+    /**
+     * Called when the user changes the source filter (e.g., clicks a FilterChip).
+     * This triggers a new search for the current query on the new source.
+     */
     fun setSelectedSource(source: WallpaperSourceItem) {
         _selectedSource.update { source }
+
+        // A source change also requires a full reset.
+        resetSearch()
+
+        viewModelScope.launch {
+            // Re-create the repository for the new source.
+            repository = WallpaperRepositoryProvider.provide(source)
+
+            // If there's an active query, re-run the search on the new source.
+            // If not, the screen will just be empty, which is correct.
+            if (searchQuery.value.isNotBlank()) {
+                fetchNextPage()
+            }
+        }
+    }
+
+    /**
+     * Called when the user scrolls to the end of the list to load more results.
+     * This function's only job is to increment the page and fetch data.
+     */
+    fun loadMore() {
+        if (_isLoading.value || _isEndOfList.value) return
+        _page.update { it + 1 }
+        fetchNextPage()
+    }
+
+    /**
+     * A private helper function to reset all state for a new search.
+     */
+    private fun resetSearch() {
+        _page.update { 1 }
+        _images.update { emptyList() }
+        _isEndOfList.update { false }
+        _error.update { null }
+    }
+
+    /**
+     * The single, internal function responsible for making the network call.
+     * It uses the current state of `searchQuery` and `page`.
+     */
+    private fun fetchNextPage() {
+        if (_isLoading.value || searchQuery.value.isBlank()) return
+
+        viewModelScope.launch {
+            _isLoading.update { true }
+            _error.update { null }
+
+            val result = repository.searchImages(page.value, searchQuery.value)
+
+            result.fold(
+                onSuccess = { response ->
+                    val fetchedImages = response.data
+                    // Always append the new images to the existing list.
+                    // resetSearch() handles clearing the list when needed.
+                    _images.update { it + fetchedImages }
+
+                    _isEndOfList.update {
+                        response.meta?.currentPage == response.meta?.lastPage || fetchedImages.isEmpty()
+                    }
+                },
+                onFailure = { error ->
+                    _error.value = error.localizedMessage
+                }
+            )
+            _isLoading.update { false }
+        }
     }
 
     companion object {

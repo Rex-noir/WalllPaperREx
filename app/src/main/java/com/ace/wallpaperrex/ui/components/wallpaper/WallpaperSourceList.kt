@@ -50,7 +50,7 @@ fun WallpaperSourceList(
                     items = uiState.items,
                     isLoadingMore = uiState.isLoading,
                     isEndOfList = uiState.isEndOfList,
-                    paginationError = uiState.error,
+                    error = uiState.error,
                     onLoadMore = { viewModel.loadNextPage() },
                     onRetryLoadMore = { viewModel.loadNextPage() },
                     onWallpaperClick = onWallpaperClick,
@@ -62,66 +62,3 @@ fun WallpaperSourceList(
     }
 }
 
-
-@Composable
-fun SkeletonWallpaperGrid(
-    modifier: Modifier = Modifier,
-    itemCount: Int = 12 // Number of skeleton items to show
-) {
-    LazyVerticalStaggeredGrid(
-        columns = StaggeredGridCells.Adaptive(minSize = 150.dp),
-        modifier = modifier // Apply modifier here
-    ) {
-        items(itemCount) {
-            SkeletonGridItem() // Uses its internal random aspect ratio
-        }
-    }
-}
-
-
-@Composable
-fun ErrorState(message: String, onRetry: () -> Unit, modifier: Modifier = Modifier) {
-    Box(
-        modifier = modifier.padding(16.dp), // Add padding for better spacing from edges
-        contentAlignment = Alignment.Center
-    ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            // Use Arrangement.spacedBy for consistent vertical spacing
-            verticalArrangement = Arrangement.spacedBy(24.dp)
-        ) {
-            // Add a relevant icon for a network or general error
-            Icon(
-                imageVector = Icons.Outlined.CloudOff,
-                contentDescription = null, // The text describes the state, so icon is decorative
-                modifier = Modifier.size(80.dp),
-                tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-            )
-
-            // Use a more prominent headline style for the message
-            Text(
-                text = message,
-                style = MaterialTheme.typography.headlineSmall,
-                textAlign = TextAlign.Center,
-                color = MaterialTheme.colorScheme.onSurface
-            )
-
-            // The retry button remains a clear call to action
-            Button(onClick = onRetry) {
-                Text("Try Again")
-            }
-        }
-    }
-}
-
-
-@Composable
-fun EmptyState(message: String, modifier: Modifier = Modifier) {
-    Box(modifier = modifier, contentAlignment = Alignment.Center) {
-        Text(
-            text = message,
-            style = MaterialTheme.typography.titleMedium,
-            textAlign = TextAlign.Center
-        )
-    }
-}
