@@ -212,16 +212,23 @@ fun SearchWallpapersScreen(
                 }
             }
         }
-
-        // --- Content for displaying the actual search results after a search is performed ---
-        activeSearchQuery?.let { query ->
+        if (activeSearchQuery == null) {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(top = SearchBarDefaults.InputFieldHeight),
                 contentAlignment = Alignment.Center
             ) {
-                Text(text = "Showing results for: $query")
+                Text(text = "Search for wallpapers")
+            }
+        } else {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(top = SearchBarDefaults.InputFieldHeight),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(text = "Showing results for: $activeSearchQuery")
             }
         }
     }
