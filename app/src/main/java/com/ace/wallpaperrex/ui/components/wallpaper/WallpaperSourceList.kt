@@ -4,13 +4,10 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
-import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
-import androidx.compose.foundation.lazy.staggeredgrid.itemsIndexed
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.CloudOff
 import androidx.compose.material3.Button
@@ -18,7 +15,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -79,68 +75,6 @@ fun SkeletonWallpaperGrid(
         items(itemCount) {
             SkeletonGridItem() // Uses its internal random aspect ratio
         }
-    }
-}
-
-
-@Composable
-fun WallpaperStaggeredGrid(
-    items: List<ImageItem>,
-    isLoadingMore: Boolean,
-    isEndOfList: Boolean,
-    paginationError: String?,
-    onLoadMore: () -> Unit,
-    onRetryLoadMore: () -> Unit,
-    onWallpaperClick: (image: ImageItem) -> Unit,
-    modifier: Modifier = Modifier
-) {
-    LazyVerticalStaggeredGrid(
-        columns = StaggeredGridCells.Adaptive(minSize = 150.dp),
-        modifier = modifier // Apply modifier here
-    ) {
-        itemsIndexed(
-            items = items,
-            key = { _, item -> item.id }
-        ) { index, item ->
-            GridImageItem(item = item, onClick = { onWallpaperClick(item) })
-
-            val loadMoreThreshold = 5
-            if (!isLoadingMore && paginationError == null && !isEndOfList && index >= items.size - loadMoreThreshold) {
-                LaunchedEffect(key1 = items.size) {
-                    onLoadMore()
-                }
-            }
-
-        }
-
-        if (isLoadingMore && paginationError == null) {
-            items(4) {
-                SkeletonGridItem()
-            }
-        }
-
-        if (paginationError != null) {
-            item(
-                span = StaggeredGridItemSpan.FullLine
-            ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Text(
-                        "Error loading more : $paginationError",
-                        color = MaterialTheme.colorScheme.error
-                    )
-
-                    Button(onClick = onRetryLoadMore) {
-                        Text("Retry")
-                    }
-                }
-            }
-        }
-
     }
 }
 
