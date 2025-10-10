@@ -3,6 +3,7 @@ package com.ace.wallpaperrex.ui.components.wallpaper
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -37,8 +38,7 @@ fun WallpaperStaggeredGrid(
 ) {
     if (items.isEmpty() && !isLoadingMore) {
         EmptyState(
-            message = "Looks like there are no wallpapers from this source.",
-            modifier = modifier.fillMaxWidth()
+            modifier = modifier.fillMaxSize()
         )
     } else if (isLoadingMore && items.isEmpty()) {
         SkeletonWallpaperGrid(modifier = modifier)
@@ -98,10 +98,10 @@ fun WallpaperStaggeredGrid(
 }
 
 @Composable
-fun EmptyState(message: String, modifier: Modifier = Modifier) {
+fun EmptyState(modifier: Modifier = Modifier) {
     Box(modifier = modifier, contentAlignment = Alignment.Center) {
         Text(
-            text = message,
+            text = "Wow. So Empty!",
             style = MaterialTheme.typography.titleMedium,
             textAlign = TextAlign.Center
         )

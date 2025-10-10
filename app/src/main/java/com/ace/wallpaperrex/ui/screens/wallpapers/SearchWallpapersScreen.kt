@@ -64,9 +64,7 @@ fun SearchWallpapersScreen(
     var expanded by rememberSaveable { mutableStateOf(false) }
     val selectedSource by searchViewModel.selectedSource.collectAsState()
 
-    // --- Data from ViewModel ---
     val searchHistory by searchViewModel.searchHistory.collectAsState()
-    val activeSearchQuery by searchViewModel.searchQuery.collectAsState()
 
     val context = LocalContext.current
 
