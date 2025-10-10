@@ -1,5 +1,8 @@
 package com.ace.wallpaperrex.ui.screens.wallpapers
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -30,6 +33,7 @@ import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -38,7 +42,11 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.isTraversalGroup
 import androidx.compose.ui.semantics.semantics
@@ -81,6 +89,32 @@ fun SearchWallpapersScreen(
     val error by searchViewModel.error.collectAsState()
     val isEndOfList by searchViewModel.isEndOfList.collectAsState()
 
+    var isSearchBarVisible by rememberSaveable { mutableStateOf(true) }
+
+    // Always show search bar when it's expanded
+    LaunchedEffect(expanded) {
+        if (expanded) {
+            isSearchBarVisible = true
+        }
+    }
+
+    val nestedScrollConnection = remember {
+        object : NestedScrollConnection {
+            override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
+                // Hide search bar when scrolling down
+                if (available.y > -1) {
+                    isSearchBarVisible = false
+                }
+                // Show search bar when scrolling up
+                if (available.y < 1) {
+                    isSearchBarVisible = true
+                }
+                return Offset.Zero
+            }
+        }
+    }
+
+
     if (showFilterDialog) {
         FilterDialog(
             sources = wallpaperSources,
@@ -98,110 +132,119 @@ fun SearchWallpapersScreen(
             .fillMaxSize()
             .padding(contentPadding)
             .semantics { isTraversalGroup = true }
+            .nestedScroll(nestedScrollConnection)
     ) {
+        WallpaperStaggeredGrid(
+            items = images,
+            isLoadingMore = isLoading,
+            isEndOfList = isEndOfList,
+            modifier = Modifier.fillMaxSize(),
+            error = error,
+            onLoadMore = { searchViewModel.loadMore() },
+            onRetryLoadMore = { searchViewModel.loadMore() },
+            onWallpaperClick = onWallpaperClick,
+            // Add top padding to avoid content being  behind the search bar
+        )
+
         // --- Search Bar ---
-        SearchBar(
+        AnimatedVisibility(
+            visible = isSearchBarVisible,
             modifier = Modifier
-                .align(Alignment.TopCenter)
-                .semantics { traversalIndex = 0f },
-            windowInsets = WindowInsets(0, 0, 0, 0),
-            colors = SearchBarDefaults.colors(containerColor = Color.Transparent),
-            tonalElevation = 0.dp,
-            inputField = {
-                SearchBarDefaults.InputField(
-                    query = textFieldState.text.toString(),
-                    onQueryChange = { textFieldState.edit { replace(0, length, it) } },
-                    onSearch = { query ->
-                        if (query.isNotBlank()) {
-                            searchViewModel.performSearch(query)
-                        }
-                        expanded = false
-                    },
-                    expanded = expanded,
-                    onExpandedChange = { expanded = it },
-                    placeholder = { Text("Search Wallpapers") },
-                    leadingIcon = {
-                        Icon(Icons.Default.Search, contentDescription = "Search Icon")
-                    },
-                    trailingIcon = {
-                        if (expanded && textFieldState.text.isNotEmpty()) {
-                            IconButton(onClick = { textFieldState.clearText() }) {
-                                Icon(Icons.Default.Close, contentDescription = "Clear Search")
-                            }
-                        }
-                    }
-                )
-            },
-            expanded = expanded,
-            onExpandedChange = { expanded = it },
+                .align(Alignment.TopCenter),
+            enter = fadeIn(),
+            exit = fadeOut(),
         ) {
-            // --- Search History and Suggestions ---
-            val currentQuery = textFieldState.text.toString()
-            val filteredHistory = remember(currentQuery, searchHistory) {
-                if (currentQuery.isBlank()) searchHistory
-                else searchHistory.filter { it.query.contains(currentQuery, ignoreCase = true) }
-            }
-
-            if (searchHistory.isNotEmpty()) {
-                Box(modifier = Modifier.fillMaxWidth()) {
-                    TextButton(
-                        onClick = { searchViewModel.clearSearchHistory() },
-                        modifier = Modifier.align(Alignment.CenterEnd),
-                    ) {
-                        Text("Clear history")
-                    }
-                }
-            }
-
-            LazyColumn(modifier = Modifier.fillMaxWidth()) {
-                items(filteredHistory, key = { it.id }) { item ->
-                    ListItem(
-                        headlineContent = { Text(item.query) },
-                        leadingContent = { Icon(Icons.Filled.History, null) },
-                        trailingContent = {
-                            IconButton(onClick = { searchViewModel.deleteSearchItem(item) }) {
-                                Icon(Icons.Default.Close, "Delete search entry")
+            SearchBar(
+                modifier = Modifier
+                    .semantics { traversalIndex = 0f },
+                windowInsets = WindowInsets(0, 0, 0, 0),
+                colors = SearchBarDefaults.colors(containerColor = Color.Transparent),
+                tonalElevation = 0.dp,
+                inputField = {
+                    SearchBarDefaults.InputField(
+                        query = textFieldState.text.toString(),
+                        onQueryChange = { textFieldState.edit { replace(0, length, it) } },
+                        onSearch = { query ->
+                            if (query.isNotBlank()) {
+                                searchViewModel.performSearch(query)
                             }
-                        },
-                        modifier = Modifier.clickable {
-                            textFieldState.edit {
-                                replace(0, length, item.query)
-                            }
-                            searchViewModel.performSearch(item.query)
                             expanded = false
                         },
-                        colors = ListItemDefaults.colors(containerColor = Color.Transparent)
+                        expanded = expanded,
+                        onExpandedChange = { expanded = it },
+                        placeholder = { Text("Search Wallpapers") },
+                        leadingIcon = {
+                            Icon(Icons.Default.Search, contentDescription = "Search Icon")
+                        },
+                        trailingIcon = {
+                            if (expanded && textFieldState.text.isNotEmpty()) {
+                                IconButton(onClick = { textFieldState.clearText() }) {
+                                    Icon(Icons.Default.Close, contentDescription = "Clear Search")
+                                }
+                            }
+                        }
                     )
+                },
+                expanded = expanded,
+                onExpandedChange = { expanded = it },
+            ) {
+                // --- Search History and Suggestions ---
+                val currentQuery = textFieldState.text.toString()
+                val filteredHistory = remember(currentQuery, searchHistory) {
+                    if (currentQuery.isBlank()) searchHistory
+                    else searchHistory.filter { it.query.contains(currentQuery, ignoreCase = true) }
                 }
 
-                if (currentQuery.isNotBlank() && filteredHistory.isEmpty()) {
-                    item {
+                if (searchHistory.isNotEmpty()) {
+                    Box(modifier = Modifier.fillMaxWidth()) {
+                        TextButton(
+                            onClick = { searchViewModel.clearSearchHistory() },
+                            modifier = Modifier.align(Alignment.CenterEnd),
+                        ) {
+                            Text("Clear history")
+                        }
+                    }
+                }
+
+                LazyColumn(modifier = Modifier.fillMaxWidth()) {
+                    items(filteredHistory, key = { it.id }) { item ->
                         ListItem(
-                            headlineContent = { Text("Search for \"$currentQuery\"") },
-                            leadingContent = { Icon(Icons.Filled.Search, null) },
+                            headlineContent = { Text(item.query) },
+                            leadingContent = { Icon(Icons.Filled.History, null) },
+                            trailingContent = {
+                                IconButton(onClick = { searchViewModel.deleteSearchItem(item) }) {
+                                    Icon(Icons.Default.Close, "Delete search entry")
+                                }
+                            },
                             modifier = Modifier.clickable {
-                                searchViewModel.performSearch(currentQuery)
+                                textFieldState.edit {
+                                    replace(0, length, item.query)
+                                }
+                                searchViewModel.performSearch(item.query)
                                 expanded = false
                             },
                             colors = ListItemDefaults.colors(containerColor = Color.Transparent)
                         )
+                    }
+
+                    if (currentQuery.isNotBlank() && filteredHistory.isEmpty()) {
+                        item {
+                            ListItem(
+                                headlineContent = { Text("Search for \"$currentQuery\"") },
+                                leadingContent = { Icon(Icons.Filled.Search, null) },
+                                modifier = Modifier.clickable {
+                                    searchViewModel.performSearch(currentQuery)
+                                    expanded = false
+                                },
+                                colors = ListItemDefaults.colors(containerColor = Color.Transparent)
+                            )
+                        }
                     }
                 }
             }
         }
 
         if (!expanded) {
-
-            WallpaperStaggeredGrid(
-                items = images,
-                isLoadingMore = isLoading,
-                isEndOfList = isEndOfList,
-                modifier = Modifier.fillMaxSize(),
-                error = error,
-                onLoadMore = { searchViewModel.loadMore() },
-                onRetryLoadMore = { searchViewModel.loadMore() },
-                onWallpaperClick = onWallpaperClick
-            )
             FloatingActionButton(
                 onClick = { showFilterDialog = true },
                 modifier = Modifier
@@ -216,6 +259,7 @@ fun SearchWallpapersScreen(
         }
     }
 }
+
 
 @Composable
 private fun FilterDialog(
