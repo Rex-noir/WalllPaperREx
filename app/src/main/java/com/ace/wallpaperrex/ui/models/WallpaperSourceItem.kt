@@ -10,7 +10,7 @@ data class WallpaperSourceItem(
     val apiKey: String? = "",
     val apiKeyDataStoreKey: Preferences.Key<String>,
     val isDefault: Boolean = false,
-    val needsApiKey: Boolean = false
+    val needsApiKey: Boolean = false,
 ) {
     val hasApiKey: Boolean
         get() = !apiKey.isNullOrBlank()

@@ -1,0 +1,90 @@
+{
+  "sources": [
+    {
+      "uniqueKey": "wall-haven",
+      "label": "Wallhaven",
+      "description": null,
+      "supportApiKey": true,
+      "requireApiKey": false,
+      "documentationUrl": null,
+      "api": {
+        "baseUrl": "wallhaven.cc",
+        "endpoints": {
+          "search": "/search",
+          "detail": "/w/{id}",
+          "curated": "/search"
+        },
+        "authentication": {
+          "type": "query",
+          "key": "apikey"
+        },
+        "pagination": {
+          "pageParam": "page",
+          "perPageParam": null
+        },
+        "searchParam": "q",
+        "seed": {
+          "param": "seed"
+        }
+      },
+      "responseMapping": {
+        "resultListPath": "data",
+        "pagination": {
+          "currentPagePath": "meta.current_page",
+          "lastPagePath": "meta.last_page",
+          "perPagePath": "meta.per_page",
+          "totalPath": "meta.total"
+        },
+        "image": {
+          "idPath": "id",
+          "thumbnailUrlPath": "thumbs.small",
+          "imageUrlPath": "path",
+          "descriptionPath": "source",
+          "uploaderPath": "uploader.username",
+          "placeholderColorPath": "colors"
+        }
+      }
+    },
+    {
+      "uniqueKey": "pexels",
+      "label": "Pexels",
+      "description": null,
+      "supportApiKey": false,
+      "requireApiKey": true,
+      "documentationUrl": null,
+      "api": {
+        "baseUrl": "api.pexels.com",
+        "endpoints": {
+          "search": "/v0/search",
+          "detail": "/v0/photos/{id}",
+          "curated": "/v0/curated"
+        },
+        "authentication": {
+          "type": "header",
+          "key": "Authorization"
+        },
+        "pagination": {
+          "pageParam": "page",
+          "perPageParam": "perPage"
+        },
+        "searchParam": "search"
+      },
+      "responseMapping": {
+        "resultListPath": "photos",
+        "pagination": {
+          "currentPagePath": "page",
+          "perPagePath": "per_page",
+          "totalPath": "total_results"
+        },
+        "image": {
+          "idPath": "id",
+          "thumbnailUrlPath": "src.medium",
+          "imageUrlPath": "src.original",
+          "descriptionPath": "alt",
+          "uploaderPath": "photographer",
+          "placeholderColorPath": "avg_color"
+        }
+      }
+    }
+  ]
+}
