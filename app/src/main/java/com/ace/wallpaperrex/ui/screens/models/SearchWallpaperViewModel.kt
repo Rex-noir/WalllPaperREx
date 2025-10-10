@@ -6,11 +6,17 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
+import com.ace.wallpaperrex.data.daos.getDefaultWallpaperSource
 import com.ace.wallpaperrex.data.database.AppDatabase
 import com.ace.wallpaperrex.data.entities.SearchHistoryItem
+import com.ace.wallpaperrex.ui.models.WallpaperSourceItem
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.WhileSubscribed
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class SearchWallpaperViewModel(application: Application) : AndroidViewModel(application) {
@@ -21,6 +27,23 @@ class SearchWallpaperViewModel(application: Application) : AndroidViewModel(appl
         started = SharingStarted.WhileSubscribed(5000),
         initialValue = emptyList()
     )
+
+    private val _selectedSource = MutableStateFlow<WallpaperSourceItem?>(null);
+    val selectedSource = _selectedSource.asStateFlow()
+
+    private val _searchQuery = MutableStateFlow("")
+    val searchQuery = _searchQuery.asStateFlow()
+
+    private val _isLoading = MutableStateFlow(false)
+    val isLoading = _isLoading.asStateFlow()
+
+    init {
+        viewModelScope.launch {
+            _selectedSource.update {
+                application.getDefaultWallpaperSource().first()
+            }
+        }
+    }
 
     fun addSearchQuery(query: String) {
         if (query.isBlank()) return
@@ -39,6 +62,10 @@ class SearchWallpaperViewModel(application: Application) : AndroidViewModel(appl
         viewModelScope.launch {
             searchHistoryDao.clearAll()
         }
+    }
+
+    fun setSelectedSource(source: WallpaperSourceItem) {
+        _selectedSource.update { source }
     }
 
     companion object {

@@ -1,12 +1,15 @@
 package com.ace.wallpaperrex.ui.screens.wallpapers
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.foundation.text.input.clearText
@@ -16,6 +19,7 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
@@ -35,11 +39,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterEnd
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.isTraversalGroup
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.traversalIndex
+import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.ace.wallpaperrex.data.daos.getWallpaperSourcesFlow
 import com.ace.wallpaperrex.ui.screens.models.SearchWallpaperViewModel
+import kotlinx.coroutines.flow.map
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -51,9 +60,16 @@ fun SearchWallpapersScreen(
     val textFieldState: TextFieldState = rememberTextFieldState()
     var expanded by rememberSaveable { mutableStateOf(false) }
     var activeSearchQuery by rememberSaveable { mutableStateOf<String?>(null) }
+    val selectedSource by searchViewModel.selectedSource.collectAsState()
 
     // --- Data from ViewModel ---
     val searchHistory by searchViewModel.searchHistory.collectAsState()
+
+    val context = LocalContext.current
+
+    val wallpaperSources by context.getWallpaperSourcesFlow()
+        .map { sourceItems -> sourceItems.filter { it.isConfigured } }
+        .collectAsStateWithLifecycle(initialValue = emptyList())
 
 
     Box(
@@ -175,9 +191,30 @@ fun SearchWallpapersScreen(
             }
         }
 
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = SearchBarDefaults.InputFieldHeight + 18.dp)
+        ) {
+            LazyRow(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 16.dp)
+            ) {
+                items(wallpaperSources) { source ->
+                    FilterChip(
+                        selected = selectedSource?.id == source.id,
+                        onClick = {
+                            searchViewModel.setSelectedSource(source)
+                        },
+                        label = { Text(source.name) }
+                    )
+                }
+            }
+        }
+
         // --- Content for displaying the actual search results after a search is performed ---
         activeSearchQuery?.let { query ->
-            // You would replace this with your actual search results UI
             Box(
                 modifier = Modifier
                     .fillMaxSize()

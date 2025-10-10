@@ -46,12 +46,12 @@ fun WallpaperSourceList(
                 )
             } else if (uiState.items.isEmpty()) {
                 EmptyState(
-                    message = "No wallpapers found for '${uiState.currentQuery}'.",
+                    message = "Looks like there are no wallpapers from this source.",
                     modifier = Modifier.fillMaxSize()
                 )
             } else {
                 WallpaperStaggeredGrid(
-                    items = uiState.items!!,
+                    items = uiState.items,
                     isLoadingMore = uiState.isLoading,
                     isEndOfList = uiState.isEndOfList,
                     paginationError = uiState.error,
