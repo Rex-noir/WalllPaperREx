@@ -106,36 +106,16 @@ fun WallpaperListScreen(
                     key = "source-${source.id}"
                 )
                 val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-                Column(modifier = Modifier.fillMaxSize()) {
-                    Box(modifier = Modifier.weight(1f)) {
-                        if (uiState.isLoading && uiState.items.isEmpty()) {
-                            SkeletonWallpaperGrid(modifier = Modifier.fillMaxSize())
-                        } else if (uiState.error != null && uiState.items.isEmpty()) {
-                            ErrorState(
-                                message = uiState.error!!, // No need for '!!'
-                                onRetry = { viewModel.retryInitialLoad() },
-                                modifier = Modifier.fillMaxSize(),
-                            )
-                        } else if (uiState.items.isEmpty()) {
-                            EmptyState(
-                                message = "Looks like there are no wallpapers from this source.",
-                                modifier = Modifier.fillMaxSize()
-                            )
-                        } else {
-                            WallpaperStaggeredGrid(
-                                items = uiState.items,
-                                isLoadingMore = uiState.isLoading,
-                                isEndOfList = uiState.isEndOfList,
-                                error = uiState.error,
-                                onLoadMore = { viewModel.loadNextPage() },
-                                onRetryLoadMore = { viewModel.loadNextPage() },
-                                onWallpaperClick = onWallpaperClick,
-                                // This modifier is important for the grid to fill the Box
-                                modifier = Modifier.fillMaxSize()
-                            )
-                        }
-                    }
-                }
+                WallpaperStaggeredGrid(
+                    items = uiState.items,
+                    isLoadingMore = uiState.isLoading,
+                    isEndOfList = uiState.isEndOfList,
+                    error = uiState.error,
+                    onLoadMore = { viewModel.loadNextPage() },
+                    onRetryLoadMore = { viewModel.loadNextPage() },
+                    onWallpaperClick = onWallpaperClick,
+                    modifier = Modifier.fillMaxSize()
+                )
             }
 
             // 5. Persist the last viewed page's source ID whenever the page changes
