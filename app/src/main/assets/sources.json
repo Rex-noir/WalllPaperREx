@@ -30,10 +30,13 @@
       "responseMapping": {
         "resultListPath": "data",
         "pagination": {
-          "currentPagePath": "meta.current_page",
-          "lastPagePath": "meta.last_page",
-          "perPagePath": "meta.per_page",
-          "totalPath": "meta.total"
+          "source": "response",
+          "paths": {
+            "currentPagePath": "meta.current_page",
+            "lastPagePath": "meta.last_page",
+            "perPagePath": "meta.per_page",
+            "totalPath": "meta.total"
+          }
         },
         "image": {
           "idPath": "id",
@@ -74,9 +77,12 @@
       "responseMapping": {
         "resultListPath": "photos",
         "pagination": {
-          "currentPagePath": "page",
-          "perPagePath": "per_page",
-          "totalPath": "total_results"
+          "source": "response",
+          "paths": {
+            "currentPagePath": "page",
+            "perPagePath": "per_page",
+            "totalPath": "total_results"
+          }
         },
         "image": {
           "idPath": "id",
@@ -119,8 +125,11 @@
       "responseMapping": {
         "resultListPath": "hits",
         "pagination": {
-          "currentPagePath": null,
-          "totalPath": "totalHits"
+          "source": "response",
+          "paths": {
+            "currentPagePath": null,
+            "totalPath": "totalHits"
+          }
         },
         "image": {
           "idPath": "id",
@@ -131,6 +140,52 @@
           "heightPath": "imageHeight",
           "uploaderPath": "user",
           "placeholderColorPath": "userUrl"
+        }
+      }
+    },
+    {
+      "uniqueKey": "Unsplash",
+      "label": "Unsplash",
+      "description": null,
+      "supportApiKey": true,
+      "requireApiKey": true,
+      "documentationUrl": "https://unsplash.com/documentation",
+      "api": {
+        "domain": "api.unsplash.com",
+        "endpoints": {
+          "search": "/search/photos",
+          "detail": "/photos/{id}",
+          "curated": "/photos"
+        },
+        "authentication": {
+          "type": "query",
+          "key": "client_id"
+        },
+        "pagination": {
+          "pageParam": "page",
+          "perPageParam": "per_page"
+        },
+        "searchParam": "query"
+      },
+      "responseMapping": {
+        "resultListPath": null,
+        "pagination": {
+          "source": "header",
+          "paths": {
+            "currentPagePath": null,
+            "totalPath": "X-TOTAL"
+          }
+        },
+        "image": {
+          "idPath": "id",
+          "widthPath": "width",
+          "heightPath": "height",
+          "placeholderColorPath": "color",
+          "thumbnailUrlPath": "urls.thumb",
+          "imageUrlPath": "urls.raw",
+          "descriptionPath": "description",
+          "uploaderPath": "user.name",
+          "uploaderUrlPath": "user.links.html"
         }
       }
     }

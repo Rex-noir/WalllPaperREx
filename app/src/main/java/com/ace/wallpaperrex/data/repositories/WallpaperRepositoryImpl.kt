@@ -11,16 +11,19 @@ import com.ace.wallpaperrex.utils.WallpaperHelper
 import com.ace.wallpaperrex.utils.mapToUserFriendlyException
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
+import io.ktor.client.plugins.expectSuccess
 import io.ktor.client.request.HttpRequestBuilder
 import io.ktor.client.request.get
 import io.ktor.client.request.header
 import io.ktor.client.request.parameter
+import io.ktor.http.Headers
 import io.ktor.http.URLProtocol
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.intOrNull
 import kotlinx.serialization.json.jsonArray
@@ -51,45 +54,90 @@ class WallpaperRepositoryImpl(
         parameterBlock: HttpRequestBuilder.() -> Unit
     ): Result<PaginatedResponse<ImageItem>> {
         return try {
-            val response: String = httpClient.get {
+            val response = httpClient.get {
                 url {
                     protocol = URLProtocol.HTTPS
                     host = source.api.domain
                     pathSegments += endpoint.trimStart('/').split("/")
                 }
+                expectSuccess = true
                 applyAuth()
                 parameter(source.api.pagination.pageParam, page)
                 source.api.pagination.perPageParam?.let { param -> parameter(param, pageSize) }
                 parameterBlock()
-            }.body()
+            }
+            val body = response.body<String>()
+            val headers = response.headers
 
-            val jsonObject = jsonParser.parseToJsonElement(response).jsonObject
-            parsePaginatedResponse(jsonObject)
+            val rootElement = jsonParser.parseToJsonElement(body)
+            return when (rootElement) {
+                is JsonObject -> parsePaginatedResponse(
+                    rootElement,
+                    headers,
+                    resultListPath = source.responseMapping.resultListPath!!
+                )
+
+                is JsonArray -> {
+                    // Wrap the array in a dummy object with a "data" field for uniform parsing
+                    val wrappedObject = buildJsonObject { put("data", rootElement) }
+                    parsePaginatedResponse(wrappedObject, headers, resultListPath = "data")
+                }
+
+                else -> throw IllegalStateException("Unexpected root JSON element type: ${rootElement::class}")
+            }
         } catch (e: Exception) {
             Result.failure(mapToUserFriendlyException(e))
         }
     }
 
-    private fun parsePaginatedResponse(jsonObject: JsonObject): Result<PaginatedResponse<ImageItem>> {
+    private fun parsePaginatedResponse(
+        jsonObject: JsonObject,
+        headers: Headers,
+        resultListPath: String
+    ): Result<PaginatedResponse<ImageItem>> {
         return runCatching {
             val mapping = source.responseMapping
-            val resultList = jsonObject.extractJsonArray(mapping.resultListPath)
+            val resultList = jsonObject.extractJsonArray(resultListPath)
                 ?: throw IllegalStateException("Results not found at path: ${mapping.resultListPath}")
             val imageItems = resultList.map { parseImageItem(it.jsonObject) }
-            val currentPage = mapping.pagination.currentPagePath?.let { jsonObject.extractInt(it) }
 
-            val totalPages = jsonObject.extractInt(mapping.pagination.totalPath)
-                ?: throw IllegalStateException("Total pages not found at path: ${mapping.pagination.totalPath}")
-            val perPage = mapping.pagination.perPagePath?.let { jsonObject.extractInt(it) }
+            var currentPage: Int? = null
+            var totalPages: Int? = null
+            var perPage: Int? = null
+            var lastPage: Int? = null
 
-            val lastPage =
-                mapping.pagination.lastPagePath?.let { jsonObject.extractInt(mapping.pagination.lastPagePath) }
+            if (mapping.pagination.source == "response") {
+                currentPage =
+                    mapping.pagination.paths.currentPagePath?.let { jsonObject.extractInt(it) }
+
+                totalPages = jsonObject.extractInt(mapping.pagination.paths.totalPath)
+
+                perPage =
+                    mapping.pagination.paths.perPagePath?.let { jsonObject.extractInt(it) }
+
+                lastPage =
+                    mapping.pagination.paths.lastPagePath?.let { jsonObject.extractInt(it) }
+            } else if (mapping.pagination.source == "header") {
+                currentPage = mapping.pagination.paths.currentPagePath
+                    ?.let { path -> headers[path]?.toIntOrNull() }
+
+                totalPages = mapping.pagination.paths.totalPath
+                    .let { path -> headers[path]?.toIntOrNull() }
+
+                perPage = mapping.pagination.paths.perPagePath
+                    ?.let { path -> headers[path]?.toIntOrNull() }
+
+                lastPage = mapping.pagination.paths.lastPagePath
+                    ?.let { path -> headers[path]?.toIntOrNull() }
+
+            }
 
             PaginatedResponse(
                 data = imageItems, meta = Meta(
                     currentPage = currentPage,
                     lastPage = lastPage
-                        ?: if (perPage != null) ((totalPages + perPage - 1) / perPage) else null,
+                        ?: if (perPage != null && totalPages != null) ((totalPages.plus(perPage))
+                            .minus(1)).div(perPage) else null,
                     perPage = perPage,
                     total = totalPages,
                 )
@@ -178,15 +226,13 @@ class WallpaperRepositoryImpl(
         }
 
         return try {
-            val response: String = httpClient.get(
-                urlString = buildUrl(endpoint)
-            ) {
+            val response: String = httpClient.get {
+                expectSuccess = true
                 url {
                     protocol = URLProtocol.HTTPS
                     host = source.api.domain
                     pathSegments += endpoint.trimStart('/').split("/")
                 }
-                applyAuth()
                 applyAuth()
             }.body()
 

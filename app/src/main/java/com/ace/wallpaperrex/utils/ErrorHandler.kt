@@ -1,11 +1,13 @@
 package com.ace.wallpaperrex.utils
 
+import android.util.Log
 import io.ktor.client.plugins.ClientRequestException
 import io.ktor.client.plugins.ServerResponseException
 import io.ktor.http.HttpStatusCode
 import java.io.IOException
 
 fun mapToUserFriendlyException(throwable: Throwable): Exception {
+    Log.e("ErrorHandler", "Caught exception: ${throwable::class.java.simpleName}", throwable)
     return when (throwable) {
         is ClientRequestException -> {
             when (throwable.response.status) {
