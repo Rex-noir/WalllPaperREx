@@ -62,7 +62,8 @@ data class SourceResponseMapping(
 data class SourceResponsePagination(
     val currentPagePath: String,
     val perPagePath: String,
-    val totalPath: String
+    val totalPath: String,
+    val lastPagePath: String?
 )
 
 @Serializable
