@@ -130,7 +130,7 @@
           "widthPath": "imageWidth",
           "heightPath": "imageHeight",
           "uploaderPath": "user",
-          "placeholderColorPath": null
+          "placeholderColorPath": "userUrl"
         }
       }
     }
