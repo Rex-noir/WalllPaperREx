@@ -4,7 +4,9 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.CreationExtras
 import com.ace.wallpaperrex.data.database.AppDatabase
 import com.ace.wallpaperrex.data.entities.SearchHistoryItem
 import com.ace.wallpaperrex.data.models.WallpaperSourceConfigItem
@@ -59,7 +61,9 @@ class SearchWallpaperViewModel(
             _selectedSource.update {
                 wallpaperSourceRepository.lastWallpaperSource.first()
             }
-            repository = WallpaperRepositoryImpl(_selectedSource.value ?: return@launch)
+            repository = WallpaperRepositoryImpl(
+                _selectedSource.value ?: wallpaperSourceRepository.wallpaperSources.first().first()
+            )
         }
     }
 
@@ -174,10 +178,14 @@ class SearchWallpaperViewModel(
         fun createFactory(sourceRepository: WallpaperSourceRepository) =
             object : ViewModelProvider.Factory {
                 @Suppress("UNCHECKED_CAST")
-                override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                override fun <T : ViewModel> create(
+                    modelClass: Class<T>,
+                    extras: CreationExtras
+                ): T {
+                    val application = checkNotNull(extras[APPLICATION_KEY])
                     return SearchWallpaperViewModel(
                         sourceRepository,
-                        application = Application()
+                        application = application
                     ) as T
                 }
             }
