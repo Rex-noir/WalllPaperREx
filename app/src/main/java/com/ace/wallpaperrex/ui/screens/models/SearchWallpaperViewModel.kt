@@ -5,7 +5,6 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.CreationExtras
 import com.ace.wallpaperrex.data.database.AppDatabase
 import com.ace.wallpaperrex.data.entities.SearchHistoryItem
 import com.ace.wallpaperrex.data.models.WallpaperSourceConfigItem
@@ -60,7 +59,7 @@ class SearchWallpaperViewModel(
             _selectedSource.update {
                 wallpaperSourceRepository.lastWallpaperSource.first()
             }
-            repository = WallpaperRepositoryImpl(_selectedSource.value!!)
+            repository = WallpaperRepositoryImpl(_selectedSource.value ?: return@launch)
         }
     }
 

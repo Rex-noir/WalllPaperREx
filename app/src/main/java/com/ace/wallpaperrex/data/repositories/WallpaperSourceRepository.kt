@@ -1,11 +1,13 @@
 package com.ace.wallpaperrex.data.repositories
 
 import android.net.Uri
+import android.util.Log
 import androidx.datastore.preferences.core.stringPreferencesKey
 import com.ace.wallpaperrex.data.models.WallpaperSourceConfigItem
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
 
 class WallpaperSourceRepository(
     private val sourceRepository: SourcesRepository,
@@ -29,6 +31,8 @@ class WallpaperSourceRepository(
         }.sortedByDescending { it.isDefault }
     }
 
+    val sourceError = sourceRepository.sourcesConfig.map { it.exceptionOrNull() }
+
     val lastWallpaperSource: Flow<WallpaperSourceConfigItem?> = combine(
         userPreferencesRepository.userPreferencesFlow,
         wallpaperSources
@@ -37,7 +41,8 @@ class WallpaperSourceRepository(
         allSources.find { it.uniqueKey === lastSourceKey }
     }
 
-    suspend fun getWallpaperSource(key: String): WallpaperSourceConfigItem? =wallpaperSources.first().find { it.uniqueKey == key }
+    suspend fun getWallpaperSource(key: String): WallpaperSourceConfigItem? =
+        wallpaperSources.first().find { it.uniqueKey == key }
 
     suspend fun setDefaultWallpaperSource(item: WallpaperSourceConfigItem) {
         userPreferencesRepository.setDefaultWallpaperSourceKey(item.uniqueKey)
@@ -59,6 +64,7 @@ class WallpaperSourceRepository(
 
     suspend fun initialize() {
         sourceRepository.triggerInitialLoadI()
+        Log.d("WallpaperSourceRepository", "Sources initialized: ${wallpaperSources.first()}")
     }
 
 }

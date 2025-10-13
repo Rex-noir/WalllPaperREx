@@ -2,6 +2,7 @@ package com.ace.wallpaperrex.data.repositories
 
 import android.content.Context
 import android.net.Uri
+import android.util.Log
 import com.ace.wallpaperrex.data.models.WallpaperSourceConfig
 import com.ace.wallpaperrex.utils.mapToUserFriendlyException
 import kotlinx.coroutines.Dispatchers
@@ -57,6 +58,7 @@ class SourcesRepositoryImpl(
                 }
                 Result.success(jsonParser.decodeFromString<WallpaperSourceConfig>(jsonString))
             } catch (e: Exception) {
+                Log.e("SourcesRepository", "Error $e")
                 Result.failure(mapToUserFriendlyException(e))
             }
         }

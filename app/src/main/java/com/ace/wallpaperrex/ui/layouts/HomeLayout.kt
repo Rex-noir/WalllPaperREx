@@ -11,6 +11,7 @@ import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Wallpaper
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -21,10 +22,13 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -152,6 +156,22 @@ fun HomeLayout(
     val currentHomeBackStackEntry by homeNavController.currentBackStackEntryAsState()
     val currentNavDestination = currentHomeBackStackEntry?.destination
 
+
+    val context = LocalContext.current
+    val sourceRepository = remember {
+        WallpaperSourceRepository(
+            sourceRepository = SourcesRepositoryImpl(context),
+            userPreferencesRepository = UserPreferencesRepository(context)
+        )
+    }
+    val sources by sourceRepository.wallpaperSources.collectAsState(initial = emptyList())
+    val sourceError by sourceRepository.sourceError.collectAsState(initial = null)
+    var isLoading by remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) {
+        sourceRepository.initialize()
+        isLoading = false
+    }
+
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
 
     var isBottomBarVisible by remember { mutableStateOf(true) }
@@ -161,8 +181,6 @@ fun HomeLayout(
         object : NestedScrollConnection {
             override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
                 val delta = available.y
-
-
                 if (delta < 0) {
                     isBottomBarVisible = false
                 } else if (delta > 0) {
@@ -179,17 +197,39 @@ fun HomeLayout(
         label = "bottomBarHeightAnimation"
     )
 
-    // context
-    val context = LocalContext.current
+    if (isLoading) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            CircularProgressIndicator()
+        }
+        return
+    }
 
-    // Wallpaper source repository
-    val sourceRepository = WallpaperSourceRepository(
-        sourceRepository = SourcesRepositoryImpl(
-            context = context
-        ),
-        userPreferencesRepository = UserPreferencesRepository(context)
-    )
+    if (sourceError != null) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(text = "${sourceError?.message}")
+        }
+        return
+    }
 
+    if (sources.isEmpty()) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(text = "No sources found.")
+        }
+        return
+    }
     Scaffold(
         modifier = modifier
             .nestedScroll(scrollBehavior.nestedScrollConnection)
@@ -264,7 +304,7 @@ fun HomeLayout(
             }
             composable<FavoriteListRoute> {
                 FavoriteListScreen(
-                    onWallpaperClick = { image , source->
+                    onWallpaperClick = { image, source ->
                         onWallpaperClick(image, source)
                     },
                     wallpaperSourceRepository = sourceRepository
