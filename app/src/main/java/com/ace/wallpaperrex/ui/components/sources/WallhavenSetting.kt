@@ -31,16 +31,16 @@ import com.ace.wallpaperrex.data.models.WallpaperSourceConfigItem
 @Composable
 fun WallhavenSetting(
     source: WallpaperSourceConfigItem,
-    onApiKeySave: (sourceId: Int, apiKey: String) -> Unit
+    onApiKeySave: (sourceKey: String, apiKey: String) -> Unit
 ) {
-    val apiKeyTextFieldState = rememberTextFieldState(initialText = source.apiKey ?: "")
+    val apiKeyTextFieldState = rememberTextFieldState(initialText = source.apiKey)
     var isInEditMode by rememberSaveable { mutableStateOf(false) }
     val focusRequester = remember { FocusRequester() }
 
     Column(
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        if (source.needsApiKey) {
+        if (source.requireApiKey) {
             Text("API Key is required for this source", style = MaterialTheme.typography.bodySmall)
         }
         OutlinedTextField(
@@ -62,7 +62,7 @@ fun WallhavenSetting(
             trailingIcon = {
                 IconButton(onClick = {
                     if (isInEditMode) {
-                        onApiKeySave(source.id, apiKeyTextFieldState.text.toString())
+                        onApiKeySave(source.uniqueKey, apiKeyTextFieldState.text.toString())
                         isInEditMode = false
                     } else {
                         isInEditMode = true
