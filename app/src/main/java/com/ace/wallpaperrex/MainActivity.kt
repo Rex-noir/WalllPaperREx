@@ -55,8 +55,8 @@ class MainActivity : ComponentActivity() {
                     composable<AppRoute.HomeRoute> {
                         HomeLayout(
                             modifier = Modifier.fillMaxSize(),
-                            onWallpaperClick = { imageItem ->
-                                sharedViewModel.setSelectedImage(imageItem)
+                            onWallpaperClick = { imageItem , source ->
+                                sharedViewModel.setSelectedImage(imageItem, source)
                                 appNavController.navigate(AppRoute.WallpaperDetailRoute(imageItem.id))
                             },
                         )
@@ -67,6 +67,7 @@ class MainActivity : ComponentActivity() {
                             onNavigateBack = { appNavController.popBackStack() },
                             viewModelStoreOwner = backStackEntry,
                             imageItem = sharedState.selectedImage,
+                            source = sharedState.selectedSourceConfig
                         )
                     }
                 }

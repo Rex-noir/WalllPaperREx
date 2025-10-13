@@ -18,6 +18,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -27,15 +28,20 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ace.wallpaperrex.R
+import com.ace.wallpaperrex.data.models.WallpaperSourceConfigItem
+import com.ace.wallpaperrex.data.repositories.WallpaperSourceRepository
 import com.ace.wallpaperrex.ui.models.ImageItem
 import com.ace.wallpaperrex.ui.screens.models.FavoriteListViewModel
+import kotlinx.coroutines.launch
 
 @Composable
 fun FavoriteListScreen(
-    onWallpaperClick: (ImageItem) -> Unit,
+    onWallpaperClick: (ImageItem, WallpaperSourceConfigItem?) -> Unit,
     modifier: Modifier = Modifier,
+    wallpaperSourceRepository: WallpaperSourceRepository,
     favoriteListViewModel: FavoriteListViewModel = viewModel(factory = FavoriteListViewModel.Factory),
 ) {
+    val scope = rememberCoroutineScope()
 
     val favorites by favoriteListViewModel.favorites.collectAsState()
     if (favorites.isEmpty()) {
@@ -77,7 +83,10 @@ fun FavoriteListScreen(
                         .aspectRatio(item.aspectRatio.takeIf { it > 0 } ?: (3f / 4f))
                         .clip(RoundedCornerShape(size = 0.dp))
                         .clickable(onClick = {
-                            onWallpaperClick(item)
+                           scope.launch {
+                               val source = wallpaperSourceRepository.getWallpaperSource(item.sourceKey)
+                               onWallpaperClick(item, source)
+                           }
                         })
                 )
             }

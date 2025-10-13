@@ -44,6 +44,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.ace.wallpaperrex.R
+import com.ace.wallpaperrex.data.models.WallpaperSourceConfigItem
 import com.ace.wallpaperrex.data.repositories.SourcesRepositoryImpl
 import com.ace.wallpaperrex.data.repositories.UserPreferencesRepository
 import com.ace.wallpaperrex.data.repositories.WallpaperSourceRepository
@@ -144,7 +145,7 @@ fun AppBottomNavigationBar(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeLayout(
-    onWallpaperClick: (image: ImageItem) -> Unit,
+    onWallpaperClick: (image: ImageItem, source: WallpaperSourceConfigItem?) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val homeNavController = rememberNavController() // For navigation within HomeLayout
@@ -249,8 +250,8 @@ fun HomeLayout(
         ) {
             composable<WallpaperListRoute> { // Use the concrete @Serializable data object
                 WallpaperListScreen(
-                    onWallpaperClick = { image ->
-                        onWallpaperClick(image)
+                    onWallpaperClick = { image, source ->
+                        onWallpaperClick(image, source)
                     },
                     wallpaperSourceRepository = sourceRepository
                 )
@@ -263,9 +264,10 @@ fun HomeLayout(
             }
             composable<FavoriteListRoute> {
                 FavoriteListScreen(
-                    onWallpaperClick = { image ->
-                        onWallpaperClick(image)
-                    }
+                    onWallpaperClick = { image , source->
+                        onWallpaperClick(image, source)
+                    },
+                    wallpaperSourceRepository = sourceRepository
                 )
             }
             composable<SearchWallpapersRoute> { currentHomeBackStackEntry ->

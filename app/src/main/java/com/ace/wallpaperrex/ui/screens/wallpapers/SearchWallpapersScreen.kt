@@ -47,7 +47,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.isTraversalGroup
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.traversalIndex
@@ -64,7 +63,7 @@ import kotlinx.coroutines.flow.map
 @Composable
 fun SearchWallpapersScreen(
     searchViewModel: SearchWallpaperViewModel,
-    onWallpaperClick: (ImageItem) -> Unit,
+    onWallpaperClick: (ImageItem, WallpaperSourceConfigItem) -> Unit,
     contentPadding: PaddingValues = PaddingValues(0.dp),
     wallpaperSourceRepository: WallpaperSourceRepository
 ) {
@@ -77,7 +76,6 @@ fun SearchWallpapersScreen(
 
     val searchHistory by searchViewModel.searchHistory.collectAsState()
 
-    val context = LocalContext.current
 
     val wallpaperSources by wallpaperSourceRepository.wallpaperSources
         .map { sourceItems -> sourceItems.filter { it.isConfigured } }
@@ -142,7 +140,9 @@ fun SearchWallpapersScreen(
             error = error,
             onLoadMore = { searchViewModel.loadMore() },
             onRetryLoadMore = { searchViewModel.loadMore() },
-            onWallpaperClick = onWallpaperClick,
+            onWallpaperClick = {image->
+                onWallpaperClick(image, selectedSource!!)
+            },
             // Add top padding to avoid content being  behind the search bar
         )
 

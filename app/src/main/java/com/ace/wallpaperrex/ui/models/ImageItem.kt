@@ -15,7 +15,7 @@ data class ImageItem(
     val aspectRatio: Float = 0f,
     val description: String? = null,
     val extension: String,
-    val sourceId: Int,
+    val sourceKey: String,
     val uploader: String? = null,
     val uploaderUrl: String? = null,
     @Serializable(with = WallpaperHelper.ColorSerializer::class)
@@ -31,7 +31,7 @@ fun ImageItem.toEntity(localPath: String? = null): FavoriteImageEntity {
         description = description,
         extension = extension,
         localPath = localPath,
-        sourceId = sourceId,
+        sourceKey = sourceKey,
         uploader = uploader,
         uploaderUrl = uploaderUrl
     );

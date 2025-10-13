@@ -54,9 +54,9 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.MutableCreationExtras
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavBackStackEntry
+import com.ace.wallpaperrex.data.models.WallpaperSourceConfigItem
 import com.ace.wallpaperrex.ui.components.wallpaper.CreditBar
 import com.ace.wallpaperrex.ui.components.wallpaper.WallpaperApplyDialog
 import com.ace.wallpaperrex.ui.models.ImageItem
@@ -70,12 +70,13 @@ import kotlinx.coroutines.launch
 fun WallpaperDetailScreen(
     onNavigateBack: () -> Unit,
     viewModelStoreOwner: NavBackStackEntry,
-    imageItem: ImageItem?
+    imageItem: ImageItem?,
+    source: WallpaperSourceConfigItem?
 ) {
 
     val viewModel: WallpaperDetailViewModel = viewModel(
         viewModelStoreOwner = viewModelStoreOwner,
-        factory = WallpaperDetailViewModel.createFactory(imageItem!!)
+        factory = WallpaperDetailViewModel.createFactory(imageItem!!, source)
     )
 
 

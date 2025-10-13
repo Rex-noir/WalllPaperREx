@@ -30,7 +30,7 @@ import kotlinx.coroutines.runBlocking
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun WallpaperListScreen(
-    onWallpaperClick: (ImageItem) -> Unit,
+    onWallpaperClick: (ImageItem, WallpaperSourceConfigItem) -> Unit,
     wallpaperSourceRepository: WallpaperSourceRepository
 ) {
     val context = LocalContext.current
@@ -107,7 +107,9 @@ fun WallpaperListScreen(
                     error = uiState.error,
                     onLoadMore = { viewModel.loadNextPage() },
                     onRetryLoadMore = { viewModel.loadNextPage() },
-                    onWallpaperClick = onWallpaperClick,
+                    onWallpaperClick = {image->
+                        onWallpaperClick(image, source)
+                    },
                     modifier = Modifier.fillMaxSize()
                 )
             }
