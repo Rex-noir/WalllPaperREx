@@ -16,7 +16,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ace.wallpaperrex.data.models.WallpaperSourceConfigItem
@@ -24,7 +23,6 @@ import com.ace.wallpaperrex.data.repositories.WallpaperSourceRepository
 import com.ace.wallpaperrex.ui.components.wallpaper.WallpaperStaggeredGrid
 import com.ace.wallpaperrex.ui.models.ImageItem
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -33,7 +31,6 @@ fun WallpaperListScreen(
     onWallpaperClick: (ImageItem, WallpaperSourceConfigItem) -> Unit,
     wallpaperSourceRepository: WallpaperSourceRepository
 ) {
-    val context = LocalContext.current
     val scope = rememberCoroutineScope()
 
     val allWallpaperSources by wallpaperSourceRepository.wallpaperSources
@@ -46,10 +43,8 @@ fun WallpaperListScreen(
     }
 
     // Determine the initial page based on the last saved source
-    val initialSource: WallpaperSourceConfigItem? = remember(wallpaperSources) {
-        runBlocking {
-            wallpaperSources.find { it.isDefault }
-        }
+    val initialSource by remember(wallpaperSources) {
+        derivedStateOf { wallpaperSources.find { it.isDefault } ?: wallpaperSources.firstOrNull() }
     }
 
     if (wallpaperSources.isNotEmpty() && initialSource != null) {
@@ -107,7 +102,7 @@ fun WallpaperListScreen(
                     error = uiState.error,
                     onLoadMore = { viewModel.loadNextPage() },
                     onRetryLoadMore = { viewModel.loadNextPage() },
-                    onWallpaperClick = {image->
+                    onWallpaperClick = { image ->
                         onWallpaperClick(image, source)
                     },
                     modifier = Modifier.fillMaxSize()

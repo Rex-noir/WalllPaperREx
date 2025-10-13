@@ -14,6 +14,7 @@ import io.ktor.client.request.HttpRequestBuilder
 import io.ktor.client.request.get
 import io.ktor.client.request.header
 import io.ktor.client.request.parameter
+import io.ktor.http.URLProtocol
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonElement
@@ -48,7 +49,12 @@ class WallpaperRepositoryImpl(
         parameterBlock: HttpRequestBuilder.() -> Unit
     ): Result<PaginatedResponse<ImageItem>> {
         return try {
-            val response: String = httpClient.get(urlString = buildUrl(endpoint)) {
+            val response: String = httpClient.get {
+                url {
+                    protocol = URLProtocol.HTTPS
+                    host = source.api.domain
+                    pathSegments += endpoint.trimStart('/').split("/")
+                }
                 applyAuth()
                 parameter(source.api.pagination.pageParam, page)
                 source.api.pagination.perPageParam?.let { param -> parameter(param, pageSize) }
@@ -89,7 +95,7 @@ class WallpaperRepositoryImpl(
     }
 
     private fun buildUrl(endpoint: String): String {
-        val baseUrl = source.api.baseUrl
+        val baseUrl = source.api.domain
         return "$baseUrl$endpoint"
     }
 
@@ -143,6 +149,12 @@ class WallpaperRepositoryImpl(
             val response: String = httpClient.get(
                 urlString = buildUrl(endpoint)
             ) {
+                url {
+                    protocol = URLProtocol.HTTPS
+                    host = source.api.domain
+                    pathSegments += endpoint.trimStart('/').split("/")
+                }
+                applyAuth()
                 applyAuth()
             }.body()
 

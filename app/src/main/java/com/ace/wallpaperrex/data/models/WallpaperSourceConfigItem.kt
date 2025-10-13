@@ -24,7 +24,7 @@ data class WallpaperSourceConfigItem(
 
 @Serializable
 data class SourceApi(
-    val baseUrl: String,
+    val domain: String,
     val endpoints: SourceEndpoints,
     val authentication: SourceAuthentication,
     val pagination: SourceApiPagination,

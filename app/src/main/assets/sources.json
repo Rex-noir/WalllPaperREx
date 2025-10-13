@@ -8,11 +8,11 @@
       "requireApiKey": false,
       "documentationUrl": null,
       "api": {
-        "baseUrl": "wallhaven.cc",
+        "domain": "wallhaven.cc",
         "endpoints": {
-          "search": "/search",
-          "detail": "/w/{id}",
-          "curated": "/search"
+          "search": "/api/v1/search",
+          "detail": "/api/v1/w/{id}",
+          "curated": "/api/v1/search"
         },
         "authentication": {
           "type": "query",
@@ -49,11 +49,11 @@
       "uniqueKey": "pexels",
       "label": "Pexels",
       "description": null,
-      "supportApiKey": false,
+      "supportApiKey": true,
       "requireApiKey": true,
       "documentationUrl": null,
       "api": {
-        "baseUrl": "api.pexels.com",
+        "domain": "api.pexels.com",
         "endpoints": {
           "search": "/v0/search",
           "detail": "/v0/photos/{id}",
