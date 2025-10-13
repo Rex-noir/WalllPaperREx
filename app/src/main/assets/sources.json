@@ -28,7 +28,10 @@
         }
       },
       "responseMapping": {
-        "resultListPath": "data",
+        "resultListPath": {
+          "curated": "data",
+          "search": "data"
+        },
         "pagination": {
           "source": "response",
           "paths": {
@@ -75,7 +78,10 @@
         "searchParam": "query"
       },
       "responseMapping": {
-        "resultListPath": "photos",
+        "resultListPath": {
+          "curated": "photos",
+          "search": "photos"
+        },
         "pagination": {
           "source": "response",
           "paths": {
@@ -123,7 +129,10 @@
         "searchParam": "q"
       },
       "responseMapping": {
-        "resultListPath": "hits",
+        "resultListPaths": {
+          "curated": "hits",
+          "search": "hits"
+        },
         "pagination": {
           "source": "response",
           "paths": {
@@ -168,7 +177,10 @@
         "searchParam": "query"
       },
       "responseMapping": {
-        "resultListPath": null,
+        "resultListPaths": {
+          "curated": null,
+          "search": "results"
+        },
         "pagination": {
           "source": "header",
           "paths": {

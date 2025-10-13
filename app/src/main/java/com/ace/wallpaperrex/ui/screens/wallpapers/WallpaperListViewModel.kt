@@ -90,7 +90,7 @@ class WallpaperListViewModel(
                     } else {
                         val items = currentState.items.plus(newUiItems)
                         items
-                    }
+                    }.distinctBy { it.id }
                     currentState.copy(
                         items = combinedItems,
                         isLoading = false,

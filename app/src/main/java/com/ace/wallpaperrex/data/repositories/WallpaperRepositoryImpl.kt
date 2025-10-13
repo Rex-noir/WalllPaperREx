@@ -41,7 +41,12 @@ class WallpaperRepositoryImpl(
         pageSize: Int
     ): Result<PaginatedResponse<ImageItem>> {
         val endpoint = source.api.endpoints.search
-        return makePaginatedRequest(endpoint, page, pageSize) {
+        return makePaginatedRequest(
+            endpoint,
+            page,
+            pageSize,
+            resultListPath = source.responseMapping.resultListPaths.searchPath
+        ) {
             parameter(source.api.searchParam, query)
         }
 
@@ -51,6 +56,7 @@ class WallpaperRepositoryImpl(
         endpoint: String,
         page: Int,
         pageSize: Int,
+        resultListPath: String?,
         parameterBlock: HttpRequestBuilder.() -> Unit
     ): Result<PaginatedResponse<ImageItem>> {
         return try {
@@ -74,11 +80,10 @@ class WallpaperRepositoryImpl(
                 is JsonObject -> parsePaginatedResponse(
                     rootElement,
                     headers,
-                    resultListPath = source.responseMapping.resultListPath!!
+                    resultListPath = resultListPath!!
                 )
 
                 is JsonArray -> {
-                    // Wrap the array in a dummy object with a "data" field for uniform parsing
                     val wrappedObject = buildJsonObject { put("data", rootElement) }
                     parsePaginatedResponse(wrappedObject, headers, resultListPath = "data")
                 }
@@ -98,7 +103,7 @@ class WallpaperRepositoryImpl(
         return runCatching {
             val mapping = source.responseMapping
             val resultList = jsonObject.extractJsonArray(resultListPath)
-                ?: throw IllegalStateException("Results not found at path: ${mapping.resultListPath}")
+                ?: throw IllegalStateException("Results not found at path: ${mapping.resultListPaths}")
             val imageItems = resultList.map { parseImageItem(it.jsonObject) }
 
             var currentPage: Int? = null
@@ -212,7 +217,12 @@ class WallpaperRepositoryImpl(
         pageSize: Int
     ): Result<PaginatedResponse<ImageItem>> {
         val endpoint = source.api.endpoints.curated
-        return makePaginatedRequest(endpoint, page, pageSize) {
+        return makePaginatedRequest(
+            endpoint,
+            page,
+            pageSize,
+            resultListPath = source.responseMapping.resultListPaths.curatedPath
+        ) {
             //
         }
     }
