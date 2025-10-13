@@ -43,7 +43,7 @@ class WallpaperDetailViewModel(
     private lateinit var repository: WallpaperRepository
 
     init {
-        if (image != null && source != null) {
+        if (image != null && source != null && image.uploader == null && image.uploaderUrl == null) {
             viewModelScope.launch(Dispatchers.IO) {
                 val favImage = favoriteImageRepository.getById(image.id)
                 _isFavorite.value = favImage != null
