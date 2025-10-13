@@ -7,7 +7,7 @@ import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.AP
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
 import com.ace.wallpaperrex.data.repositories.WallpaperRepository
-import com.ace.wallpaperrex.data.repositories.WallpaperRepositoryProvider
+import com.ace.wallpaperrex.data.repositories.WallpaperRepositoryImpl
 import com.ace.wallpaperrex.data.repositories.WallpaperSourceRepository
 import com.ace.wallpaperrex.ui.models.ImageItem
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -48,7 +48,7 @@ class WallpaperListViewModel(
                 initialValue = emptyList()
             ).map { sources -> sources.find { it.uniqueKey == sourceKey } }.filterNotNull()
                 .collect {
-                    repository = WallpaperRepositoryProvider.provide(it)
+                    repository = WallpaperRepositoryImpl(it)
                     loadWallpapers(page = 1, isInitialLoad = true)
                 }
         }
