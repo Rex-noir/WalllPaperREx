@@ -31,6 +31,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavDestination
@@ -42,6 +43,9 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.ace.wallpaperrex.R
+import com.ace.wallpaperrex.data.repositories.SourcesRepositoryImpl
+import com.ace.wallpaperrex.data.repositories.UserPreferencesRepository
+import com.ace.wallpaperrex.data.repositories.WallpaperSourceRepository
 import com.ace.wallpaperrex.ui.models.ImageItem
 import com.ace.wallpaperrex.ui.screens.setting.SourcesSettingsScreen
 import com.ace.wallpaperrex.ui.screens.wallpapers.FavoriteListScreen
@@ -171,6 +175,18 @@ fun HomeLayout(
         targetValue = if (isBottomBarVisible) bottomBarHeight else 0.dp,
         label = "bottomBarHeightAnimation"
     )
+
+    // context
+    val context = LocalContext.current
+
+    // Wallpaper source repository
+    val sourceRepository = WallpaperSourceRepository(
+        sourceRepository = SourcesRepositoryImpl(
+            context = context
+        ),
+        userPreferencesRepository = UserPreferencesRepository(context)
+    )
+
     Scaffold(
         modifier = modifier
             .nestedScroll(scrollBehavior.nestedScrollConnection)
@@ -233,7 +249,8 @@ fun HomeLayout(
                 WallpaperListScreen(
                     onWallpaperClick = { image ->
                         onWallpaperClick(image)
-                    }
+                    },
+                    wallpaperSourceRepository = sourceRepository
                 )
             }
             composable<SourcesSettingsRoute> {

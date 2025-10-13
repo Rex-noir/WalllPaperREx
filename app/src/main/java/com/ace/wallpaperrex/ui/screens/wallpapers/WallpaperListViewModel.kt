@@ -1,15 +1,14 @@
 package com.ace.wallpaperrex.ui.screens.wallpapers
 
-import android.app.Application
 import androidx.compose.runtime.Immutable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
-import com.ace.wallpaperrex.data.daos.getWallpaperSourcesFlow
 import com.ace.wallpaperrex.data.repositories.WallpaperRepository
 import com.ace.wallpaperrex.data.repositories.WallpaperRepositoryProvider
+import com.ace.wallpaperrex.data.repositories.WallpaperSourceRepository
 import com.ace.wallpaperrex.ui.models.ImageItem
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -31,8 +30,8 @@ data class WallpaperListUiState(
 )
 
 class WallpaperListViewModel(
-    val sourceId: Int,
-    private val application: Application,
+    val sourceKey: String,
+    val wallpaperSourceRepository: WallpaperSourceRepository,
 ) :
     ViewModel() {
 
@@ -43,14 +42,15 @@ class WallpaperListViewModel(
 
     init {
         viewModelScope.launch {
-            application.getWallpaperSourcesFlow().stateIn(
+            wallpaperSourceRepository.wallpaperSources.stateIn(
                 scope = viewModelScope,
                 started = SharingStarted.WhileSubscribed(5000),
                 initialValue = emptyList()
-            ).map { sources -> sources.find { it.id == sourceId } }.filterNotNull().collect {
-                repository = WallpaperRepositoryProvider.provide(it)
-                loadWallpapers(page = 1, isInitialLoad = true)
-            }
+            ).map { sources -> sources.find { it.uniqueKey == sourceKey } }.filterNotNull()
+                .collect {
+                    repository = WallpaperRepositoryProvider.provide(it)
+                    loadWallpapers(page = 1, isInitialLoad = true)
+                }
         }
 
     }
@@ -132,7 +132,8 @@ class WallpaperListViewModel(
 
     companion object {
         fun createFactory(
-            sourceId: Int
+            sourceKey: String,
+            wallpaperSourceRepository: WallpaperSourceRepository
         ): ViewModelProvider.Factory =
             object : ViewModelProvider.Factory {
                 @Suppress("UNCHECKED_CAST")
@@ -141,7 +142,7 @@ class WallpaperListViewModel(
                     extras: CreationExtras
                 ): T {
                     val application = checkNotNull(extras[APPLICATION_KEY])
-                    return WallpaperListViewModel(sourceId, application) as T
+                    return WallpaperListViewModel(sourceKey, wallpaperSourceRepository) as T
                 }
             }
     }

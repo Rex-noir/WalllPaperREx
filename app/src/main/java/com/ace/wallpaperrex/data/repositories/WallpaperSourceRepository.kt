@@ -2,7 +2,8 @@ package com.ace.wallpaperrex.data.repositories
 
 import android.net.Uri
 import androidx.datastore.preferences.core.stringPreferencesKey
-import com.ace.wallpaperrex.ui.models.WallpaperSourceConfigItem
+import com.ace.wallpaperrex.data.models.WallpaperSourceConfig
+import com.ace.wallpaperrex.data.models.WallpaperSourceConfigItem
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 
@@ -43,6 +44,10 @@ class WallpaperSourceRepository(
     suspend fun setWallpaperApiKey(item: WallpaperSourceConfigItem, apiKey: String) {
         val key = stringPreferencesKey(item.uniqueKey)
         userPreferencesRepository.setWallpaperApiKey(key, apiKey)
+    }
+
+    suspend fun setLastWallpaperSource(key: String) {
+        userPreferencesRepository.setLastWallpaperSourceKey(key)
     }
 
     suspend fun updateSourcesFromNetwork(url: String): Result<Unit> =

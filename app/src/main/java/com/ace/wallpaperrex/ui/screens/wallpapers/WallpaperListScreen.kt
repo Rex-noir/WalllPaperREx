@@ -19,13 +19,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.ace.wallpaperrex.data.daos.getLastWallpaperSource
-import com.ace.wallpaperrex.data.daos.getWallpaperSourcesFlow
-import com.ace.wallpaperrex.data.daos.setLastWallpaperSourceId
+import com.ace.wallpaperrex.data.models.WallpaperSourceConfigItem
+import com.ace.wallpaperrex.data.repositories.WallpaperSourceRepository
 import com.ace.wallpaperrex.ui.components.wallpaper.WallpaperStaggeredGrid
 import com.ace.wallpaperrex.ui.models.ImageItem
-import com.ace.wallpaperrex.data.models.WallpaperSourceConfigItem
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 
@@ -33,12 +30,13 @@ import kotlinx.coroutines.runBlocking
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun WallpaperListScreen(
-    onWallpaperClick: (ImageItem) -> Unit
+    onWallpaperClick: (ImageItem) -> Unit,
+    wallpaperSourceRepository: WallpaperSourceRepository
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
 
-    val allWallpaperSources by context.getWallpaperSourcesFlow()
+    val allWallpaperSources by wallpaperSourceRepository.wallpaperSources
         .collectAsStateWithLifecycle(initialValue = emptyList())
 
     val wallpaperSources by remember(allWallpaperSources) {
@@ -49,11 +47,8 @@ fun WallpaperListScreen(
 
     // Determine the initial page based on the last saved source
     val initialSource: WallpaperSourceConfigItem? = remember(wallpaperSources) {
-        if (wallpaperSources.isNotEmpty()) {
-            runBlocking { context.getLastWallpaperSource().first() }
-                ?: wallpaperSources.first()
-        } else {
-            null
+        runBlocking {
+            wallpaperSources.find { it.isDefault }
         }
     }
 
@@ -83,7 +78,7 @@ fun WallpaperListScreen(
                                     pagerState.animateScrollToPage(index)
                                 }
                             },
-                            text = { Text(text = source.name) }
+                            text = { Text(text = source.label) }
                         )
                     }
                 }
@@ -94,12 +89,15 @@ fun WallpaperListScreen(
                 modifier = Modifier
                     .fillMaxSize()
                     .weight(1f),
-                key = { pageIndex -> wallpaperSources[pageIndex].id }
+                key = { pageIndex -> wallpaperSources[pageIndex].uniqueKey }
             ) { pageIndex ->
                 val source = wallpaperSources[pageIndex]
                 val viewModel: WallpaperListViewModel = viewModel(
-                    factory = WallpaperListViewModel.createFactory(source.id),
-                    key = "source-${source.id}"
+                    factory = WallpaperListViewModel.createFactory(
+                        source.uniqueKey,
+                        wallpaperSourceRepository
+                    ),
+                    key = "source-${source.uniqueKey}"
                 )
                 val uiState by viewModel.uiState.collectAsStateWithLifecycle()
                 WallpaperStaggeredGrid(
@@ -117,8 +115,8 @@ fun WallpaperListScreen(
             // 5. Persist the last viewed page's source ID whenever the page changes
             LaunchedEffect(pagerState.currentPage) {
                 if (wallpaperSources.isNotEmpty()) {
-                    val currentSourceId = wallpaperSources[pagerState.currentPage].id
-                    context.setLastWallpaperSourceId(currentSourceId)
+                    val currentSourceKey = wallpaperSources[pagerState.currentPage].uniqueKey
+                    wallpaperSourceRepository.setLastWallpaperSource(currentSourceKey)
                 }
             }
         }
