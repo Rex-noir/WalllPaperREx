@@ -2,6 +2,7 @@ package com.ace.wallpaperrex.data.repositories
 
 import com.ace.wallpaperrex.ui.models.ImageItem
 import com.ace.wallpaperrex.ui.models.PaginatedResponse
+import com.ace.wallpaperrex.utils.WallpaperHelper
 import com.ace.wallpaperrex.utils.mapToUserFriendlyException
 
 interface WallpaperRepository {
@@ -26,7 +27,7 @@ interface WallpaperRepository {
     suspend fun getImages(
         page: Int,
         sorting: String? = null,
-        pageSize: Int = 20
+        pageSize: Int = WallpaperHelper.PER_PAGE_SIZE
     ): Result<PaginatedResponse<ImageItem>>
 
     suspend fun getSingleImage(id: String): Result<ImageItem>

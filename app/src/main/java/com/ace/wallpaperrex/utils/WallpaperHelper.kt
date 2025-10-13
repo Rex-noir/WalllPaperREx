@@ -107,4 +107,6 @@ object WallpaperHelper {
         }
 
     }
+
+    const val PER_PAGE_SIZE = 20
 }
