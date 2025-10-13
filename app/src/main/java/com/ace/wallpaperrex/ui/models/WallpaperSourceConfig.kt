@@ -1,6 +1,7 @@
 package com.ace.wallpaperrex.ui.models
 
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.Transient
 
 
 @Serializable
@@ -10,10 +11,15 @@ data class WallpaperSourceConfigItem(
     val description: String?,
     val supportApiKey: Boolean = true,
     val requireApiKey: Boolean = false,
+    @Transient val apiKey: String = "",
+    @Transient val isDefault: Boolean = false,
     val documentationUrl: String?,
     val api: SourceApi,
     val responseMapping: SourceResponseMapping
-)
+) {
+    val hasApiKey = apiKey.isNotEmpty() && supportApiKey
+    val isConfigured get() = hasApiKey && requireApiKey || !requireApiKey
+}
 
 @Serializable
 data class SourceApi(

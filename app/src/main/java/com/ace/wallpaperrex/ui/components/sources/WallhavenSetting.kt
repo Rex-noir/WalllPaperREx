@@ -26,11 +26,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.unit.dp
-import com.ace.wallpaperrex.ui.models.WallpaperSourceItem
+import com.ace.wallpaperrex.data.models.WallpaperSourceConfigItem
 
 @Composable
 fun WallhavenSetting(
-    source: WallpaperSourceItem,
+    source: WallpaperSourceConfigItem,
     onApiKeySave: (sourceId: Int, apiKey: String) -> Unit
 ) {
     val apiKeyTextFieldState = rememberTextFieldState(initialText = source.apiKey ?: "")

@@ -12,7 +12,7 @@ import com.ace.wallpaperrex.data.entities.SearchHistoryItem
 import com.ace.wallpaperrex.data.repositories.WallpaperRepository
 import com.ace.wallpaperrex.data.repositories.WallpaperRepositoryProvider
 import com.ace.wallpaperrex.ui.models.ImageItem
-import com.ace.wallpaperrex.ui.models.WallpaperSourceItem
+import com.ace.wallpaperrex.data.models.WallpaperSourceConfigItem
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
@@ -30,7 +30,7 @@ class SearchWallpaperViewModel(application: Application) : AndroidViewModel(appl
         initialValue = emptyList()
     )
 
-    private val _selectedSource = MutableStateFlow<WallpaperSourceItem?>(null);
+    private val _selectedSource = MutableStateFlow<WallpaperSourceConfigItem?>(null);
     val selectedSource = _selectedSource.asStateFlow()
 
     private lateinit var repository: WallpaperRepository
@@ -98,7 +98,7 @@ class SearchWallpaperViewModel(application: Application) : AndroidViewModel(appl
      * Called when the user changes the source filter (e.g., clicks a FilterChip).
      * This triggers a new search for the current query on the new source.
      */
-    fun setSelectedSource(source: WallpaperSourceItem) {
+    fun setSelectedSource(source: WallpaperSourceConfigItem) {
         _selectedSource.update { source }
 
         // A source change also requires a full reset.

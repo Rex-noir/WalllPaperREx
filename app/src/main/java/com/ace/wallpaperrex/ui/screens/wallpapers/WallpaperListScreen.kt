@@ -1,7 +1,6 @@
 package com.ace.wallpaperrex.ui.screens.wallpapers
 
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -23,12 +22,9 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ace.wallpaperrex.data.daos.getLastWallpaperSource
 import com.ace.wallpaperrex.data.daos.getWallpaperSourcesFlow
 import com.ace.wallpaperrex.data.daos.setLastWallpaperSourceId
-import com.ace.wallpaperrex.ui.components.wallpaper.EmptyState
-import com.ace.wallpaperrex.ui.components.wallpaper.ErrorState
-import com.ace.wallpaperrex.ui.components.wallpaper.SkeletonWallpaperGrid
 import com.ace.wallpaperrex.ui.components.wallpaper.WallpaperStaggeredGrid
 import com.ace.wallpaperrex.ui.models.ImageItem
-import com.ace.wallpaperrex.ui.models.WallpaperSourceItem
+import com.ace.wallpaperrex.data.models.WallpaperSourceConfigItem
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -52,7 +48,7 @@ fun WallpaperListScreen(
     }
 
     // Determine the initial page based on the last saved source
-    val initialSource: WallpaperSourceItem? = remember(wallpaperSources) {
+    val initialSource: WallpaperSourceConfigItem? = remember(wallpaperSources) {
         if (wallpaperSources.isNotEmpty()) {
             runBlocking { context.getLastWallpaperSource().first() }
                 ?: wallpaperSources.first()

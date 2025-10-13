@@ -40,7 +40,7 @@ import com.ace.wallpaperrex.data.daos.getWallpaperSourcesFlow
 import com.ace.wallpaperrex.data.daos.setDefaultWallpaperSourceId
 import com.ace.wallpaperrex.data.daos.setWallpaperApiKey
 import com.ace.wallpaperrex.ui.components.sources.SourceSettingCard
-import com.ace.wallpaperrex.ui.models.WallpaperSourceItem
+import com.ace.wallpaperrex.data.models.WallpaperSourceConfigItem
 import com.ace.wallpaperrex.ui.models.wallpaperSourcesStatic
 import kotlinx.coroutines.launch
 
@@ -103,7 +103,7 @@ fun SourcesSettingsScreen(
 
 @Composable
 fun SourceApiKeySettingInput(
-    source: WallpaperSourceItem,
+    source: WallpaperSourceConfigItem,
     onApiKeySave: (sourceId: Int, apiKey: String) -> Unit
 ) {
 

@@ -1,10 +1,8 @@
 package com.ace.wallpaperrex.ui.components.sources
 
-import androidx.annotation.DrawableRes
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.HorizontalDivider
@@ -16,10 +14,8 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import com.ace.wallpaperrex.ui.models.WallpaperSourceItem
+import com.ace.wallpaperrex.data.models.WallpaperSourceConfigItem
 
 /**
  * A generic card to display a wallpaper source item.
@@ -30,7 +26,7 @@ import com.ace.wallpaperrex.ui.models.WallpaperSourceItem
  */
 @Composable
 fun SourceSettingCard(
-    source: WallpaperSourceItem,
+    source: WallpaperSourceConfigItem,
     onSetAsDefault: () -> Unit, // Add a callback for the action
     modifier: Modifier = Modifier,
     content: @Composable ColumnScope.() -> Unit // Slot for custom body content

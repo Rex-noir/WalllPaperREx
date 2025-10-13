@@ -3,13 +3,9 @@ package com.ace.wallpaperrex.data.repositories
 import com.ace.wallpaperrex.data.http.KtorClient
 import com.ace.wallpaperrex.ui.models.ImageItem
 import com.ace.wallpaperrex.ui.models.PaginatedResponse
-import com.ace.wallpaperrex.ui.models.WallpaperSourceItem
+import com.ace.wallpaperrex.data.models.WallpaperSourceConfigItem
 import com.ace.wallpaperrex.utils.mapToUserFriendlyException
 import io.ktor.client.HttpClient
-import io.ktor.client.plugins.ClientRequestException
-import io.ktor.client.plugins.ServerResponseException
-import io.ktor.http.HttpStatusCode
-import java.io.IOException
 
 interface WallpaperRepository {
     /**
@@ -49,7 +45,7 @@ interface WallpaperRepository {
 
 object WallpaperRepositoryProvider {
     fun provide(
-        source: WallpaperSourceItem,
+        source: WallpaperSourceConfigItem,
         client: HttpClient = KtorClient.instance
     ): WallpaperRepository {
         return when (source.id) {

@@ -57,7 +57,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ace.wallpaperrex.data.daos.getWallpaperSourcesFlow
 import com.ace.wallpaperrex.ui.components.wallpaper.WallpaperStaggeredGrid
 import com.ace.wallpaperrex.ui.models.ImageItem
-import com.ace.wallpaperrex.ui.models.WallpaperSourceItem
+import com.ace.wallpaperrex.data.models.WallpaperSourceConfigItem
 import com.ace.wallpaperrex.ui.screens.models.SearchWallpaperViewModel
 import kotlinx.coroutines.flow.map
 
@@ -263,9 +263,9 @@ fun SearchWallpapersScreen(
 
 @Composable
 private fun FilterDialog(
-    sources: List<WallpaperSourceItem>,
-    selectedSource: WallpaperSourceItem?,
-    onSourceSelected: (WallpaperSourceItem) -> Unit,
+    sources: List<WallpaperSourceConfigItem>,
+    selectedSource: WallpaperSourceConfigItem?,
+    onSourceSelected: (WallpaperSourceConfigItem) -> Unit,
     onDismiss: () -> Unit
 ) {
     AlertDialog(
