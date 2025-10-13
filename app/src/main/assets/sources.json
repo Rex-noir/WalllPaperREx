@@ -28,7 +28,7 @@
         }
       },
       "responseMapping": {
-        "resultListPath": {
+        "resultListPaths": {
           "curated": "data",
           "search": "data"
         },
@@ -78,7 +78,7 @@
         "searchParam": "query"
       },
       "responseMapping": {
-        "resultListPath": {
+        "resultListPaths": {
           "curated": "photos",
           "search": "photos"
         },
