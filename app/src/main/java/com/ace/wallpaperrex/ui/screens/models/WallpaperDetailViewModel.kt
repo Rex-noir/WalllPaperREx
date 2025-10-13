@@ -1,10 +1,8 @@
 package com.ace.wallpaperrex.ui.screens.models
 
-import android.app.Application
 import android.content.Context
 import android.graphics.Bitmap
 import android.util.Log
-import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
@@ -30,8 +28,7 @@ class WallpaperDetailViewModel(
     private val favoriteImageRepository: FavoriteImageRepository,
     private val image: ImageItem?,
     private val source: WallpaperSourceConfigItem,
-    application: Application
-) : AndroidViewModel(application) {
+) : ViewModel() {
 
     private val _image =
         MutableStateFlow(image)
@@ -121,7 +118,6 @@ class WallpaperDetailViewModel(
                         repository,
                         imageItem,
                         sourceConfigItem,
-                        application
                     ) as T
                 }
             }
