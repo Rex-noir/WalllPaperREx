@@ -114,6 +114,11 @@ class WallpaperRepositoryImpl(
 
     private fun parseImageItem(jsonObject: JsonObject): ImageItem {
         val mapping = source.responseMapping.image
+        val width = jsonObject.extractInt(mapping.widthPath)
+            ?: throw IllegalStateException("Width not found at path: ${mapping.widthPath}")
+        val height = jsonObject.extractInt(mapping.heightPath)
+            ?: throw IllegalStateException("Height not found at path: ${mapping.heightPath}")
+
         return ImageItem(
             id = jsonObject.extractString(mapping.idPath)
                 ?: throw IllegalStateException("ID not found at path: ${mapping.idPath}"),
@@ -126,6 +131,7 @@ class WallpaperRepositoryImpl(
             extension = "webp",
             sourceKey = source.uniqueKey,
             alt = mapping.altPath?.let { jsonObject.extractString(it) },
+            aspectRatio = width.toFloat() / height.toFloat(),
             placeHolderColor = mapping.placeholderColorPath?.let {
                 when (val colorElement = jsonObject.extractValue(it)) {
                     is JsonPrimitive -> {

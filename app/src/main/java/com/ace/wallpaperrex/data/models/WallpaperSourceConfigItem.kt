@@ -75,5 +75,7 @@ data class SourceResponseImageMapping(
     val altPath: String? = null,
     val uploaderPath: String? = null,
     val uploaderUrlPath: String? = null,
-    val placeholderColorPath: String?
+    val placeholderColorPath: String?,
+    val widthPath: String,
+    val heightPath: String
 )

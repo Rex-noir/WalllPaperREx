@@ -40,6 +40,8 @@
           "thumbnailUrlPath": "thumbs.small",
           "imageUrlPath": "path",
           "descriptionPath": "source",
+          "widthPath": "dimension_x",
+          "heightPath": "dimension_y",
           "uploaderPath": "uploader.username",
           "placeholderColorPath": "colors"
         }
@@ -65,7 +67,7 @@
         },
         "pagination": {
           "pageParam": "page",
-          "perPageParam": "perPage"
+          "perPageParam": "per_page"
         },
         "searchParam": "query"
       },
@@ -81,10 +83,52 @@
           "thumbnailUrlPath": "src.medium",
           "imageUrlPath": "src.original",
           "descriptionPath": "alt",
+          "widthPath": "width",
+          "heightPath": "height",
           "uploaderPath": "photographer",
           "uploaderUrlPath": "photographer_url",
           "altPath": "alt",
           "placeholderColorPath": "avg_color"
+        }
+      }
+    },
+    {
+      "uniqueKey": "pixabay",
+      "label": "Pixabay",
+      "description": null,
+      "supportApiKey": true,
+      "requireApiKey": true,
+      "documentationUrl": "https://pixabay.com/api/docs/",
+      "api": {
+        "domain": "pixabay.com",
+        "endpoints": {
+          "search": "/api/search"
+        },
+        "authentication": {
+          "type": "query",
+          "key": "key"
+        },
+        "pagination": {
+          "pageParam": "page",
+          "perPageParam": "per_page"
+        },
+        "searchParam": "q"
+      },
+      "responseMapping": {
+        "resultListPath": "hits",
+        "pagination": {
+          "currentPagePath": null,
+          "totalPath": "totalHits"
+        },
+        "image": {
+          "idPath": "id",
+          "thumbnailUrlPath": "webformatURL",
+          "imageUrlPath": "largeImageURL",
+          "descriptionPath": "tags",
+          "widthPath": "imageWidth",
+          "heightPath": "imageHeight",
+          "uploaderPath": "user",
+          "placeholderColorPath": null
         }
       }
     }
