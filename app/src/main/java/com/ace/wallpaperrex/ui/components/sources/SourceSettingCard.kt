@@ -40,7 +40,7 @@ fun SourceSettingCard(
                 // Main text for the setting
                 headlineContent = {
                     Text(
-                        text = source.name,
+                        text = source.label,
                         style = MaterialTheme.typography.titleMedium
                     )
                 },
