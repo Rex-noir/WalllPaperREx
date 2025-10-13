@@ -67,7 +67,7 @@
           "pageParam": "page",
           "perPageParam": "perPage"
         },
-        "searchParam": "search"
+        "searchParam": "query"
       },
       "responseMapping": {
         "resultListPath": "photos",
