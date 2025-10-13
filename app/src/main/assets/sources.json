@@ -55,9 +55,9 @@
       "api": {
         "domain": "api.pexels.com",
         "endpoints": {
-          "search": "/v0/search",
-          "detail": "/v0/photos/{id}",
-          "curated": "/v0/curated"
+          "search": "/v1/search",
+          "detail": "/v1/photos/{id}",
+          "curated": "/v1/curated"
         },
         "authentication": {
           "type": "header",
