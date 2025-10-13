@@ -3,6 +3,7 @@ package com.ace.wallpaperrex.data.repositories
 import android.content.Context
 import android.net.Uri
 import com.ace.wallpaperrex.ui.models.WallpaperSourceConfigItem
+import com.ace.wallpaperrex.utils.mapToUserFriendlyException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
@@ -52,7 +53,7 @@ class SourcesRepositoryImpl(
     }
 
     override suspend fun getSourcesConfig(): Result<WallpaperSourceConfig> {
-        cachedConfig?.let withContext@{ return@withContext Result.success(it) }
+        cachedConfig?.let { return Result.success(it) }
         return try {
             val internalConfigFile = File(context.filesDir, CURRENT_SOURCES_FILENAME)
             val config = if (internalConfigFile.exists()) {
@@ -67,7 +68,7 @@ class SourcesRepositoryImpl(
             cachedConfig = config
             Result.success(config)
         } catch (e: Exception) {
-            Result.failure(e)
+            Result.failure(mapToUserFriendlyException(e))
         }
     }
 
@@ -82,7 +83,7 @@ class SourcesRepositoryImpl(
                 saveConfig(newJsonString)
                 Result.success(Unit)
             } catch (e: Exception) {
-                Result.failure(e)
+                Result.failure(mapToUserFriendlyException(e))
             }
         }
 
@@ -100,7 +101,7 @@ class SourcesRepositoryImpl(
             saveConfig(newJsonString)
             Result.success(Unit)
         } catch (e: Exception) {
-            Result.failure(e)
+            Result.failure(mapToUserFriendlyException(e))
         }
     }
 
