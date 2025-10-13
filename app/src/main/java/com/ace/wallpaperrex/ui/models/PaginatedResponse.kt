@@ -7,10 +7,10 @@ import kotlinx.serialization.Serializable
 @Serializable
 @Immutable
 data class Meta(
-    @SerialName("current_page") val currentPage: Int,
-    @SerialName("last_page") val lastPage: Int,
-    @SerialName("per_page") val perPage: Int,
-    @SerialName("total") val total: Int
+    @SerialName("current_page") val currentPage: Int?,
+    @SerialName("last_page") val lastPage: Int?,
+    @SerialName("per_page") val perPage: Int?,
+    @SerialName("total") val total: Int?
 )
 
 @Serializable

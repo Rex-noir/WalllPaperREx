@@ -76,19 +76,20 @@ class WallpaperRepositoryImpl(
             val resultList = jsonObject.extractJsonArray(mapping.resultListPath)
                 ?: throw IllegalStateException("Results not found at path: ${mapping.resultListPath}")
             val imageItems = resultList.map { parseImageItem(it.jsonObject) }
-            val currentPage = jsonObject.extractInt(mapping.pagination.currentPagePath)
-                ?: throw IllegalStateException("Current page not found at path: ${mapping.pagination.currentPagePath}")
+            val currentPage = mapping.pagination.currentPagePath?.let { jsonObject.extractInt(it) }
+
             val totalPages = jsonObject.extractInt(mapping.pagination.totalPath)
                 ?: throw IllegalStateException("Total pages not found at path: ${mapping.pagination.totalPath}")
-            val perPage = jsonObject.extractInt(mapping.pagination.perPagePath)
-                ?: throw IllegalStateException("Per page not found at path: ${mapping.pagination.perPagePath}")
+            val perPage = mapping.pagination.perPagePath?.let { jsonObject.extractInt(it) }
 
             val lastPage =
                 mapping.pagination.lastPagePath?.let { jsonObject.extractInt(mapping.pagination.lastPagePath) }
+
             PaginatedResponse(
                 data = imageItems, meta = Meta(
                     currentPage = currentPage,
-                    lastPage = lastPage ?: ((totalPages + perPage - 1) / perPage),
+                    lastPage = lastPage
+                        ?: if (perPage != null) ((totalPages + perPage - 1) / perPage) else null,
                     perPage = perPage,
                     total = totalPages,
                 )
@@ -170,7 +171,11 @@ class WallpaperRepositoryImpl(
 
     override suspend fun getSingleImage(id: String): Result<ImageItem> {
         val endpointTemplate = source.api.endpoints.detail
-        val endpoint = endpointTemplate.replace("{id}", id)
+        val endpoint = endpointTemplate?.replace("{id}", id)
+
+        if (endpoint == null) {
+            return Result.failure(IllegalStateException("Endpoint not found"))
+        }
 
         return try {
             val response: String = httpClient.get(

@@ -34,7 +34,7 @@ data class SourceApi(
 @Serializable
 data class SourceEndpoints(
     val search: String,
-    val detail: String,
+    val detail: String? = null,
     val curated: String
 )
 
@@ -60,8 +60,8 @@ data class SourceResponseMapping(
 
 @Serializable
 data class SourceResponsePagination(
-    val currentPagePath: String,
-    val perPagePath: String,
+    val currentPagePath: String? = null,
+    val perPagePath: String? = null,
     val totalPath: String,
     val lastPagePath: String? = null
 )

@@ -102,7 +102,9 @@
       "api": {
         "domain": "pixabay.com",
         "endpoints": {
-          "search": "/api/search"
+          "search": "/api/",
+          "detail": null,
+          "curated": "/api/"
         },
         "authentication": {
           "type": "query",
