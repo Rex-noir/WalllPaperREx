@@ -80,7 +80,10 @@ class WallpaperListViewModel(
             );
             result.fold(onSuccess = { imageResponse ->
                 val newUiItems = imageResponse.data
-
+                var isEnd = newUiItems.isEmpty()
+                if (!isEnd && imageResponse.meta?.total != null && imageResponse.meta.total != -1) {
+                    isEnd = _uiState.value.currentPage >= imageResponse.meta.total
+                }
                 _uiState.update { currentState ->
                     val combinedItems = if (isInitialLoad || isSearchWipe) {
                         newUiItems
@@ -93,7 +96,7 @@ class WallpaperListViewModel(
                         isLoading = false,
                         currentPage = imageResponse.meta?.currentPage?.plus(1)
                             ?: (currentState.currentPage + 1),
-                        isEndOfList = newUiItems.isEmpty() || (imageResponse.meta?.currentPage == imageResponse.meta?.lastPage)
+                        isEndOfList = isEnd
                     )
                 }
             }, onFailure = { error ->
