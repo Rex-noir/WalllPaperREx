@@ -4,6 +4,7 @@ import com.ace.wallpaperrex.data.http.KtorClient
 import com.ace.wallpaperrex.ui.models.ImageItem
 import com.ace.wallpaperrex.ui.models.PaginatedResponse
 import com.ace.wallpaperrex.ui.models.WallpaperSourceItem
+import com.ace.wallpaperrex.utils.mapToUserFriendlyException
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.ClientRequestException
 import io.ktor.client.plugins.ServerResponseException
@@ -41,49 +42,7 @@ interface WallpaperRepository {
         return try {
             Result.success(block())
         } catch (e: Exception) {
-            Result.failure(mapToSpecificException(e))
-        }
-    }
-
-    private fun mapToSpecificException(e: Exception): Exception {
-        return when (e) {
-            is ClientRequestException -> {
-                when (e.response.status) {
-                    HttpStatusCode.Unauthorized -> Exception(
-                        "Invalid API Key. Please check your credentials.",
-                        e
-                    )
-
-                    HttpStatusCode.BadRequest -> Exception(
-                        "Invalid request. Please check the search query or parameters.",
-                        e
-                    )
-
-                    HttpStatusCode.TooManyRequests -> Exception(
-                        "You have exceeded the API rate limit.",
-                        e
-                    )
-
-                    else -> Exception(
-                        "Client error: ${e.response.status.description}. Please try again.",
-                        e
-                    )
-                }
-            }
-
-            is ServerResponseException -> Exception(
-                "Server error (${e.response.status.value}). Please try again later.",
-                e
-            )
-
-            is IOException -> Exception(
-                "Network error. Please check your internet connection.",
-                e
-            ) // For no internet
-            else -> Exception(
-                "An unexpected error occurred: ${e.message}",
-                e
-            ) // Fallback for other errors
+            Result.failure(mapToUserFriendlyException(e))
         }
     }
 }
