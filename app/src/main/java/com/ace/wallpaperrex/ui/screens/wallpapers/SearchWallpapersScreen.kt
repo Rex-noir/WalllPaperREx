@@ -53,20 +53,20 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.traversalIndex
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.ace.wallpaperrex.data.daos.getWallpaperSourcesFlow
+import com.ace.wallpaperrex.data.models.WallpaperSourceConfigItem
+import com.ace.wallpaperrex.data.repositories.WallpaperSourceRepository
 import com.ace.wallpaperrex.ui.components.wallpaper.WallpaperStaggeredGrid
 import com.ace.wallpaperrex.ui.models.ImageItem
-import com.ace.wallpaperrex.data.models.WallpaperSourceConfigItem
 import com.ace.wallpaperrex.ui.screens.models.SearchWallpaperViewModel
 import kotlinx.coroutines.flow.map
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SearchWallpapersScreen(
-    searchViewModel: SearchWallpaperViewModel = viewModel(factory = SearchWallpaperViewModel.Factory),
+    searchViewModel: SearchWallpaperViewModel,
     onWallpaperClick: (ImageItem) -> Unit,
-    contentPadding: PaddingValues = PaddingValues(0.dp)
+    contentPadding: PaddingValues = PaddingValues(0.dp),
+    wallpaperSourceRepository: WallpaperSourceRepository
 ) {
 
     // --- State Management ---
@@ -79,7 +79,7 @@ fun SearchWallpapersScreen(
 
     val context = LocalContext.current
 
-    val wallpaperSources by context.getWallpaperSourcesFlow()
+    val wallpaperSources by wallpaperSourceRepository.wallpaperSources
         .map { sourceItems -> sourceItems.filter { it.isConfigured } }
         .collectAsStateWithLifecycle(initialValue = emptyList())
 
@@ -275,10 +275,10 @@ private fun FilterDialog(
             LazyColumn {
                 items(sources) { source ->
                     ListItem(
-                        headlineContent = { Text(source.name) },
+                        headlineContent = { Text(source.label) },
                         leadingContent = {
                             RadioButton(
-                                selected = selectedSource?.id == source.id,
+                                selected = selectedSource?.uniqueKey == source.uniqueKey,
                                 onClick = { onSourceSelected(source) }
                             )
                         },
