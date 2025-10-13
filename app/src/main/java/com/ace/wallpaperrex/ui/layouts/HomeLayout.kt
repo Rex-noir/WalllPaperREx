@@ -34,6 +34,7 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavDestination
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavGraph.Companion.findStartDestination
@@ -47,6 +48,7 @@ import com.ace.wallpaperrex.data.repositories.SourcesRepositoryImpl
 import com.ace.wallpaperrex.data.repositories.UserPreferencesRepository
 import com.ace.wallpaperrex.data.repositories.WallpaperSourceRepository
 import com.ace.wallpaperrex.ui.models.ImageItem
+import com.ace.wallpaperrex.ui.screens.models.SearchWallpaperViewModel
 import com.ace.wallpaperrex.ui.screens.setting.SourcesSettingsScreen
 import com.ace.wallpaperrex.ui.screens.wallpapers.FavoriteListScreen
 import com.ace.wallpaperrex.ui.screens.wallpapers.SearchWallpapersScreen
@@ -266,9 +268,14 @@ fun HomeLayout(
                     }
                 )
             }
-            composable<SearchWallpapersRoute> {
+            composable<SearchWallpapersRoute> { currentHomeBackStackEntry ->
                 SearchWallpapersScreen(
-                    onWallpaperClick = onWallpaperClick
+                    onWallpaperClick = onWallpaperClick,
+                    wallpaperSourceRepository = sourceRepository,
+                    searchViewModel = viewModel(
+                        viewModelStoreOwner = currentHomeBackStackEntry,
+                        factory = SearchWallpaperViewModel.createFactory(sourceRepository)
+                    )
                 )
             }
         }
