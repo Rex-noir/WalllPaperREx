@@ -8,16 +8,13 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
-import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
-import androidx.navigation.toRoute
-import com.ace.wallpaperrex.AppRoute
-import com.ace.wallpaperrex.data.daos.getWallpaperSourcesFlow
 import com.ace.wallpaperrex.data.database.AppDatabase
+import com.ace.wallpaperrex.data.models.WallpaperSourceConfigItem
 import com.ace.wallpaperrex.data.repositories.FavoriteImageRepository
 import com.ace.wallpaperrex.data.repositories.WallpaperRepository
-import com.ace.wallpaperrex.data.repositories.WallpaperRepositoryProvider
+import com.ace.wallpaperrex.data.repositories.WallpaperRepositoryImpl
 import com.ace.wallpaperrex.ui.models.ImageItem
 import com.ace.wallpaperrex.ui.models.toEntity
 import com.ace.wallpaperrex.utils.ImageFileHelper
@@ -26,14 +23,13 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.take
-import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.launch
 
 
 class WallpaperDetailViewModel(
     private val favoriteImageRepository: FavoriteImageRepository,
     private val image: ImageItem?,
+    private val source: WallpaperSourceConfigItem,
     application: Application
 ) : AndroidViewModel(application) {
 
@@ -55,11 +51,7 @@ class WallpaperDetailViewModel(
                 val favImage = favoriteImageRepository.getById(image.id)
                 _isFavorite.value = favImage != null
 
-                val sources =
-                    application.applicationContext.getWallpaperSourcesFlow().take(1).toList()
-                        .flatten()
-                repository =
-                    WallpaperRepositoryProvider.provide(sources.find { it.id == image.sourceId }!!)
+                repository = WallpaperRepositoryImpl(source)
 
                 val detailedImage = repository.getSingleImage(image.id)
                 if (detailedImage.isSuccess) {
@@ -113,17 +105,26 @@ class WallpaperDetailViewModel(
 
     companion object {
 
-        fun createFactory(imageItem: ImageItem) = object : ViewModelProvider.Factory {
-            @Suppress("UNCHECKED_CAST")
-            override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
-                val application = checkNotNull(extras[APPLICATION_KEY])
-                val repository = FavoriteImageRepository(
-                    dao = AppDatabase.getDatabase(application).favoriteImageDao()
-                )
+        fun createFactory(imageItem: ImageItem, sourceConfigItem: WallpaperSourceConfigItem) =
+            object : ViewModelProvider.Factory {
+                @Suppress("UNCHECKED_CAST")
+                override fun <T : ViewModel> create(
+                    modelClass: Class<T>,
+                    extras: CreationExtras
+                ): T {
+                    val application = checkNotNull(extras[APPLICATION_KEY])
+                    val repository = FavoriteImageRepository(
+                        dao = AppDatabase.getDatabase(application).favoriteImageDao()
+                    )
 
-                return WallpaperDetailViewModel(repository, imageItem, application) as T
+                    return WallpaperDetailViewModel(
+                        repository,
+                        imageItem,
+                        sourceConfigItem,
+                        application
+                    ) as T
+                }
             }
-        }
     }
 
 
