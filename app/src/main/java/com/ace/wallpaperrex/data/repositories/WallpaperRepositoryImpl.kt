@@ -51,7 +51,7 @@ class WallpaperRepositoryImpl(
             val response: String = httpClient.get(urlString = buildUrl(endpoint)) {
                 applyAuth()
                 parameter(source.api.pagination.pageParam, page)
-                source.api.pagination.perPageParam.let { param -> parameter(param, pageSize) }
+                source.api.pagination.perPageParam?.let { param -> parameter(param, pageSize) }
                 parameterBlock()
             }.body()
 
@@ -117,6 +117,7 @@ class WallpaperRepositoryImpl(
             uploaderUrl = mapping.uploaderUrlPath?.let { jsonObject.extractString(it) },
             extension = "webp",
             sourceKey = source.uniqueKey,
+            alt = mapping.altPath?.let { jsonObject.extractString(it) },
             placeHolderColor = mapping.placeholderColorPath?.let {
                 Color(jsonObject.extractString(it)!!.toColorInt())
             }

@@ -47,8 +47,8 @@ data class SourceAuthentication(
 @Serializable
 data class SourceApiPagination(
     val pageParam: String,
-    val perPageParam: String,
-    val currentPageParam: String
+    val perPageParam: String? = null,
+    val currentPageParam: String? = null
 )
 
 @Serializable
@@ -63,7 +63,7 @@ data class SourceResponsePagination(
     val currentPagePath: String,
     val perPagePath: String,
     val totalPath: String,
-    val lastPagePath: String?
+    val lastPagePath: String? = null
 )
 
 @Serializable
@@ -72,8 +72,8 @@ data class SourceResponseImageMapping(
     val thumbnailUrlPath: String,
     val imageUrlPath: String,
     val descriptionPath: String?,
-    val titlePath: String?,
-    val uploaderPath: String?,
-    val uploaderUrlPath: String?,
+    val altPath: String? = null,
+    val uploaderPath: String? = null,
+    val uploaderUrlPath: String? = null,
     val placeholderColorPath: String?
 )

@@ -82,6 +82,8 @@
           "imageUrlPath": "src.original",
           "descriptionPath": "alt",
           "uploaderPath": "photographer",
+          "uploaderUrlPath": "photographer_url",
+          "altPath": "alt",
           "placeholderColorPath": "avg_color"
         }
       }

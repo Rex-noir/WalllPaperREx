@@ -20,7 +20,8 @@ data class FavoriteImageEntity(
     val savedAt: Long = System.currentTimeMillis(),
     val sourceKey: String,
     val uploader: String?,
-    val uploaderUrl: String?
+    val uploaderUrl: String?,
+    val alt:String? = null
 )
 
 fun FavoriteImageEntity.toImageItem(): ImageItem {
@@ -34,6 +35,7 @@ fun FavoriteImageEntity.toImageItem(): ImageItem {
         sourceKey = sourceKey,
         uploader = uploader,
         uploaderUrl = uploaderUrl,
+        alt = alt,
         placeHolderColor = null
     )
 }
