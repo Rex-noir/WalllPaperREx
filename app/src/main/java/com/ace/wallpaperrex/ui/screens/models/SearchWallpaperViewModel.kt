@@ -172,18 +172,6 @@ class SearchWallpaperViewModel(
     }
 
     companion object {
-        val Factory: ViewModelProvider.Factory = object : ViewModelProvider.Factory {
-            @Suppress("UNCHECKED_CAST")
-            override fun <T : ViewModel> create(
-                modelClass: Class<T>,
-                extras: CreationExtras
-            ): T {
-                val application =
-                    checkNotNull(extras[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY])
-                return SearchWallpaperViewModel() as T
-            }
-        }
-
         fun createFactory(sourceRepository: WallpaperSourceRepository) =
             object : ViewModelProvider.Factory {
                 @Suppress("UNCHECKED_CAST")
