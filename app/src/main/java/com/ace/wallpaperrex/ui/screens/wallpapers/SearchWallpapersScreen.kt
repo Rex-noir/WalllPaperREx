@@ -158,7 +158,6 @@ fun SearchWallpapersScreen(
                 modifier = Modifier
                     .semantics { traversalIndex = 0f },
                 windowInsets = WindowInsets(0, 0, 0, 0),
-                colors = SearchBarDefaults.colors(containerColor = Color.Transparent),
                 tonalElevation = 0.dp,
                 inputField = {
                     SearchBarDefaults.InputField(
