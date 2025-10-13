@@ -101,7 +101,7 @@ fun WallpaperListScreen(
                     isEndOfList = uiState.isEndOfList,
                     error = uiState.error,
                     onLoadMore = { viewModel.loadNextPage() },
-                    onRetryLoadMore = { viewModel.loadNextPage() },
+                    onRetryLoadMore = { viewModel.retry() },
                     onWallpaperClick = { image ->
                         onWallpaperClick(image, source)
                     },

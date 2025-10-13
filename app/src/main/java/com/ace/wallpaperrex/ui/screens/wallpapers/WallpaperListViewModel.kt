@@ -114,6 +114,14 @@ class WallpaperListViewModel(
         }
     }
 
+    fun retry() {
+        if (_uiState.value.currentPage == 1) {
+            retryInitialLoad()
+        } else {
+            loadNextPage()
+        }
+    }
+
     fun retryInitialLoad() {
         _uiState.update {
             it.copy(
