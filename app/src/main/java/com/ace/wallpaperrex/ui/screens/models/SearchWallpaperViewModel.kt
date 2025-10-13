@@ -158,8 +158,6 @@ class SearchWallpaperViewModel(
             result.fold(
                 onSuccess = { response ->
                     val fetchedImages = response.data
-                    // Always append the new images to the existing list.
-                    // resetSearch() handles clearing the list when needed.
                     _images.update { it + fetchedImages }
 
                     _isEndOfList.update {
