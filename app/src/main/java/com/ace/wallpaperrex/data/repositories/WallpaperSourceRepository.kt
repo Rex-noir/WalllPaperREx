@@ -38,7 +38,8 @@ class WallpaperSourceRepository(
         wallpaperSources
     ) { prefs, allSources ->
         val lastSourceKey = prefs[UserPrefsKeys.LAST_WALLPAPER_SOURCE_UNIQUE_KEY]
-        allSources.find { it.uniqueKey === lastSourceKey }
+        Log.d("WallpaperSourceRepository", "Last source key: $lastSourceKey")
+        allSources.find { it.uniqueKey == lastSourceKey }
     }
 
     suspend fun getWallpaperSource(key: String): WallpaperSourceConfigItem? =

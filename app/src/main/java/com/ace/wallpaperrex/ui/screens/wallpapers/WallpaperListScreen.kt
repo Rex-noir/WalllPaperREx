@@ -13,8 +13,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -22,6 +24,7 @@ import com.ace.wallpaperrex.data.models.WallpaperSourceConfigItem
 import com.ace.wallpaperrex.data.repositories.WallpaperSourceRepository
 import com.ace.wallpaperrex.ui.components.wallpaper.WallpaperStaggeredGrid
 import com.ace.wallpaperrex.ui.models.ImageItem
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 
@@ -41,10 +44,19 @@ fun WallpaperListScreen(
             allWallpaperSources.filter { it.isConfigured }
         }
     }
+    var initialSource by remember { mutableStateOf<WallpaperSourceConfigItem?>(null) }
 
-    // Determine the initial page based on the last saved source
-    val initialSource by remember(wallpaperSources) {
-        derivedStateOf { wallpaperSources.find { it.isDefault } ?: wallpaperSources.firstOrNull() }
+    LaunchedEffect(wallpaperSources) {
+        // We only proceed if the list of sources is actually loaded.
+        if (wallpaperSources.isNotEmpty()) {
+            // Asynchronously get the first emitted value from the Flow.
+            val lastSource = wallpaperSourceRepository.lastWallpaperSource.first()
+
+            initialSource = // Case 1: A "last used" source was found, so we use it.
+                lastSource
+                    ?: // Case 2: No "last used" source, so we fall back to the first one in the list.
+                            wallpaperSources.first()
+        }
     }
 
     if (wallpaperSources.isNotEmpty() && initialSource != null) {
