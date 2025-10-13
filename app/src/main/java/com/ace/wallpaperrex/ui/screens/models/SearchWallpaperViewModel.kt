@@ -159,9 +159,13 @@ class SearchWallpaperViewModel(
                 onSuccess = { response ->
                     val fetchedImages = response.data
                     _images.update { it + fetchedImages }
+                    var isEnd = fetchedImages.isEmpty()
+                    if (!isEnd && response.meta?.total != null && response.meta.total != -1) {
+                        isEnd = _page.value >= response.meta.total
+                    }
 
                     _isEndOfList.update {
-                        response.meta?.currentPage == response.meta?.lastPage || fetchedImages.isEmpty()
+                        isEnd
                     }
                 },
                 onFailure = { error ->
