@@ -36,23 +36,21 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.ace.wallpaperrex.data.daos.getWallpaperSourcesFlow
-import com.ace.wallpaperrex.data.daos.setDefaultWallpaperSourceId
-import com.ace.wallpaperrex.data.daos.setWallpaperApiKey
-import com.ace.wallpaperrex.ui.components.sources.SourceSettingCard
 import com.ace.wallpaperrex.data.models.WallpaperSourceConfigItem
-import com.ace.wallpaperrex.ui.models.wallpaperSourcesStatic
+import com.ace.wallpaperrex.data.repositories.WallpaperSourceRepository
+import com.ace.wallpaperrex.ui.components.sources.SourceSettingCard
 import kotlinx.coroutines.launch
 
 @Composable
 fun SourcesSettingsScreen(
     modifier: Modifier = Modifier,
+    wallpaperSourceRepository: WallpaperSourceRepository
 ) {
 
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
 
-    val sources by context.getWallpaperSourcesFlow().collectAsState(
+    val sources by wallpaperSourceRepository.wallpaperSources.collectAsState(
         initial = emptyList(),
     )
 
@@ -69,30 +67,28 @@ fun SourcesSettingsScreen(
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             itemsIndexed(
-                items = wallpaperSourcesStatic,
-                key = { _, source -> source.id }
+                items = sources,
+                key = { _, source -> source.uniqueKey }
             ) { index, sourceItem ->
-                val sourceModel = sources.find { it.id == sourceItem.id }
+                val sourceModel = sources.find { it.uniqueKey == sourceItem.uniqueKey }
                 SourceSettingCard(
                     source = sourceModel!!,
                     modifier = Modifier,
                     onSetAsDefault = {
                         scope.launch {
-                            context.setDefaultWallpaperSourceId(sourceItem.id)
+                            wallpaperSourceRepository.setDefaultWallpaperSource(sourceItem)
                         }
                     }
                 ) {
-                    when (sourceItem.id) {
-                        1, 2 -> {
-                            SourceApiKeySettingInput(sourceModel, onApiKeySave = { id, key ->
-                                scope.launch {
-                                    context.setWallpaperApiKey(sourceItem.apiKeyDataStoreKey, key)
-                                }
-                            })
-                        }
+                    if (sourceItem.supportApiKey) {
 
-                        else ->
-                            Text("No configuration needed/supported currently")
+                        SourceApiKeySettingInput(sourceModel, onApiKeySave = { id, key ->
+                            scope.launch {
+                                wallpaperSourceRepository.setWallpaperApiKey(sourceItem, key)
+                            }
+                        })
+                    } else {
+                        Text("No API Key is required for this source")
                     }
                 }
 
@@ -104,10 +100,10 @@ fun SourcesSettingsScreen(
 @Composable
 fun SourceApiKeySettingInput(
     source: WallpaperSourceConfigItem,
-    onApiKeySave: (sourceId: Int, apiKey: String) -> Unit
+    onApiKeySave: (sourceKey: String, apiKey: String) -> Unit
 ) {
 
-    val apiKeyTextFieldState = rememberTextFieldState(initialText = source.apiKey ?: "")
+    val apiKeyTextFieldState = rememberTextFieldState(initialText = source.apiKey)
     var isInEditMode by rememberSaveable { mutableStateOf(false) }
     val focusRequester = remember { FocusRequester() }
 
@@ -115,7 +111,7 @@ fun SourceApiKeySettingInput(
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
 
-        if (source.needsApiKey) {
+        if (source.requireApiKey) {
             Text("API Key is required for this source", style = MaterialTheme.typography.bodySmall)
         }
 
@@ -138,7 +134,7 @@ fun SourceApiKeySettingInput(
             trailingIcon = {
                 IconButton(onClick = {
                     if (isInEditMode) {
-                        onApiKeySave(source.id, apiKeyTextFieldState.text.toString())
+                        onApiKeySave(source.uniqueKey, apiKeyTextFieldState.text.toString())
                         isInEditMode = false
                     } else {
                         isInEditMode = true
