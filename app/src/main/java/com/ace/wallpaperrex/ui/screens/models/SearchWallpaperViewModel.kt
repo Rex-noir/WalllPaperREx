@@ -6,13 +6,13 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
-import com.ace.wallpaperrex.data.daos.getDefaultWallpaperSource
 import com.ace.wallpaperrex.data.database.AppDatabase
 import com.ace.wallpaperrex.data.entities.SearchHistoryItem
-import com.ace.wallpaperrex.data.repositories.WallpaperRepository
-import com.ace.wallpaperrex.data.repositories.WallpaperRepositoryProvider
-import com.ace.wallpaperrex.ui.models.ImageItem
 import com.ace.wallpaperrex.data.models.WallpaperSourceConfigItem
+import com.ace.wallpaperrex.data.repositories.WallpaperRepository
+import com.ace.wallpaperrex.data.repositories.WallpaperRepositoryImpl
+import com.ace.wallpaperrex.data.repositories.WallpaperSourceRepository
+import com.ace.wallpaperrex.ui.models.ImageItem
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
@@ -21,7 +21,10 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-class SearchWallpaperViewModel(application: Application) : AndroidViewModel(application) {
+class SearchWallpaperViewModel(
+    wallpaperSourceRepository: WallpaperSourceRepository,
+    application: Application
+) : AndroidViewModel(application) {
     private val searchHistoryDao = AppDatabase.getDatabase(application).searchHistoryDao()
 
     val searchHistory = searchHistoryDao.getSearchHistory().stateIn(
@@ -55,9 +58,9 @@ class SearchWallpaperViewModel(application: Application) : AndroidViewModel(appl
     init {
         viewModelScope.launch {
             _selectedSource.update {
-                application.getDefaultWallpaperSource().first()
+                wallpaperSourceRepository.lastWallpaperSource.first()
             }
-            repository = WallpaperRepositoryProvider.provide(selectedSource.value!!)
+            repository = WallpaperRepositoryImpl(_selectedSource.value!!)
         }
     }
 
@@ -106,7 +109,7 @@ class SearchWallpaperViewModel(application: Application) : AndroidViewModel(appl
 
         viewModelScope.launch {
             // Re-create the repository for the new source.
-            repository = WallpaperRepositoryProvider.provide(source)
+            repository = WallpaperRepositoryImpl(source)
 
             // If there's an active query, re-run the search on the new source.
             // If not, the screen will just be empty, which is correct.
@@ -177,8 +180,19 @@ class SearchWallpaperViewModel(application: Application) : AndroidViewModel(appl
             ): T {
                 val application =
                     checkNotNull(extras[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY])
-                return SearchWallpaperViewModel(application) as T
+                return SearchWallpaperViewModel() as T
             }
         }
+
+        fun createFactory(sourceRepository: WallpaperSourceRepository) =
+            object : ViewModelProvider.Factory {
+                @Suppress("UNCHECKED_CAST")
+                override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                    return SearchWallpaperViewModel(
+                        sourceRepository,
+                        application = Application()
+                    ) as T
+                }
+            }
     }
 }
