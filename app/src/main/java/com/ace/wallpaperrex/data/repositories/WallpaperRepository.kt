@@ -1,11 +1,8 @@
 package com.ace.wallpaperrex.data.repositories
 
-import com.ace.wallpaperrex.data.http.KtorClient
 import com.ace.wallpaperrex.ui.models.ImageItem
 import com.ace.wallpaperrex.ui.models.PaginatedResponse
-import com.ace.wallpaperrex.data.models.WallpaperSourceConfigItem
 import com.ace.wallpaperrex.utils.mapToUserFriendlyException
-import io.ktor.client.HttpClient
 
 interface WallpaperRepository {
     /**
@@ -39,19 +36,6 @@ interface WallpaperRepository {
             Result.success(block())
         } catch (e: Exception) {
             Result.failure(mapToUserFriendlyException(e))
-        }
-    }
-}
-
-object WallpaperRepositoryProvider {
-    fun provide(
-        source: WallpaperSourceConfigItem,
-        client: HttpClient = KtorClient.instance
-    ): WallpaperRepository {
-        return when (source.id) {
-            1 -> WallhavenImageRepository(client, apiKey = source.apiKey)
-            2 -> PexelsWallpaperRepository(client, apiKey = source.apiKey!!)
-            else -> throw IllegalArgumentException("Unknown source ID: ${source.id}. No repository for the given source id")
         }
     }
 }
