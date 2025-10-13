@@ -1,5 +1,6 @@
 package com.ace.wallpaperrex.ui.screens.wallpapers
 
+import android.util.Log
 import androidx.compose.runtime.Immutable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -96,6 +97,7 @@ class WallpaperListViewModel(
                     )
                 }
             }, onFailure = { error ->
+                Log.e("WallpaperListViewModel", "loadWallpapers: ${error.localizedMessage}")
                 _uiState.update {
                     it.copy(
                         isLoading = false,

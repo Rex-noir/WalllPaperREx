@@ -36,7 +36,7 @@ fun WallpaperStaggeredGrid(
     onWallpaperClick: (image: ImageItem) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    if (items.isEmpty() && !isLoadingMore) {
+    if (items.isEmpty() && !isLoadingMore && error == null) {
         EmptyState(
             modifier = modifier.fillMaxSize()
         )

@@ -7,6 +7,7 @@ import com.ace.wallpaperrex.data.models.WallpaperSourceConfigItem
 import com.ace.wallpaperrex.ui.models.ImageItem
 import com.ace.wallpaperrex.ui.models.Meta
 import com.ace.wallpaperrex.ui.models.PaginatedResponse
+import com.ace.wallpaperrex.utils.WallpaperHelper
 import com.ace.wallpaperrex.utils.mapToUserFriendlyException
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
@@ -19,6 +20,7 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.intOrNull
 import kotlinx.serialization.json.jsonArray
@@ -125,7 +127,26 @@ class WallpaperRepositoryImpl(
             sourceKey = source.uniqueKey,
             alt = mapping.altPath?.let { jsonObject.extractString(it) },
             placeHolderColor = mapping.placeholderColorPath?.let {
-                Color(jsonObject.extractString(it)!!.toColorInt())
+                when (val colorElement = jsonObject.extractValue(it)) {
+                    is JsonPrimitive -> {
+                        colorElement.contentOrNull?.runCatching {
+                            Color(this.toColorInt())
+                        }?.getOrNull()
+                    }
+
+                    is JsonArray -> {
+                        val colorStrings: List<String> =
+                            colorElement.mapNotNull { value -> value.jsonPrimitive.contentOrNull }
+
+                        if (colorStrings.isNotEmpty()) {
+                            WallpaperHelper.calculateAverageColor(colorStrings)
+                        } else {
+                            null
+                        }
+                    }
+
+                    else -> null
+                }
             }
         )
     }
