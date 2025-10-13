@@ -29,8 +29,8 @@
       },
       "responseMapping": {
         "resultListPaths": {
-          "curated": "data",
-          "search": "data"
+          "curatedPath": "data",
+          "searchPath": "data"
         },
         "pagination": {
           "source": "response",
@@ -79,8 +79,8 @@
       },
       "responseMapping": {
         "resultListPaths": {
-          "curated": "photos",
-          "search": "photos"
+          "curatedPath": "photos",
+          "searchPath": "photos"
         },
         "pagination": {
           "source": "response",
@@ -130,8 +130,8 @@
       },
       "responseMapping": {
         "resultListPaths": {
-          "curated": "hits",
-          "search": "hits"
+          "curatedPath": "hits",
+          "searchPath": "hits"
         },
         "pagination": {
           "source": "response",
@@ -178,8 +178,8 @@
       },
       "responseMapping": {
         "resultListPaths": {
-          "curated": null,
-          "search": "results"
+          "curatedPath": null,
+          "searchPath": "results"
         },
         "pagination": {
           "source": "header",

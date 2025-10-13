@@ -209,13 +209,16 @@ fun HomeLayout(
     }
 
     if (sourceError != null) {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp),
-            contentAlignment = Alignment.Center
-        ) {
-            Text(text = "${sourceError?.message}")
+        Scaffold { innerPadding ->
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(innerPadding)
+                    .padding(horizontal = 15.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(text = "${sourceError?.message}")
+            }
         }
         return
     }

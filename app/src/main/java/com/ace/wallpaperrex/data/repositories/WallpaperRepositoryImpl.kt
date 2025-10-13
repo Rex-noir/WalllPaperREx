@@ -80,7 +80,7 @@ class WallpaperRepositoryImpl(
                 is JsonObject -> parsePaginatedResponse(
                     rootElement,
                     headers,
-                    resultListPath = resultListPath!!
+                    resultListPath = resultListPath
                 )
 
                 is JsonArray -> {
@@ -98,11 +98,11 @@ class WallpaperRepositoryImpl(
     private fun parsePaginatedResponse(
         jsonObject: JsonObject,
         headers: Headers,
-        resultListPath: String
+        resultListPath: String?
     ): Result<PaginatedResponse<ImageItem>> {
         return runCatching {
             val mapping = source.responseMapping
-            val resultList = jsonObject.extractJsonArray(resultListPath)
+            val resultList = resultListPath?.let { jsonObject.extractJsonArray(it) }
                 ?: throw IllegalStateException("Results not found at path: ${mapping.resultListPaths}")
             val imageItems = resultList.map { parseImageItem(it.jsonObject) }
 
