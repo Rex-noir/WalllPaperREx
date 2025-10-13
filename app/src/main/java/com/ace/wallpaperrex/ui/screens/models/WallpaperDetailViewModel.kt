@@ -27,7 +27,7 @@ import kotlinx.coroutines.launch
 class WallpaperDetailViewModel(
     private val favoriteImageRepository: FavoriteImageRepository,
     private val image: ImageItem?,
-    private val source: WallpaperSourceConfigItem,
+    private val source: WallpaperSourceConfigItem?,
 ) : ViewModel() {
 
     private val _image =
@@ -43,7 +43,7 @@ class WallpaperDetailViewModel(
     private lateinit var repository: WallpaperRepository
 
     init {
-        if (image != null) {
+        if (image != null && source != null) {
             viewModelScope.launch(Dispatchers.IO) {
                 val favImage = favoriteImageRepository.getById(image.id)
                 _isFavorite.value = favImage != null
@@ -102,7 +102,7 @@ class WallpaperDetailViewModel(
 
     companion object {
 
-        fun createFactory(imageItem: ImageItem, sourceConfigItem: WallpaperSourceConfigItem) =
+        fun createFactory(imageItem: ImageItem, sourceConfigItem: WallpaperSourceConfigItem?) =
             object : ViewModelProvider.Factory {
                 @Suppress("UNCHECKED_CAST")
                 override fun <T : ViewModel> create(

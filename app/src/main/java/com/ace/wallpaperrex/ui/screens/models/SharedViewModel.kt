@@ -17,7 +17,7 @@ class SharedViewModel : ViewModel() {
     private val _uiState = MutableStateFlow(SharedViewModelUIState())
     val uiState = _uiState.asStateFlow()
 
-    fun setSelectedImage(image: ImageItem, sourceConfigItem: WallpaperSourceConfigItem) {
+    fun setSelectedImage(image: ImageItem, sourceConfigItem: WallpaperSourceConfigItem?) {
         _uiState.value = _uiState.value.copy(selectedImage = image, selectedSourceConfig = sourceConfigItem)
     }
 
