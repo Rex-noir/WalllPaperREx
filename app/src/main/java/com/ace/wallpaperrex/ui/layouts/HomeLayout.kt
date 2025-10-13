@@ -234,9 +234,15 @@ fun HomeLayout(
         return
     }
     Scaffold(
-        modifier = modifier
-            .nestedScroll(scrollBehavior.nestedScrollConnection)
-            .nestedScroll(nestedScrollConnection),
+        modifier = modifier.then(
+            if (currentNavDestination?.hasRoute<WallpaperListRoute>() == true || currentNavDestination?.hasRoute<SearchWallpapersRoute>() == true) {
+                Modifier
+                    .nestedScroll(scrollBehavior.nestedScrollConnection)
+                    .nestedScroll(nestedScrollConnection)
+            } else {
+                Modifier
+            }
+        ),
         topBar = {
             when {
                 currentNavDestination?.hasRoute<WallpaperListRoute>() == true || currentNavDestination?.hasRoute<SearchWallpapersRoute>() == true -> {
