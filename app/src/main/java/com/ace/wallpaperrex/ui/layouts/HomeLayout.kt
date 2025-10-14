@@ -54,6 +54,7 @@ import com.ace.wallpaperrex.data.repositories.UserPreferencesRepository
 import com.ace.wallpaperrex.data.repositories.WallpaperSourceRepository
 import com.ace.wallpaperrex.ui.models.ImageItem
 import com.ace.wallpaperrex.ui.screens.models.SearchWallpaperViewModel
+import com.ace.wallpaperrex.ui.screens.setting.GeneralSettingScreen
 import com.ace.wallpaperrex.ui.screens.setting.SourcesSettingsScreen
 import com.ace.wallpaperrex.ui.screens.wallpapers.FavoriteListScreen
 import com.ace.wallpaperrex.ui.screens.wallpapers.SearchWallpapersScreen
@@ -309,7 +310,7 @@ fun HomeLayout(
                 SourcesSettingsScreen(wallpaperSourceRepository = sourceRepository)
             }
             composable<SettingsRoute> {
-                Text("This is settings screen")
+                GeneralSettingScreen()
             }
             composable<FavoriteListRoute> {
                 FavoriteListScreen(
