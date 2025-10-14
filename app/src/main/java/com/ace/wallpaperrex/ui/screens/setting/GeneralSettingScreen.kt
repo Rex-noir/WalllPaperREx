@@ -32,7 +32,9 @@ fun GeneralSettingScreen(
                 onSourceChange = viewModel::setAutoChangeWallpaperSource,
                 customSources = state.autoChangeCustomSources,
                 availableSources = sources,
-                onCustomSourcesChange = viewModel::setAutoChangeCustomSources
+                onCustomSourcesChange = viewModel::setAutoChangeCustomSources,
+                safeMode = state.autoChangeSafeMode,
+                onSafeModeChange = viewModel::setAutoChangeSafeMode
             )
         }
     }

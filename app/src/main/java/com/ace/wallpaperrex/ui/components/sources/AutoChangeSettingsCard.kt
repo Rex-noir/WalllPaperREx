@@ -45,7 +45,9 @@ fun AutoChangeSettingsCard(
     customSources: List<String>,
     availableSources: List<WallpaperSourceConfigItem>,
     onCustomSourcesChange: (List<String>) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    safeMode: Boolean,
+    onSafeModeChange: (Boolean) -> Unit
 ) {
     Card(
         modifier = modifier.fillMaxWidth(),
@@ -82,6 +84,31 @@ fun AutoChangeSettingsCard(
             // Settings content (visible when enabled)
             AnimatedVisibility(visible = enabled) {
                 Column {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(MaterialTheme.shapes.small)
+                            .clickable { onEnabledChange(!enabled) }
+                            .padding(all = 12.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = "Safe Mode",
+                                style = MaterialTheme.typography.titleMedium
+                            )
+                            Text(
+                                text = "This will filter out NSFW images. NOTE : It is based on the source configuration and if the selected source doesn't support safe mode, this will not work.",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                        Switch(
+                            checked = safeMode,
+                            onCheckedChange = onSafeModeChange
+                        )
+                    }
                     Spacer(modifier = Modifier.height(8.dp))
                     HorizontalDivider()
                     Spacer(modifier = Modifier.height(8.dp))
@@ -163,9 +190,11 @@ private fun SourceSelectorSection(
         source != GeneralSettingRepository.Companion.AutoChangeWallpaperSource.FAVORITES
     var showSourcePicker by remember { mutableStateOf(false) }
 
-    Column(modifier = Modifier
-        .fillMaxWidth()
-        .padding(12.dp)) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(12.dp)
+    ) {
         Text(
             text = "Wallpaper Source",
             style = MaterialTheme.typography.titleSmall,
@@ -247,6 +276,13 @@ private fun SourceSelectorSection(
                                 onCustomSourcesChange(newSelection)
                             },
                             label = { Text(text = sourceItem.label) }
+                        )
+                    }
+                    if (customSources.isEmpty()) {
+                        Text(
+                            "Please select at least one source.",
+                            color = MaterialTheme.colorScheme.error,
+                            style = MaterialTheme.typography.bodySmall
                         )
                     }
                 }

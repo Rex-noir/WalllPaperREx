@@ -11,7 +11,8 @@ data class GeneralSettingState(
     val autoChangeWallpaper: Boolean = false,
     val autoChangeWallpaperInterval: Int = 15,
     val autoChangeWallpaperSource: GeneralSettingRepository.Companion.AutoChangeWallpaperSource = GeneralSettingRepository.Companion.AutoChangeWallpaperSource.FAVORITES,
-    val autoChangeCustomSources: List<String> = emptyList()
+    val autoChangeCustomSources: List<String> = emptyList(),
+    val autoChangeSafeMode: Boolean = true
 )
 
 class GeneralSettingViewModel : ViewModel() {
@@ -43,5 +44,8 @@ class GeneralSettingViewModel : ViewModel() {
         _state.value = _state.value.copy(autoChangeCustomSources = sources)
     }
 
+    fun setAutoChangeSafeMode(enabled: Boolean) {
+        _state.value = _state.value.copy(autoChangeSafeMode = enabled)
+    }
 
 }
