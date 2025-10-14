@@ -72,7 +72,6 @@ import com.ace.wallpaperrex.ui.screens.models.WallpaperDetailViewModel
 import com.ace.wallpaperrex.utils.ImageFileHelper.saveRawBytesToUri
 import com.ace.wallpaperrex.utils.convertToWebpBytes
 import kotlinx.coroutines.launch
-import net.engawapg.lib.zoomable.rememberZoomState
 
 
 @Composable
@@ -249,6 +248,8 @@ fun WallpaperDetailScreen(
                     contentScale = ContentScale.Fit,
                     allowHardware = false,
                     crossfadeEnabled = false,
+                    zoomEnabled = true,
+                    snapBackZoom = true,
                     onSuccess = { successState ->
                         val drawable = successState.result.drawable
                         val bitmap = (drawable as BitmapDrawable).bitmap
@@ -258,6 +259,7 @@ fun WallpaperDetailScreen(
                         Picture(
                             model = imageItem!!.thumbnail,
                             shape = RectangleShape,
+                            contentScale = ContentScale.FillHeight,
                             modifier = Modifier
                                 .fillMaxSize()
                                 .onSizeChanged { containerSize = it }

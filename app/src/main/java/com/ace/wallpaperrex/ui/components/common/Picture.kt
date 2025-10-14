@@ -40,6 +40,7 @@ import com.google.accompanist.placeholder.material.shimmer
 import com.google.accompanist.placeholder.placeholder
 import net.engawapg.lib.zoomable.ZoomState
 import net.engawapg.lib.zoomable.rememberZoomState
+import net.engawapg.lib.zoomable.snapBackZoomable
 import net.engawapg.lib.zoomable.zoomable
 
 
@@ -64,8 +65,9 @@ fun Picture(
     alpha: Float = DefaultAlpha,
     colorFilter: ColorFilter? = null,
     filterQuality: FilterQuality = DrawScope.DefaultFilterQuality,
-    zoomState: ZoomState? = null,
+    zoomState: ZoomState = rememberZoomState(),
     zoomEnabled: Boolean = false,
+    snapBackZoom: Boolean = true,
     shimmerEnabled: Boolean = true,
     crossfadeEnabled: Boolean = true,
     allowHardware: Boolean = true,
@@ -101,7 +103,12 @@ fun Picture(
                 .then(if (shimmerEnabled) Modifier.shimmer(shimmerVisible) else Modifier)
                 .then(
                     when {
-                        zoomState != null -> Modifier.zoomable(
+                        !snapBackZoom -> Modifier.zoomable(
+                            zoomState,
+                            zoomEnabled = zoomEnabled
+                        )
+
+                        snapBackZoom -> Modifier.snapBackZoomable(
                             zoomState,
                             zoomEnabled = zoomEnabled
                         )
