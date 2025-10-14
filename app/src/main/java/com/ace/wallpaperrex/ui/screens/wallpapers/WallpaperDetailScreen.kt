@@ -11,6 +11,7 @@ import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
+import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -228,6 +229,11 @@ fun WallpaperDetailScreen(
                     modifier = Modifier
                         .fillMaxSize()
                         .onSizeChanged { containerSize = it }
+                        .then(
+                            if (imageItem != null && imageItem?.placeHolderColor != null) Modifier.background(
+                                imageItem!!.placeHolderColor!!
+                            ) else Modifier
+                        )
                         .pointerInput(Unit) {
                             detectDragGestures { change, dragAmount ->
                                 change.consume()
@@ -262,6 +268,11 @@ fun WallpaperDetailScreen(
                             contentScale = ContentScale.FillHeight,
                             modifier = Modifier
                                 .fillMaxSize()
+                                .then(
+                                    if (imageItem != null && imageItem?.placeHolderColor != null) Modifier.background(
+                                        imageItem!!.placeHolderColor!!
+                                    ) else Modifier
+                                )
                                 .onSizeChanged { containerSize = it }
                                 .pointerInput(Unit) {
                                     detectDragGestures { change, dragAmount ->
