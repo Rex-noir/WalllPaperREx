@@ -6,7 +6,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.material3.SecondaryTabRow
+import androidx.compose.material3.PrimaryScrollableTabRow
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -71,8 +71,7 @@ fun WallpaperListScreen(
 
         Column(modifier = Modifier.fillMaxSize()) {
             if (wallpaperSources.size > 1) {
-                SecondaryTabRow(
-                    // 2. The selected tab is now driven by the pager's current page
+                PrimaryScrollableTabRow(
                     selectedTabIndex = pagerState.currentPage,
                     modifier = Modifier.fillMaxWidth()
                 ) {
