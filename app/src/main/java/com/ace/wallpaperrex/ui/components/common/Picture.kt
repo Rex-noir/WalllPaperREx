@@ -1,45 +1,28 @@
-import StatusBarUtils.hideSystemBars
-import StatusBarUtils.isSystemBarsHidden
-import StatusBarUtils.showSystemBars
 import android.app.Activity
 import android.content.Context
 import android.content.ContextWrapper
-import android.content.res.Configuration
 import android.os.Build.VERSION.SDK_INT
-import androidx.annotation.FloatRange
-import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.AnimationSpec
-import androidx.compose.animation.core.exponentialDecay
-import androidx.compose.animation.core.spring
-import androidx.compose.foundation.gestures.*
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxScope
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.runtime.*
-import androidx.compose.runtime.saveable.Saver
-import androidx.compose.runtime.saveable.listSaver
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.*
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.DefaultAlpha
+import androidx.compose.ui.graphics.FilterQuality
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.drawscope.DrawScope
-import androidx.compose.ui.input.pointer.PointerInputChange
-import androidx.compose.ui.input.pointer.PointerInputScope
-import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.input.pointer.positionChange
-import androidx.compose.ui.input.pointer.util.VelocityTracker
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.layout.layout
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.dp
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import coil.ImageLoader
@@ -55,8 +38,7 @@ import coil.transform.Transformation
 import com.google.accompanist.placeholder.PlaceholderHighlight
 import com.google.accompanist.placeholder.material.shimmer
 import com.google.accompanist.placeholder.placeholder
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.launch
+import net.engawapg.lib.zoomable.ZoomState
 import net.engawapg.lib.zoomable.rememberZoomState
 import net.engawapg.lib.zoomable.zoomable
 
@@ -82,7 +64,8 @@ fun Picture(
     alpha: Float = DefaultAlpha,
     colorFilter: ColorFilter? = null,
     filterQuality: FilterQuality = DrawScope.DefaultFilterQuality,
-    zoomParams: ZoomParams = ZoomParams(),
+    zoomState: ZoomState? = null,
+    zoomEnabled: Boolean = false,
     shimmerEnabled: Boolean = true,
     crossfadeEnabled: Boolean = true,
     allowHardware: Boolean = true,
@@ -108,10 +91,6 @@ fun Picture(
         .transformations(transformations)
         .build()
 
-    val zoomState = if (zoomParams.zoomEnabled) {
-        rememberZoomState()
-    } else null
-
     val image: @Composable () -> Unit = {
         SubcomposeAsyncImage(
             model = request,
@@ -120,7 +99,17 @@ fun Picture(
             modifier = modifier
                 .clip(shape)
                 .then(if (shimmerEnabled) Modifier.shimmer(shimmerVisible) else Modifier)
-                .then(if (zoomState != null) Modifier.zoomable(zoomState) else Modifier),
+                .then(
+                    when {
+                        zoomState != null -> Modifier.zoomable(
+                            zoomState,
+                            zoomEnabled = zoomEnabled
+                        )
+
+                        zoomEnabled -> Modifier.zoomable(rememberZoomState())
+                        else -> Modifier
+                    }
+                ),
             contentScale = contentScale,
             loading = {
                 if (loading != null) loading(it)
@@ -189,13 +178,6 @@ object StatusBarUtils {
     }
 }
 
-data class ZoomParams(
-    val zoomEnabled: Boolean = false,
-    val hideBarsOnTap: Boolean = false,
-    val minZoomScale: Float = 1f,
-    val maxZoomScale: Float = 4f,
-    val onTap: (Offset) -> Unit = {}
-)
 
 private fun Dp.toPx(density: Density): Float {
     return with(density) { toPx() }

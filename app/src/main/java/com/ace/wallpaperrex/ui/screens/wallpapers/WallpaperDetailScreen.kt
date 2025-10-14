@@ -1,7 +1,6 @@
 package com.ace.wallpaperrex.ui.screens.wallpapers
 
 import Picture
-import ZoomParams
 import android.graphics.Bitmap
 import android.graphics.drawable.BitmapDrawable
 import android.util.Log
@@ -12,6 +11,7 @@ import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
+import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -41,17 +41,25 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -64,6 +72,7 @@ import com.ace.wallpaperrex.ui.screens.models.WallpaperDetailViewModel
 import com.ace.wallpaperrex.utils.ImageFileHelper.saveRawBytesToUri
 import com.ace.wallpaperrex.utils.convertToWebpBytes
 import kotlinx.coroutines.launch
+import net.engawapg.lib.zoomable.rememberZoomState
 
 
 @Composable
@@ -94,7 +103,42 @@ fun WallpaperDetailScreen(
 
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
+    val zoomState = rememberZoomState()
+    var containerSize by remember { mutableStateOf(IntSize.Zero) }
+    // Pan state
+    var panOffset by remember { mutableStateOf(Offset.Zero) }
+    var scale by remember { mutableFloatStateOf(1f) }
+    var maxPanX by remember { mutableFloatStateOf(0f) }
+    var maxPanY by remember { mutableFloatStateOf(0f) }
 
+    LaunchedEffect(imageBitmap, containerSize) {
+        if (imageBitmap != null && containerSize.width > 0 && containerSize.height > 0) {
+            val bitmapWidth = imageBitmap!!.width.toFloat()
+            val bitmapHeight = imageBitmap!!.height.toFloat()
+            val containerWidth = containerSize.width.toFloat()
+            val containerHeight = containerSize.height.toFloat()
+
+            val bitmapAspect = bitmapWidth / bitmapHeight
+            val containerAspect = containerWidth / containerHeight
+
+            // Calculate scale to fill screen
+            scale = if (bitmapAspect > containerAspect) {
+                containerHeight / bitmapHeight
+            } else {
+                containerWidth / bitmapWidth
+            }
+
+            // Calculate how much we can pan
+            val scaledWidth = bitmapWidth * scale
+            val scaledHeight = bitmapHeight * scale
+
+            maxPanX = ((scaledWidth - containerWidth) / 2f).coerceAtLeast(0f)
+            maxPanY = ((scaledHeight - containerHeight) / 2f).coerceAtLeast(0f)
+
+            // Reset pan to center
+            panOffset = Offset.Zero
+        }
+    }
 
     Scaffold(
         snackbarHost = {
@@ -168,7 +212,10 @@ fun WallpaperDetailScreen(
                             error.localizedMessage ?: "An unknown error occurred"
                         )
                     }
-                }
+                },
+                scale = scale,
+                panOffset = panOffset,
+                containerSize = containerSize
             )
 
             Box(
@@ -180,8 +227,27 @@ fun WallpaperDetailScreen(
                 Picture(
                     model = imageItem!!.url,
                     shape = RectangleShape,
-                    modifier = Modifier.fillMaxSize(),
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .onSizeChanged { containerSize = it }
+                        .pointerInput(Unit) {
+                            detectDragGestures { change, dragAmount ->
+                                change.consume()
+                                val newOffset = panOffset + dragAmount
+                                panOffset = Offset(
+                                    x = newOffset.x.coerceIn(-maxPanX, maxPanX),
+                                    y = newOffset.y.coerceIn(-maxPanY, maxPanY)
+                                )
+                            }
+                        }
+                        .graphicsLayer {
+                            scaleX = scale
+                            scaleY = scale
+                            translationX = panOffset.x
+                            translationY = panOffset.y
+                        },
                     shimmerEnabled = false,
+                    contentScale = ContentScale.Fit,
                     allowHardware = false,
                     crossfadeEnabled = false,
                     onSuccess = { successState ->
@@ -193,13 +259,29 @@ fun WallpaperDetailScreen(
                         Picture(
                             model = imageItem!!.thumbnail,
                             shape = RectangleShape,
-                            modifier = Modifier.fillMaxSize(),
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .onSizeChanged { containerSize = it }
+                                .pointerInput(Unit) {
+                                    detectDragGestures { change, dragAmount ->
+                                        change.consume()
+                                        val newOffset = panOffset + dragAmount
+                                        panOffset = Offset(
+                                            x = newOffset.x.coerceIn(-maxPanX, maxPanX),
+                                            y = newOffset.y.coerceIn(-maxPanY, maxPanY)
+                                        )
+                                    }
+                                }
+                                .graphicsLayer {
+                                    scaleX = scale
+                                    scaleY = scale
+                                    translationX = panOffset.x
+                                    translationY = panOffset.y
+                                },
                             shimmerEnabled = true,
                             crossfadeEnabled = false,
-                            zoomParams = ZoomParams(zoomEnabled = true, hideBarsOnTap = true)
                         )
                     },
-                    zoomParams = ZoomParams(zoomEnabled = true, hideBarsOnTap = true)
                 )
 
                 val image = imageItem!!

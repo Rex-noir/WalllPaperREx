@@ -1,6 +1,7 @@
 package com.ace.wallpaperrex.ui.components.wallpaper
 
 import android.graphics.Bitmap
+import android.util.Log
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -22,11 +23,14 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import com.ace.wallpaperrex.utils.WallpaperHelper
 import com.ace.wallpaperrex.utils.convertToWebpBytes
 import kotlinx.coroutines.launch
+import net.engawapg.lib.zoomable.ZoomState
 
 @Composable
 fun WallpaperApplyDialog(
@@ -34,7 +38,11 @@ fun WallpaperApplyDialog(
     imageBitmap: Bitmap?,
     onDismiss: () -> Unit,
     onSuccess: () -> Unit,
-    onError: (Exception) -> Unit = {}
+    zoomState: ZoomState? = null,
+    onError: (Exception) -> Unit = {},
+    scale: Float,
+    panOffset: Offset,
+    containerSize: IntSize
 ) {
     if (isVisible) {
         var selectedTarget by remember { mutableStateOf(WallpaperHelper.ScreenTarget.HOME) }
@@ -82,7 +90,80 @@ fun WallpaperApplyDialog(
                     onClick = {
                         isApplying = true
                         scope.launch {
-                            val bytes = imageBitmap?.convertToWebpBytes()
+                            if (containerSize.width == 0 || containerSize.height == 0) return@launch
+                            var bitmapClone = imageBitmap!!
+
+                            if (scale > 0f) {
+                                val bitmapWidth = bitmapClone.width.toFloat()
+                                val bitmapHeight = bitmapClone.height.toFloat()
+                                val containerWidth = containerSize.width.toFloat()
+                                val containerHeight = containerSize.height.toFloat()
+
+                                // Calculate the scaled dimensions
+                                val scaledWidth = bitmapWidth * scale
+                                val scaledHeight = bitmapHeight * scale
+
+                                // The image is centered in the container and then panned
+                                // Calculate where the top-left of the scaled image is in screen space
+                                val imageLeftInScreen =
+                                    (containerWidth - scaledWidth) / 2f + panOffset.x
+                                val imageTopInScreen =
+                                    (containerHeight - scaledHeight) / 2f + panOffset.y
+
+                                // The visible area in screen coordinates is (0, 0) to (containerWidth, containerHeight)
+                                // Calculate which part of the image is visible
+                                val visibleLeftInScreen = 0f - imageLeftInScreen
+                                val visibleTopInScreen = 0f - imageTopInScreen
+                                val visibleRightInScreen = containerWidth - imageLeftInScreen
+                                val visibleBottomInScreen = containerHeight - imageTopInScreen
+
+                                // Convert to bitmap coordinates (unscale)
+                                var left = visibleLeftInScreen / scale
+                                var top = visibleTopInScreen / scale
+                                var right = visibleRightInScreen / scale
+                                var bottom = visibleBottomInScreen / scale
+
+                                // Clamp to bitmap bounds
+                                left = left.coerceIn(0f, bitmapWidth)
+                                top = top.coerceIn(0f, bitmapHeight)
+                                right = right.coerceIn(0f, bitmapWidth)
+                                bottom = bottom.coerceIn(0f, bitmapHeight)
+
+                                // Ensure valid dimensions
+                                if (right <= left) right = (left + 1).coerceAtMost(bitmapWidth)
+                                if (bottom <= top) bottom = (top + 1).coerceAtMost(bitmapHeight)
+
+                                // Convert to integers with validation
+                                val finalLeft = left.toInt().coerceIn(0, bitmapClone.width - 1)
+                                val finalTop = top.toInt().coerceIn(0, bitmapClone.height - 1)
+                                val finalWidth = (right - left).toInt()
+                                    .coerceIn(1, bitmapClone.width - finalLeft)
+                                val finalHeight = (bottom - top).toInt()
+                                    .coerceIn(1, bitmapClone.height - finalTop)
+
+                                Log.d(
+                                    "Crop", """
+                                    Scale: $scale, PanOffset: $panOffset
+                                    Bitmap: ${bitmapClone.width}x${bitmapClone.height}
+                                    Container: ${containerWidth}x${containerHeight}
+                                    Scaled: ${scaledWidth}x${scaledHeight}
+                                    Image position in screen: ($imageLeftInScreen, $imageTopInScreen)
+                                    Visible in screen: ($visibleLeftInScreen, $visibleTopInScreen) to ($visibleRightInScreen, $visibleBottomInScreen)
+                                    Visible in bitmap: ($left, $top) to ($right, $bottom)
+                                    Crop: ($finalLeft, $finalTop, $finalWidth, $finalHeight)
+                                """.trimIndent()
+                                )
+
+                                bitmapClone = Bitmap.createBitmap(
+                                    bitmapClone,
+                                    finalLeft,
+                                    finalTop,
+                                    finalWidth,
+                                    finalHeight
+                                )
+                            }
+
+                            val bytes = bitmapClone.convertToWebpBytes()
                             try {
                                 WallpaperHelper.applyWallpaper(
                                     context,
