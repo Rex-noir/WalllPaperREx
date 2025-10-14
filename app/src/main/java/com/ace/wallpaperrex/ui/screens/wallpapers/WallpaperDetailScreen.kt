@@ -103,7 +103,6 @@ fun WallpaperDetailScreen(
 
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
-    val zoomState = rememberZoomState()
     var containerSize by remember { mutableStateOf(IntSize.Zero) }
     // Pan state
     var panOffset by remember { mutableStateOf(Offset.Zero) }
