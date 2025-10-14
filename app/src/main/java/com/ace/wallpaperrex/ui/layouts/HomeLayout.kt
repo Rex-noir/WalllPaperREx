@@ -341,7 +341,9 @@ fun HomeLayout(
                 SourcesSettingsScreen(wallpaperSourceRepository = sourceRepository)
             }
             composable<SettingsRoute> {
-                GeneralSettingScreen()
+                GeneralSettingScreen(
+                    sourceRepository = sourceRepository
+                )
             }
             composable<FavoriteListRoute> {
                 FavoriteListScreen(
