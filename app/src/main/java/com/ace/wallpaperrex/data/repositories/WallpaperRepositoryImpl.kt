@@ -253,6 +253,28 @@ class WallpaperRepositoryImpl(
         }
     }
 
+    override suspend fun hitDownloadEndpoint(image: ImageItem): Result<Unit> {
+        return try {
+            val endpointTemplate = source.api.endpoints.download
+            val endpoint = endpointTemplate?.replace("{id}", image.id)
+            if (endpoint == null) {
+                return Result.failure(IllegalStateException("Endpoint not found"))
+            }
+            val response = httpClient.get {
+                url {
+                    protocol = URLProtocol.HTTPS
+                    host = source.api.domain
+                    pathSegments += endpoint.trimStart('/').split("/")
+                }
+                expectSuccess = true
+                applyAuth()
+            }
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(mapToUserFriendlyException(e))
+        }
+    }
+
     private fun JsonElement.extractValue(path: String): JsonElement? {
         val parts = path.split('.')
         var current: JsonElement? = this

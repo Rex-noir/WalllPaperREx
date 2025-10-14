@@ -43,16 +43,19 @@ class WallpaperDetailViewModel(
     private lateinit var repository: WallpaperRepository
 
     init {
-        if (image != null && source != null && image.uploader == null && image.uploaderUrl == null) {
-            viewModelScope.launch(Dispatchers.IO) {
-                val favImage = favoriteImageRepository.getById(image.id)
-                _isFavorite.value = favImage != null
+        if (source != null) {
+            repository = WallpaperRepositoryImpl(source)
 
-                repository = WallpaperRepositoryImpl(source)
+            if (image != null && image.uploader == null && image.uploaderUrl == null) {
+                viewModelScope.launch(Dispatchers.IO) {
+                    val favImage = favoriteImageRepository.getById(image.id)
+                    _isFavorite.value = favImage != null
 
-                val detailedImage = repository.getSingleImage(image.id)
-                if (detailedImage.isSuccess) {
-                    _image.value = detailedImage.getOrThrow()
+
+                    val detailedImage = repository.getSingleImage(image.id)
+                    if (detailedImage.isSuccess) {
+                        _image.value = detailedImage.getOrThrow()
+                    }
                 }
             }
         }
@@ -83,20 +86,25 @@ class WallpaperDetailViewModel(
             _isFavorite.value = newValue
 
             if (newValue) {
+                hitDownloadEndpoint()
                 _isSavingAsFavorite.value = true
-                viewModelScope.launch {
-                    val localPath = ImageFileHelper.saveBytesToCache(
-                        context,
-                        name = name,
-                        bytes = bitmap.convertToWebpBytes()
-                    )
-                    addToFavorite(localPath)
-                    _isSavingAsFavorite.value = false
-                }
+                val localPath = ImageFileHelper.saveBytesToCache(
+                    context,
+                    name = name,
+                    bytes = bitmap.convertToWebpBytes()
+                )
+                addToFavorite(localPath)
+                _isSavingAsFavorite.value = false
             } else {
                 ImageFileHelper.deleteCachedImage(context, name)
                 removeFromFavorite()
             }
+        }
+    }
+
+    fun hitDownloadEndpoint() {
+        viewModelScope.launch {
+            repository.hitDownloadEndpoint(imageItem.value!!)
         }
     }
 

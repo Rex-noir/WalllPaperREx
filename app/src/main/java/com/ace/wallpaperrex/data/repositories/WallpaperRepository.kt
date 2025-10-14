@@ -39,4 +39,7 @@ interface WallpaperRepository {
             Result.failure(mapToUserFriendlyException(e))
         }
     }
+
+    suspend fun hitDownloadEndpoint(image: ImageItem): Result<Unit>
+
 }

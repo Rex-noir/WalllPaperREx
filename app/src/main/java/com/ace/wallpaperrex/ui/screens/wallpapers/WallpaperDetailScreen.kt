@@ -80,7 +80,7 @@ fun WallpaperDetailScreen(
     onNavigateBack: () -> Unit,
     viewModelStoreOwner: NavBackStackEntry,
     imageItem: ImageItem?,
-    source: WallpaperSourceConfigItem?
+    source: WallpaperSourceConfigItem?,
 ) {
 
     val viewModel: WallpaperDetailViewModel = viewModel(
@@ -157,6 +157,9 @@ fun WallpaperDetailScreen(
                     ) { uri ->
                         uri?.let { destinationUri ->
                             scope.launch {
+                                if (source?.api?.endpoints?.download != null) {
+                                    viewModel.hitDownloadEndpoint()
+                                }
                                 val bytes = imageBitmap?.convertToWebpBytes()
                                 saveRawBytesToUri(context, bytes!!, uri)
                             }
