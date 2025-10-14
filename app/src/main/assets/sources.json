@@ -164,7 +164,8 @@
         "endpoints": {
           "search": "/search/photos",
           "detail": "/photos/{id}",
-          "curated": "/photos"
+          "curated": "/photos",
+          "download": "/photos/{id}/download"
         },
         "authentication": {
           "type": "query",

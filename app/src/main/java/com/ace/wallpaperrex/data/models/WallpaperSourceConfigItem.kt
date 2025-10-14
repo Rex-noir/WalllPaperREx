@@ -35,7 +35,8 @@ data class SourceApi(
 data class SourceEndpoints(
     val search: String,
     val detail: String? = null,
-    val curated: String
+    val curated: String,
+    val download: String? = null
 )
 
 @Serializable
