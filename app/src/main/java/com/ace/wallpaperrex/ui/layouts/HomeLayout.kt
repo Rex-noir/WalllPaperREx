@@ -308,7 +308,7 @@ fun HomeLayout(
             composable<SourcesSettingsRoute> {
                 SourcesSettingsScreen(wallpaperSourceRepository = sourceRepository)
             }
-            composable<SettingsRoute> { // Use the concrete @Serializable data object
+            composable<SettingsRoute> {
                 Text("This is settings screen")
             }
             composable<FavoriteListRoute> {
