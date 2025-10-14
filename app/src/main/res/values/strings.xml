@@ -4,7 +4,7 @@
     <string name="settings_title">Settings</string>
     <string name="back_button_desc">Go back</string>
     <string name="bottom_nav_home">Wallpapers</string>
-    <string name="bottom_nav_settings">Setting</string>
+    <string name="bottom_nav_settings">General Settings</string>
     <string name="bottom_nav_search">Search</string>
     <string name="bottom_nav_favorites">Favorites</string>
     <string name="bottom_nav_sources_setting">Sources</string>
