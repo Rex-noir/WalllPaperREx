@@ -8,4 +8,6 @@
     <string name="bottom_nav_search">Search</string>
     <string name="bottom_nav_favorites">Favorites</string>
     <string name="bottom_nav_sources_setting">Sources</string>
+    <string name="sources_reset_success">Reset successfully to default source config</string>
+    <string name="sources_reset_failed">Source config reset failed.</string>
 </resources>

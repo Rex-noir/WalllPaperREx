@@ -18,6 +18,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -27,6 +29,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -52,6 +55,7 @@ import com.ace.wallpaperrex.data.models.WallpaperSourceConfigItem
 import com.ace.wallpaperrex.data.repositories.SourcesRepositoryImpl
 import com.ace.wallpaperrex.data.repositories.UserPreferencesRepository
 import com.ace.wallpaperrex.data.repositories.WallpaperSourceRepository
+import com.ace.wallpaperrex.ui.components.sources.SourceSettingTopBar
 import com.ace.wallpaperrex.ui.models.ImageItem
 import com.ace.wallpaperrex.ui.screens.models.SearchWallpaperViewModel
 import com.ace.wallpaperrex.ui.screens.setting.GeneralSettingScreen
@@ -59,6 +63,7 @@ import com.ace.wallpaperrex.ui.screens.setting.SourcesSettingsScreen
 import com.ace.wallpaperrex.ui.screens.wallpapers.FavoriteListScreen
 import com.ace.wallpaperrex.ui.screens.wallpapers.SearchWallpapersScreen
 import com.ace.wallpaperrex.ui.screens.wallpapers.WallpaperListScreen
+import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 import kotlin.reflect.KClass
 
@@ -157,8 +162,8 @@ fun HomeLayout(
     val currentHomeBackStackEntry by homeNavController.currentBackStackEntryAsState()
     val currentNavDestination = currentHomeBackStackEntry?.destination
 
-
     val context = LocalContext.current
+    val scope = rememberCoroutineScope()
     val sourceRepository = remember {
         WallpaperSourceRepository(
             sourceRepository = SourcesRepositoryImpl(context),
@@ -174,6 +179,7 @@ fun HomeLayout(
     }
 
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
+    val snackbarHostState = remember { SnackbarHostState() }
 
     var isBottomBarVisible by remember { mutableStateOf(true) }
     val bottomBarHeight = 80.dp
@@ -244,6 +250,7 @@ fun HomeLayout(
                 Modifier
             }
         ),
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             when {
                 currentNavDestination?.hasRoute<WallpaperListRoute>() == true || currentNavDestination?.hasRoute<SearchWallpapersRoute>() == true -> {
@@ -257,6 +264,30 @@ fun HomeLayout(
 //                        onClearClicked = { searchQuery = "" }
 //                    )
                     null
+                }
+
+                currentNavDestination?.hasRoute<SourcesSettingsRoute>() == true -> {
+                    val navItem = homeBottomNavItems.find {
+                        currentNavDestination.hasRoute(it.routeKClass)
+                    }
+                    SourceSettingTopBar(
+                        title = navItem?.titleResId ?: R.string.bottom_nav_sources_setting,
+                        onResetClick = {
+                            scope.launch {
+                                val result = sourceRepository.resetSourceConfigToDefault()
+                                if (result.isSuccess) {
+                                    snackbarHostState.showSnackbar(
+                                        context.getString(R.string.sources_reset_success)
+                                    )
+                                } else {
+                                    snackbarHostState.showSnackbar(
+                                        result.exceptionOrNull()?.localizedMessage
+                                            ?: context.getString(R.string.sources_reset_failed)
+                                    )
+                                }
+                            }
+                        }
+                    )
                 }
 
                 else -> {

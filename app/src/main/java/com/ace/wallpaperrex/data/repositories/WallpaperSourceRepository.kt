@@ -63,6 +63,7 @@ class WallpaperSourceRepository(
 
     suspend fun importSourcesFromFile(uri: Uri): Result<Unit> = sourceRepository.importFromFile(uri)
 
+    suspend fun resetSourceConfigToDefault(): Result<Unit> = sourceRepository.resetToDefault()
     suspend fun initialize() {
         sourceRepository.triggerInitialLoadI()
         Log.d("WallpaperSourceRepository", "Sources initialized: ${wallpaperSources.first()}")

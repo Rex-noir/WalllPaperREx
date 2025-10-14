@@ -21,6 +21,8 @@ interface SourcesRepository {
     suspend fun triggerInitialLoadI()
     suspend fun updateFromNetwork(url: String): Result<Unit>
     suspend fun importFromFile(uri: Uri): Result<Unit>
+
+    suspend fun resetToDefault(): Result<Unit>
 }
 
 
@@ -87,6 +89,20 @@ class SourcesRepositoryImpl(
                 .use { it?.readText() } ?: throw IOException("Could not read from file URI")
             val newConfig = jsonParser.decodeFromString<WallpaperSourceConfig>(newJsonString)
             saveConfigAndEmit(newJsonString, newConfig)
+        }.onFailure {
+            return@withContext Result.failure(mapToUserFriendlyException(it))
+        }
+        Result.success(Unit)
+    }
+
+    override suspend fun resetToDefault(): Result<Unit> = withContext(Dispatchers.IO) {
+        runCatching {
+            val internalConfigFile = File(context.filesDir, CURRENT_SOURCES_FILENAME)
+            val defaultJson =
+                context.assets.open("sources.json").bufferedReader().use { it.readText() }
+            internalConfigFile.writeText(defaultJson)
+            val defaultConfig = jsonParser.decodeFromString<WallpaperSourceConfig>(defaultJson)
+            _sourcesConfig.value = Result.success(defaultConfig)
         }.onFailure {
             return@withContext Result.failure(mapToUserFriendlyException(it))
         }
