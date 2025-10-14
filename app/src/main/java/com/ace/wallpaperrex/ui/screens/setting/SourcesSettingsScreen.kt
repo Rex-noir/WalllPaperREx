@@ -47,7 +47,6 @@ fun SourcesSettingsScreen(
     wallpaperSourceRepository: WallpaperSourceRepository
 ) {
 
-    val context = LocalContext.current
     val scope = rememberCoroutineScope()
 
     val sources by wallpaperSourceRepository.wallpaperSources.collectAsState(
