@@ -136,7 +136,12 @@ fun SearchWallpapersScreen(
             .nestedScroll(nestedScrollConnection)
     ) {
         if (searchQuery.isBlank()) {
-            Text("Search from different sources.")
+            Text(
+                "Search from different sources.",
+                modifier = Modifier
+                    .align(Alignment.Center)
+                    .fillMaxSize()
+            )
         } else {
             WallpaperStaggeredGrid(
                 items = images,
