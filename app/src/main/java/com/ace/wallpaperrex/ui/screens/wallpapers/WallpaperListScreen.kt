@@ -18,6 +18,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ace.wallpaperrex.data.models.WallpaperSourceConfigItem
@@ -73,7 +74,8 @@ fun WallpaperListScreen(
             if (wallpaperSources.size > 1) {
                 PrimaryScrollableTabRow(
                     selectedTabIndex = pagerState.currentPage,
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
+                    edgePadding = 0.dp
                 ) {
                     wallpaperSources.forEachIndexed { index, source ->
                         Tab(
