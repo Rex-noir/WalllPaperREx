@@ -260,7 +260,7 @@ class WallpaperRepositoryImpl(
             if (endpoint == null) {
                 return Result.failure(IllegalStateException("Endpoint not found"))
             }
-            val response = httpClient.get {
+            httpClient.get {
                 url {
                     protocol = URLProtocol.HTTPS
                     host = source.api.domain
