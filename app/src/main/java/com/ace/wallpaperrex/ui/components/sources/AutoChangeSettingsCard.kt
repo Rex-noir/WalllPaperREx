@@ -84,31 +84,6 @@ fun AutoChangeSettingsCard(
             // Settings content (visible when enabled)
             AnimatedVisibility(visible = enabled) {
                 Column {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clip(MaterialTheme.shapes.small)
-                            .clickable { onEnabledChange(!enabled) }
-                            .padding(all = 12.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text(
-                                text = "Safe Mode",
-                                style = MaterialTheme.typography.titleMedium
-                            )
-                            Text(
-                                text = "This will filter out NSFW images. NOTE : It is based on the source configuration and if the selected source doesn't support safe mode, this will not work.",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
-                        Switch(
-                            checked = safeMode,
-                            onCheckedChange = onSafeModeChange
-                        )
-                    }
                     Spacer(modifier = Modifier.height(8.dp))
                     HorizontalDivider()
                     Spacer(modifier = Modifier.height(8.dp))

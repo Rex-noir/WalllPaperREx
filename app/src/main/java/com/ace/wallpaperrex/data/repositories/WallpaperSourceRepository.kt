@@ -62,6 +62,10 @@ class WallpaperSourceRepository(
         dataStoreRepository.setLastWallpaperSourceKey(key)
     }
 
+    suspend fun updateSafeModeForSource(item: WallpaperSourceConfigItem, enabled: Boolean) {
+        dataStoreRepository.updateSafeModeForSource(item.uniqueKey, enabled)
+    }
+
     suspend fun updateSourcesFromNetwork(url: String): Result<Unit> =
         sourceRepository.updateFromNetwork(url)
 
