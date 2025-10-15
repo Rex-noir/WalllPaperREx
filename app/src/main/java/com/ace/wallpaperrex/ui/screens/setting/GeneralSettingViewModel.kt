@@ -2,7 +2,9 @@ package com.ace.wallpaperrex.ui.screens.setting
 
 import androidx.compose.runtime.Immutable
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import com.ace.wallpaperrex.data.repositories.GeneralSettingRepository
+import com.ace.wallpaperrex.data.repositories.WallpaperSourceRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
@@ -15,9 +17,12 @@ data class GeneralSettingState(
     val autoChangeSafeMode: Boolean = true
 )
 
-class GeneralSettingViewModel : ViewModel() {
+class GeneralSettingViewModel(private val sourcesRepository: WallpaperSourceRepository) :
+    ViewModel() {
     private val _state = MutableStateFlow(GeneralSettingState())
     val state = _state.asStateFlow()
+
+    val wallpaperSources = sourcesRepository.wallpaperSources
 
     fun setAutoChangeWallpaper(enabled: Boolean) {
         _state.value = _state.value.copy(autoChangeWallpaper = enabled)
@@ -33,6 +38,15 @@ class GeneralSettingViewModel : ViewModel() {
         // In minutes
         val autoChangeWallpaperPeriodAvailableList =
             listOf<Int>(15, 30, 45, 60)
+
+        fun factory(wallpaperSourceRepository: WallpaperSourceRepository): ViewModelProvider.Factory {
+            @Suppress("UNCHECKED_CAST")
+            return object : ViewModelProvider.Factory {
+                override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                    return GeneralSettingViewModel(wallpaperSourceRepository) as T
+                }
+            }
+        }
 
     }
 

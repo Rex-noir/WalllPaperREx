@@ -55,14 +55,14 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.ace.wallpaperrex.R
 import com.ace.wallpaperrex.data.models.WallpaperSourceConfigItem
-import com.ace.wallpaperrex.data.repositories.SourcesRepositoryImpl
 import com.ace.wallpaperrex.data.repositories.DataStoreRepository
-import com.ace.wallpaperrex.data.repositories.SourcesRepository
+import com.ace.wallpaperrex.data.repositories.SourcesRepositoryImpl
 import com.ace.wallpaperrex.data.repositories.WallpaperSourceRepository
 import com.ace.wallpaperrex.ui.components.sources.SourceSettingTopBar
 import com.ace.wallpaperrex.ui.models.ImageItem
 import com.ace.wallpaperrex.ui.screens.models.SearchWallpaperViewModel
 import com.ace.wallpaperrex.ui.screens.setting.GeneralSettingScreen
+import com.ace.wallpaperrex.ui.screens.setting.GeneralSettingViewModel
 import com.ace.wallpaperrex.ui.screens.setting.SourcesSettingsScreen
 import com.ace.wallpaperrex.ui.screens.wallpapers.FavoriteListScreen
 import com.ace.wallpaperrex.ui.screens.wallpapers.SearchWallpapersScreen
@@ -361,7 +361,9 @@ fun HomeLayout(
             }
             composable<SettingsRoute> {
                 GeneralSettingScreen(
-                    sourceRepository = sourceRepository
+                    viewModel = viewModel(
+                        factory = GeneralSettingViewModel.factory(wallpaperSourceRepository = sourceRepository)
+                    )
                 )
             }
             composable<FavoriteListRoute> {
