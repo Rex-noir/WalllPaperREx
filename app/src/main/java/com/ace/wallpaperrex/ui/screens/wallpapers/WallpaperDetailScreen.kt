@@ -276,7 +276,6 @@ fun WallpaperDetailScreen(
                                         imageItem!!.placeHolderColor!!
                                     ) else Modifier
                                 )
-                                .onSizeChanged { containerSize = it }
                                 .pointerInput(Unit) {
                                     detectDragGestures { change, dragAmount ->
                                         change.consume()
