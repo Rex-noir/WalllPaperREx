@@ -52,6 +52,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.traversalIndex
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ace.wallpaperrex.data.models.WallpaperSourceConfigItem
 import com.ace.wallpaperrex.data.repositories.WallpaperSourceRepository
 import com.ace.wallpaperrex.ui.components.wallpaper.WallpaperStaggeredGrid
@@ -86,6 +87,8 @@ fun SearchWallpapersScreen(
     val images by searchViewModel.images.collectAsState()
     val error by searchViewModel.error.collectAsState()
     val isEndOfList by searchViewModel.isEndOfList.collectAsState()
+
+    val searchQuery by searchViewModel.searchQuery.collectAsState()
 
     var isSearchBarVisible by rememberSaveable { mutableStateOf(true) }
 
@@ -132,19 +135,23 @@ fun SearchWallpapersScreen(
             .semantics { isTraversalGroup = true }
             .nestedScroll(nestedScrollConnection)
     ) {
-        WallpaperStaggeredGrid(
-            items = images,
-            isLoadingMore = isLoading,
-            isEndOfList = isEndOfList,
-            modifier = Modifier.fillMaxSize(),
-            error = error,
-            onLoadMore = { searchViewModel.loadMore() },
-            onRetryLoadMore = { searchViewModel.loadMore() },
-            onWallpaperClick = { image ->
-                onWallpaperClick(image, selectedSource!!)
-            },
-            // Add top padding to avoid content being  behind the search bar
-        )
+        if (searchQuery.isBlank()) {
+            Text("Search from different sources.")
+        } else {
+            WallpaperStaggeredGrid(
+                items = images,
+                isLoadingMore = isLoading,
+                isEndOfList = isEndOfList,
+                modifier = Modifier.fillMaxSize(),
+                error = error,
+                onLoadMore = { searchViewModel.loadMore() },
+                onRetryLoadMore = { searchViewModel.loadMore() },
+                onWallpaperClick = { image ->
+                    onWallpaperClick(image, selectedSource!!)
+                },
+            )
+        }
+
 
         // --- Search Bar ---
         AnimatedVisibility(
