@@ -19,6 +19,8 @@ data class ImageItem(
     val alt: String? = null,
     val uploader: String? = null,
     val uploaderUrl: String? = null,
+    val width: Int? = null,
+    val height: Int? = null,
     @Serializable(with = WallpaperHelper.ColorSerializer::class)
     val placeHolderColor: Color?
 )

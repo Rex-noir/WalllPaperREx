@@ -21,7 +21,9 @@ data class FavoriteImageEntity(
     val sourceKey: String,
     val uploader: String?,
     val uploaderUrl: String?,
-    val alt:String? = null
+    val alt: String? = null,
+    val width: Int? = null,
+    val height: Int? = null
 )
 
 fun FavoriteImageEntity.toImageItem(): ImageItem {

@@ -200,6 +200,8 @@ class WallpaperRepositoryImpl(
             extension = "webp",
             sourceKey = source.uniqueKey,
             alt = mapping.altPath?.let { jsonObject.extractString(it) },
+            width = mapping.widthPath.let { jsonObject.extractInt(it) },
+            height = mapping.heightPath.let { jsonObject.extractInt(it) },
             aspectRatio = width.toFloat() / height.toFloat(),
             placeHolderColor = mapping.placeholderColorPath?.let {
                 when (val colorElement = jsonObject.extractValue(it)) {
