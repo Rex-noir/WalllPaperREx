@@ -13,6 +13,7 @@ import okio.IOException
 
 private val Context.userPreferencesDataStore by preferencesDataStore(name = "user_preferences")
 private val Context.wallpaperSourcesDataStore by preferencesDataStore(name = "wallpaper_sources")
+private val Context.autoChangeWallpaperDataStore by preferencesDataStore(name = "auto_change_wallpaper")
 
 object DataStoreKeys {
     val LAST_WALLPAPER_SOURCE_UNIQUE_KEY = stringPreferencesKey("last_wallpaper_source_unique_key")

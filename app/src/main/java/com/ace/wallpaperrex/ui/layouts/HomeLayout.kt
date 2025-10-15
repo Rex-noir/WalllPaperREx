@@ -57,6 +57,7 @@ import com.ace.wallpaperrex.R
 import com.ace.wallpaperrex.data.models.WallpaperSourceConfigItem
 import com.ace.wallpaperrex.data.repositories.SourcesRepositoryImpl
 import com.ace.wallpaperrex.data.repositories.DataStoreRepository
+import com.ace.wallpaperrex.data.repositories.SourcesRepository
 import com.ace.wallpaperrex.data.repositories.WallpaperSourceRepository
 import com.ace.wallpaperrex.ui.components.sources.SourceSettingTopBar
 import com.ace.wallpaperrex.ui.models.ImageItem
@@ -167,10 +168,13 @@ fun HomeLayout(
 
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
+
+    val dataStoreRepository = DataStoreRepository(context)
+    val sourcesRepository = SourcesRepositoryImpl(context)
     val sourceRepository = remember {
         WallpaperSourceRepository(
-            sourceRepository = SourcesRepositoryImpl(context),
-            dataStoreRepository = DataStoreRepository(context)
+            sourceRepository = sourcesRepository,
+            dataStoreRepository = dataStoreRepository
         )
     }
     val sources by sourceRepository.wallpaperSources.collectAsState(initial = emptyList())
