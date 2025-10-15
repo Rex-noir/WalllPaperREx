@@ -162,7 +162,7 @@ class SearchWallpaperViewModel(
      * It uses the current state of `searchQuery` and `page`.
      */
     private fun fetchNextPage() {
-        if (_isLoading.value || searchQuery.value.isBlank()) return
+        if (_isLoading.value || searchQuery.value.isBlank() && _selectedSource.value != null) return
 
         viewModelScope.launch {
             _isLoading.update { true }

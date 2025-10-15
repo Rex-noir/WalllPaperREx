@@ -140,7 +140,7 @@ fun SearchWallpapersScreen(
             error = error,
             onLoadMore = { searchViewModel.loadMore() },
             onRetryLoadMore = { searchViewModel.loadMore() },
-            onWallpaperClick = {image->
+            onWallpaperClick = { image ->
                 onWallpaperClick(image, selectedSource!!)
             },
             // Add top padding to avoid content being  behind the search bar
@@ -272,6 +272,13 @@ private fun FilterDialog(
         title = { Text("Select a Source") },
         text = {
             LazyColumn {
+                if (sources.isEmpty()) {
+                    item(
+                        key = "empty",
+                    ) {
+                        Text("No sources available. Please add atleast one source")
+                    }
+                }
                 items(sources) { source ->
                     ListItem(
                         headlineContent = { Text(source.label) },
