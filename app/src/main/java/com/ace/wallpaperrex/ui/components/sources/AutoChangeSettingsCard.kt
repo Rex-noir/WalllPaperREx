@@ -31,24 +31,27 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.unit.dp
 import com.ace.wallpaperrex.data.models.WallpaperSourceConfigItem
-import com.ace.wallpaperrex.data.repositories.GeneralSettingRepository
+import com.ace.wallpaperrex.ui.screens.models.AutoChangeWallpaperSetting
 
 @Composable
 fun AutoChangeSettingsCard(
-    enabled: Boolean,
-    onEnabledChange: (Boolean) -> Unit,
-    intervalMinutes: Int,
-    availableIntervals: List<Int>,
-    onIntervalChange: (Int) -> Unit,
-    source: GeneralSettingRepository.Companion.AutoChangeWallpaperSource,
-    onSourceChange: (GeneralSettingRepository.Companion.AutoChangeWallpaperSource) -> Unit,
-    customSources: List<String>,
-    availableSources: List<WallpaperSourceConfigItem>,
-    onCustomSourcesChange: (List<String>) -> Unit,
+    autoChangeWallpaperSetting: AutoChangeWallpaperSetting,
     modifier: Modifier = Modifier,
-    safeMode: Boolean,
-    onSafeModeChange: (Boolean) -> Unit
+    onIntervalChange: (Int) -> Unit,
+    onSourceChange: (AutoChangeWallpaperSetting.Source) -> Unit,
+    onCustomSourcesChange: (List<WallpaperSourceConfigItem>) -> Unit,
+    onEnabledChange: (Boolean) -> Unit,
+    availableSources: List<WallpaperSourceConfigItem>,
 ) {
+    val intervalMinutes = autoChangeWallpaperSetting.interval
+    val enabled = autoChangeWallpaperSetting.enabled
+    val source = autoChangeWallpaperSetting.source
+    val customSources = autoChangeWallpaperSetting.customSources
+
+
+    val autoChangeWallpaperPeriodAvailableList =
+        listOf(15, 30, 45, 60)
+
     Card(
         modifier = modifier.fillMaxWidth(),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
@@ -91,7 +94,7 @@ fun AutoChangeSettingsCard(
                     // Interval selector
                     IntervalSelectorSection(
                         selectedInterval = intervalMinutes,
-                        availableIntervals = availableIntervals,
+                        availableIntervals = autoChangeWallpaperPeriodAvailableList,
                         onIntervalSelect = onIntervalChange
                     )
 
@@ -155,14 +158,14 @@ private fun IntervalSelectorSection(
 
 @Composable
 private fun SourceSelectorSection(
-    source: GeneralSettingRepository.Companion.AutoChangeWallpaperSource,
-    customSources: List<String>,
+    source: AutoChangeWallpaperSetting.Source,
+    customSources: List<WallpaperSourceConfigItem>,
     availableSources: List<WallpaperSourceConfigItem>,
-    onSourceChange: (GeneralSettingRepository.Companion.AutoChangeWallpaperSource) -> Unit,
-    onCustomSourcesChange: (List<String>) -> Unit
+    onSourceChange: (AutoChangeWallpaperSetting.Source) -> Unit,
+    onCustomSourcesChange: (List<WallpaperSourceConfigItem>) -> Unit
 ) {
     val isCustomMode =
-        source != GeneralSettingRepository.Companion.AutoChangeWallpaperSource.FAVORITES
+        source != AutoChangeWallpaperSetting.Source.FAVORITES
     var showSourcePicker by remember { mutableStateOf(false) }
 
     Column(
@@ -186,9 +189,9 @@ private fun SourceSelectorSection(
                     val newMode = !isCustomMode
                     onSourceChange(
                         if (newMode) {
-                            GeneralSettingRepository.Companion.AutoChangeWallpaperSource.CUSTOM_SOURCES
+                            AutoChangeWallpaperSetting.Source.CUSTOM_SOURCES
                         } else {
-                            GeneralSettingRepository.Companion.AutoChangeWallpaperSource.FAVORITES
+                            AutoChangeWallpaperSetting.Source.FAVORITES
                         }
                     )
                     showSourcePicker = newMode
@@ -242,14 +245,14 @@ private fun SourceSelectorSection(
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     availableSources.forEach { sourceItem ->
-                        val isSelected = customSources.contains(sourceItem.uniqueKey)
+                        val isSelected = customSources.contains(sourceItem)
                         FilterChip(
                             selected = isSelected,
                             onClick = {
                                 val newSelection = if (isSelected) {
-                                    customSources - sourceItem.uniqueKey
+                                    customSources - sourceItem
                                 } else {
-                                    customSources + sourceItem.uniqueKey
+                                    customSources + sourceItem
                                 }
                                 onCustomSourcesChange(newSelection)
                             },

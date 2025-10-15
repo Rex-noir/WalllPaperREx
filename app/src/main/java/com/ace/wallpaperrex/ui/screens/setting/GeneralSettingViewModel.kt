@@ -1,65 +1,66 @@
 package com.ace.wallpaperrex.ui.screens.setting
 
-import androidx.compose.runtime.Immutable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.ace.wallpaperrex.data.repositories.GeneralSettingRepository
+import androidx.lifecycle.viewModelScope
+import com.ace.wallpaperrex.data.models.WallpaperSourceConfigItem
+import com.ace.wallpaperrex.data.repositories.GeneralSettingsRepository
 import com.ace.wallpaperrex.data.repositories.WallpaperSourceRepository
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import com.ace.wallpaperrex.ui.screens.models.AutoChangeWallpaperSetting
+import kotlinx.coroutines.launch
 
-@Immutable
-data class GeneralSettingState(
-    val autoChangeWallpaper: Boolean = true,
-    val autoChangeWallpaperInterval: Int = 15,
-    val autoChangeWallpaperSource: GeneralSettingRepository.Companion.AutoChangeWallpaperSource = GeneralSettingRepository.Companion.AutoChangeWallpaperSource.FAVORITES,
-    val autoChangeCustomSources: List<String> = emptyList(),
-    val autoChangeSafeMode: Boolean = true
-)
 
-class GeneralSettingViewModel(private val sourcesRepository: WallpaperSourceRepository) :
+class GeneralSettingViewModel(
+    sourcesRepository: WallpaperSourceRepository,
+    private val generalSettingsRepository: GeneralSettingsRepository
+) :
     ViewModel() {
-    private val _state = MutableStateFlow(GeneralSettingState())
-    val state = _state.asStateFlow()
 
     val wallpaperSources = sourcesRepository.wallpaperSources
+    val autoChangeSetting =
+        generalSettingsRepository.autoChangeWallpaperSetting
 
-    fun setAutoChangeWallpaper(enabled: Boolean) {
-        _state.value = _state.value.copy(autoChangeWallpaper = enabled)
+    fun updateAutoChangeWallpaperEnabled(enabled: Boolean) {
+        viewModelScope.launch {
+            generalSettingsRepository.updateAutoChangeWallpaperEnabled(enabled)
+        }
     }
 
     fun setAutoChangeWallpaperInterval(interval: Int) {
-        _state.value = _state.value.copy(autoChangeWallpaperInterval = interval)
+        viewModelScope.launch {
+            generalSettingsRepository.updateAutoChangeWallpaperInterval(interval)
+        }
+    }
+
+    fun setAutoChangeWallpaperSource(source: AutoChangeWallpaperSetting.Source) {
+        viewModelScope.launch {
+            generalSettingsRepository.updateAutoChangeWallpaperSource(source.key)
+        }
+    }
+
+    fun setAutoChangeCustomSources(sources: List<WallpaperSourceConfigItem>) {
+        viewModelScope.launch {
+            generalSettingsRepository.updateAutoChangeWallpaperCustomSources(sources.joinToString(",") { it.uniqueKey })
+        }
     }
 
     companion object {
         const val TAG = "GeneralSettingViewModel"
-
-        // In minutes
-        val autoChangeWallpaperPeriodAvailableList =
-            listOf<Int>(15, 30, 45, 60)
-
-        fun factory(wallpaperSourceRepository: WallpaperSourceRepository): ViewModelProvider.Factory {
+        fun factory(
+            wallpaperSourceRepository: WallpaperSourceRepository,
+            generalSettingsRepository: GeneralSettingsRepository
+        ): ViewModelProvider.Factory {
             @Suppress("UNCHECKED_CAST")
             return object : ViewModelProvider.Factory {
                 override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                    return GeneralSettingViewModel(wallpaperSourceRepository) as T
+                    return GeneralSettingViewModel(
+                        wallpaperSourceRepository,
+                        generalSettingsRepository
+                    ) as T
                 }
             }
         }
 
-    }
 
-    fun setAutoChangeWallpaperSource(source: GeneralSettingRepository.Companion.AutoChangeWallpaperSource) {
-        _state.value = _state.value.copy(autoChangeWallpaperSource = source)
     }
-
-    fun setAutoChangeCustomSources(sources: List<String>) {
-        _state.value = _state.value.copy(autoChangeCustomSources = sources)
-    }
-
-    fun setAutoChangeSafeMode(enabled: Boolean) {
-        _state.value = _state.value.copy(autoChangeSafeMode = enabled)
-    }
-
 }

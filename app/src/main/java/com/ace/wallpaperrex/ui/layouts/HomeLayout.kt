@@ -56,6 +56,7 @@ import androidx.navigation.compose.rememberNavController
 import com.ace.wallpaperrex.R
 import com.ace.wallpaperrex.data.models.WallpaperSourceConfigItem
 import com.ace.wallpaperrex.data.repositories.DataStoreRepository
+import com.ace.wallpaperrex.data.repositories.GeneralSettingsRepository
 import com.ace.wallpaperrex.data.repositories.SourcesRepositoryImpl
 import com.ace.wallpaperrex.data.repositories.WallpaperSourceRepository
 import com.ace.wallpaperrex.ui.components.sources.SourceSettingTopBar
@@ -362,7 +363,13 @@ fun HomeLayout(
             composable<SettingsRoute> {
                 GeneralSettingScreen(
                     viewModel = viewModel(
-                        factory = GeneralSettingViewModel.factory(wallpaperSourceRepository = sourceRepository)
+                        factory = GeneralSettingViewModel.factory(
+                            wallpaperSourceRepository = sourceRepository,
+                            generalSettingsRepository = GeneralSettingsRepository(
+                                dataStoreRepository,
+                                wallpaperSourceRepository = sourceRepository
+                            )
+                        )
                     )
                 )
             }

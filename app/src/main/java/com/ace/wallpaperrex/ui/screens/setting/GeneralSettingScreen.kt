@@ -8,30 +8,26 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.ace.wallpaperrex.ui.components.sources.AutoChangeSettingsCard
+import com.ace.wallpaperrex.ui.screens.models.AutoChangeWallpaperSetting
 
 @Composable
 fun GeneralSettingScreen(
     modifier: Modifier = Modifier,
     viewModel: GeneralSettingViewModel,
 ) {
-    val state by viewModel.state.collectAsState()
     val sources by viewModel.wallpaperSources.collectAsState(initial = emptyList())
+    val autoChangeSettings by viewModel.autoChangeSetting.collectAsState(initial = AutoChangeWallpaperSetting())
 
     LazyColumn(modifier = modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
         item {
             AutoChangeSettingsCard(
-                enabled = state.autoChangeWallpaper,
-                onEnabledChange = viewModel::setAutoChangeWallpaper,
-                intervalMinutes = state.autoChangeWallpaperInterval,
-                availableIntervals = GeneralSettingViewModel.autoChangeWallpaperPeriodAvailableList,
+                autoChangeWallpaperSetting = autoChangeSettings,
+                modifier = Modifier.padding(vertical = 8.dp),
                 onIntervalChange = viewModel::setAutoChangeWallpaperInterval,
-                source = state.autoChangeWallpaperSource,
                 onSourceChange = viewModel::setAutoChangeWallpaperSource,
-                customSources = state.autoChangeCustomSources,
-                availableSources = sources,
                 onCustomSourcesChange = viewModel::setAutoChangeCustomSources,
-                safeMode = state.autoChangeSafeMode,
-                onSafeModeChange = viewModel::setAutoChangeSafeMode
+                onEnabledChange = viewModel::updateAutoChangeWallpaperEnabled,
+                availableSources = sources
             )
         }
     }
