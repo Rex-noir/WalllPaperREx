@@ -65,7 +65,11 @@ class SearchWallpaperViewModel(
                 started = SharingStarted.WhileSubscribed(5000),
                 initialValue = emptyList()
             )
-                .map { sourceConfigItems -> sourceConfigItems.find { it.uniqueKey == _selectedSource.value?.uniqueKey } }
+                .map { sourceConfigItems ->
+                    sourceConfigItems.find {
+                        it.uniqueKey == (_selectedSource.value?.uniqueKey ?: it.uniqueKey)
+                    }
+                }
                 .filterNotNull().collect {
                     _selectedSource.update {
                         wallpaperSourceRepository.lastWallpaperSource.first()
