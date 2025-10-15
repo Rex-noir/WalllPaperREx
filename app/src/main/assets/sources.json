@@ -28,8 +28,8 @@
         },
         "safeMode": {
           "type": "query",
-          "param": "purity",
-          "valueType": "boolean",
+          "key": "purity",
+          "value": "1",
           "enabled": true
         }
       },
@@ -135,8 +135,8 @@
         "searchParam": "q",
         "safeMode": {
           "type": "query",
-          "param": "safesearch",
-          "valueType": "boolean",
+          "key": "safesearch",
+          "value": "true",
           "enabled": true
         }
       },

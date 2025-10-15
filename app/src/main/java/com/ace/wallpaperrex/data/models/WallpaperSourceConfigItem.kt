@@ -41,9 +41,9 @@ data class SourceEndpoints(
 
 @Serializable
 data class SourceApiSafeMode(
-    val param: String,
+    val key: String,
     val type: String,
-    val valueType: String,
+    val value: String,
     val enabled: Boolean = true
 )
 

@@ -1,7 +1,9 @@
 package com.ace.wallpaperrex.ui.layouts
 
 import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -11,6 +13,7 @@ import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Wallpaper
+import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -224,7 +227,19 @@ fun HomeLayout(
                     .padding(horizontal = 15.dp),
                 contentAlignment = Alignment.Center
             ) {
-                Text(text = "${sourceError?.message}")
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Text(text = "${sourceError?.message}")
+                    Button(onClick = {
+                        scope.launch {
+                            sourceRepository.resetSourceConfigToDefault()
+                        }
+                    }) {
+                        Text("Reset to default source config")
+                    }
+                }
             }
         }
         return

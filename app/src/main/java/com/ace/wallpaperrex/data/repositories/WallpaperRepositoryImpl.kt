@@ -48,6 +48,15 @@ class WallpaperRepositoryImpl(
             resultListPath = source.responseMapping.resultListPaths.searchPath
         ) {
             parameter(source.api.searchParam, query)
+            if (source.api.safeMode?.enabled ?: false) {
+                val safeModeApi = source.api.safeMode
+                val type = safeModeApi.type
+                if (type == "query") {
+                    parameter(safeModeApi.key, safeModeApi.value)
+                } else if (type == "header") {
+                    header(safeModeApi.key, safeModeApi.value)
+                }
+            }
         }
 
     }
@@ -57,7 +66,7 @@ class WallpaperRepositoryImpl(
         page: Int,
         pageSize: Int,
         resultListPath: String?,
-        parameterBlock: HttpRequestBuilder.() -> Unit
+        requestOptions: HttpRequestBuilder.() -> Unit
     ): Result<PaginatedResponse<ImageItem>> {
         return try {
             val response = httpClient.get {
@@ -70,7 +79,7 @@ class WallpaperRepositoryImpl(
                 applyAuth()
                 parameter(source.api.pagination.pageParam, page)
                 source.api.pagination.perPageParam?.let { param -> parameter(param, pageSize) }
-                parameterBlock()
+                requestOptions()
             }
             val body = response.body<String>()
             val headers = response.headers
@@ -148,11 +157,6 @@ class WallpaperRepositoryImpl(
                 )
             )
         }
-    }
-
-    private fun buildUrl(endpoint: String): String {
-        val baseUrl = source.api.domain
-        return "$baseUrl$endpoint"
     }
 
     private fun HttpRequestBuilder.applyAuth() {
