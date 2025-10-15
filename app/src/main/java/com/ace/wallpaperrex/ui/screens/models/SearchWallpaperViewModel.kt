@@ -17,7 +17,9 @@ import com.ace.wallpaperrex.ui.models.ImageItem
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -58,12 +60,21 @@ class SearchWallpaperViewModel(
 
     init {
         viewModelScope.launch {
-            _selectedSource.update {
-                wallpaperSourceRepository.lastWallpaperSource.first()
-            }
-            repository = WallpaperRepositoryImpl(
-                _selectedSource.value ?: wallpaperSourceRepository.wallpaperSources.first().first()
+            wallpaperSourceRepository.wallpaperSources.stateIn(
+                viewModelScope,
+                started = SharingStarted.WhileSubscribed(5000),
+                initialValue = emptyList()
             )
+                .map { sourceConfigItems -> sourceConfigItems.find { it.uniqueKey == _selectedSource.value?.uniqueKey } }
+                .filterNotNull().collect {
+                    _selectedSource.update {
+                        wallpaperSourceRepository.lastWallpaperSource.first()
+                    }
+                    repository = WallpaperRepositoryImpl(
+                        _selectedSource.value ?: wallpaperSourceRepository.wallpaperSources.first()
+                            .first()
+                    )
+                }
         }
     }
 
