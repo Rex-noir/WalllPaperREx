@@ -1,15 +1,22 @@
 package com.ace.wallpaperrex.ui.screens.wallpapers
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.input.TextFieldState
@@ -20,16 +27,23 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.outlined.ImageSearch
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Badge
+import androidx.compose.material3.BadgedBox
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.SearchBar
 import androidx.compose.material3.SearchBarDefaults
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -42,6 +56,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
@@ -50,9 +65,10 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.semantics.isTraversalGroup
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.traversalIndex
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
+import com.ace.wallpaperrex.data.entities.SearchHistoryItem
 import com.ace.wallpaperrex.data.models.WallpaperSourceConfigItem
 import com.ace.wallpaperrex.data.repositories.WallpaperSourceRepository
 import com.ace.wallpaperrex.ui.components.wallpaper.WallpaperStaggeredGrid
@@ -77,11 +93,9 @@ fun SearchWallpapersScreen(
 
     val searchHistory by searchViewModel.searchHistory.collectAsState()
 
-
     val wallpaperSources by wallpaperSourceRepository.wallpaperSources
         .map { sourceItems -> sourceItems.filter { it.isConfigured } }
         .collectAsStateWithLifecycle(initialValue = emptyList())
-
 
     val isLoading by searchViewModel.isLoading.collectAsState()
     val images by searchViewModel.images.collectAsState()
@@ -115,9 +129,8 @@ fun SearchWallpapersScreen(
         }
     }
 
-
     if (showFilterDialog) {
-        FilterDialog(
+        EnhancedFilterDialog(
             sources = wallpaperSources,
             selectedSource = selectedSource,
             onSourceSelected = { source ->
@@ -136,11 +149,9 @@ fun SearchWallpapersScreen(
             .nestedScroll(nestedScrollConnection)
     ) {
         if (searchQuery.isBlank()) {
-            Text(
-                "Search from different sources.",
-                modifier = Modifier
-                    .align(Alignment.Center)
-                    .fillMaxSize()
+            EmptySearchState(
+                modifier = Modifier.align(Alignment.Center),
+                selectedSource = selectedSource
             )
         } else {
             WallpaperStaggeredGrid(
@@ -157,18 +168,15 @@ fun SearchWallpapersScreen(
             )
         }
 
-
         // --- Search Bar ---
         AnimatedVisibility(
             visible = isSearchBarVisible,
-            modifier = Modifier
-                .align(Alignment.TopCenter),
+            modifier = Modifier.align(Alignment.TopCenter),
             enter = fadeIn(),
             exit = fadeOut(),
         ) {
             SearchBar(
-                modifier = Modifier
-                    .semantics { traversalIndex = 0f },
+                modifier = Modifier.semantics { traversalIndex = 0f },
                 windowInsets = WindowInsets(0, 0, 0, 0),
                 tonalElevation = 0.dp,
                 inputField = {
@@ -185,12 +193,20 @@ fun SearchWallpapersScreen(
                         onExpandedChange = { expanded = it },
                         placeholder = { Text("Search Wallpapers") },
                         leadingIcon = {
-                            Icon(Icons.Default.Search, contentDescription = "Search Icon")
+                            Icon(
+                                Icons.Default.Search,
+                                contentDescription = "Search Icon",
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
                         },
                         trailingIcon = {
                             if (expanded && textFieldState.text.isNotEmpty()) {
                                 IconButton(onClick = { textFieldState.clearText() }) {
-                                    Icon(Icons.Default.Close, contentDescription = "Clear Search")
+                                    Icon(
+                                        Icons.Default.Close,
+                                        contentDescription = "Clear Search",
+                                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
                                 }
                             }
                         }
@@ -199,81 +215,220 @@ fun SearchWallpapersScreen(
                 expanded = expanded,
                 onExpandedChange = { expanded = it },
             ) {
-                // --- Search History and Suggestions ---
-                val currentQuery = textFieldState.text.toString()
-                val filteredHistory = remember(currentQuery, searchHistory) {
-                    if (currentQuery.isBlank()) searchHistory
-                    else searchHistory.filter { it.query.contains(currentQuery, ignoreCase = true) }
-                }
-
-                if (searchHistory.isNotEmpty()) {
-                    Box(modifier = Modifier.fillMaxWidth()) {
-                        TextButton(
-                            onClick = { searchViewModel.clearSearchHistory() },
-                            modifier = Modifier.align(Alignment.CenterEnd),
-                        ) {
-                            Text("Clear history")
-                        }
-                    }
-                }
-
-                LazyColumn(modifier = Modifier.fillMaxWidth()) {
-                    items(filteredHistory, key = { it.id }) { item ->
-                        ListItem(
-                            headlineContent = { Text(item.query) },
-                            leadingContent = { Icon(Icons.Filled.History, null) },
-                            trailingContent = {
-                                IconButton(onClick = { searchViewModel.deleteSearchItem(item) }) {
-                                    Icon(Icons.Default.Close, "Delete search entry")
-                                }
-                            },
-                            modifier = Modifier.clickable {
-                                textFieldState.edit {
-                                    replace(0, length, item.query)
-                                }
-                                searchViewModel.performSearch(item.query)
-                                expanded = false
-                            },
-                            colors = ListItemDefaults.colors(containerColor = Color.Transparent)
-                        )
-                    }
-
-                    if (currentQuery.isNotBlank() && filteredHistory.isEmpty()) {
-                        item {
-                            ListItem(
-                                headlineContent = { Text("Search for \"$currentQuery\"") },
-                                leadingContent = { Icon(Icons.Filled.Search, null) },
-                                modifier = Modifier.clickable {
-                                    searchViewModel.performSearch(currentQuery)
-                                    expanded = false
-                                },
-                                colors = ListItemDefaults.colors(containerColor = Color.Transparent)
-                            )
-                        }
-                    }
-                }
+                SearchContent(
+                    textFieldState = textFieldState,
+                    searchHistory = searchHistory,
+                    searchViewModel = searchViewModel,
+                    onSearchPerformed = { expanded = false }
+                )
             }
         }
 
         if (!expanded) {
-            FloatingActionButton(
+            AnimatedFloatingActionButton(
                 onClick = { showFilterDialog = true },
+                selectedSource = selectedSource,
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
                     .padding(16.dp)
+            )
+        }
+    }
+}
+
+@Composable
+private fun EmptySearchState(
+    modifier: Modifier = Modifier,
+    selectedSource: WallpaperSourceConfigItem?
+) {
+    Column(
+        modifier = modifier.padding(32.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Icon(
+            imageVector = Icons.Outlined.ImageSearch,
+            contentDescription = null,
+            modifier = Modifier.size(80.dp),
+            tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.6f)
+        )
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        Text(
+            text = "Search Wallpapers",
+            style = MaterialTheme.typography.headlineSmall,
+            color = MaterialTheme.colorScheme.onSurface,
+            textAlign = TextAlign.Center
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Text(
+            text = "Enter a keyword to discover amazing wallpapers from different sources",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center
+        )
+
+        if (selectedSource != null) {
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Surface(
+                color = MaterialTheme.colorScheme.secondaryContainer,
+                shape = MaterialTheme.shapes.small
             ) {
-                Icon(
-                    imageVector = Icons.Default.FilterList,
-                    contentDescription = "Filter sources"
+                Text(
+                    text = "Source: ${selectedSource.label}",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSecondaryContainer,
+                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
                 )
             }
         }
     }
 }
 
+@Composable
+private fun SearchContent(
+    textFieldState: TextFieldState,
+    searchHistory: List<SearchHistoryItem>,
+    searchViewModel: SearchWallpaperViewModel,
+    onSearchPerformed: () -> Unit
+) {
+    val currentQuery = textFieldState.text.toString()
+    val filteredHistory = remember(currentQuery, searchHistory) {
+        if (currentQuery.isBlank()) searchHistory
+        else searchHistory.filter { it.query.contains(currentQuery, ignoreCase = true) }
+    }
+
+    Column {
+        if (searchHistory.isNotEmpty()) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "Recent searches",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                TextButton(
+                    onClick = { searchViewModel.clearSearchHistory() }
+                ) {
+                    Text(
+                        "Clear all",
+                        style = MaterialTheme.typography.labelMedium
+                    )
+                }
+            }
+        }
+
+        LazyColumn(modifier = Modifier.fillMaxWidth()) {
+            items(filteredHistory, key = { it.id }) { item ->
+                ListItem(
+                    headlineContent = {
+                        Text(
+                            item.query,
+                            style = MaterialTheme.typography.bodyLarge
+                        )
+                    },
+                    leadingContent = {
+                        Icon(
+                            Icons.Filled.History,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    },
+                    trailingContent = {
+                        IconButton(onClick = { searchViewModel.deleteSearchItem(item) }) {
+                            Icon(
+                                Icons.Default.Close,
+                                contentDescription = "Delete search entry",
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    },
+                    modifier = Modifier.clickable {
+                        textFieldState.edit {
+                            replace(0, length, item.query)
+                        }
+                        searchViewModel.performSearch(item.query)
+                        onSearchPerformed()
+                    },
+                    colors = ListItemDefaults.colors(containerColor = Color.Transparent)
+                )
+            }
+
+            if (currentQuery.isNotBlank() && filteredHistory.isEmpty()) {
+                item {
+                    ListItem(
+                        headlineContent = {
+                            Text(
+                                "Search for \"$currentQuery\"",
+                                style = MaterialTheme.typography.bodyLarge
+                            )
+                        },
+                        leadingContent = {
+                            Icon(
+                                Icons.Filled.Search,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.primary
+                            )
+                        },
+                        modifier = Modifier.clickable {
+                            searchViewModel.performSearch(currentQuery)
+                            onSearchPerformed()
+                        },
+                        colors = ListItemDefaults.colors(containerColor = Color.Transparent)
+                    )
+                }
+            }
+        }
+    }
+}
 
 @Composable
-private fun FilterDialog(
+private fun AnimatedFloatingActionButton(
+    onClick: () -> Unit,
+    selectedSource: WallpaperSourceConfigItem?,
+    modifier: Modifier = Modifier
+) {
+    val rotation by animateFloatAsState(
+        targetValue = if (selectedSource != null) 0f else 360f,
+        label = "FAB rotation"
+    )
+
+    FloatingActionButton(
+        onClick = onClick,
+        modifier = modifier,
+        containerColor = MaterialTheme.colorScheme.primaryContainer,
+        contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+    ) {
+        BadgedBox(
+            badge = {
+                if (selectedSource != null) {
+                    Badge(
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        contentColor = MaterialTheme.colorScheme.onPrimary
+                    )
+                }
+            }
+        ) {
+            Icon(
+                imageVector = Icons.Default.FilterList,
+                contentDescription = "Filter sources",
+                modifier = Modifier.rotate(rotation)
+            )
+        }
+    }
+}
+
+@Composable
+private fun EnhancedFilterDialog(
     sources: List<WallpaperSourceConfigItem>,
     selectedSource: WallpaperSourceConfigItem?,
     onSourceSelected: (WallpaperSourceConfigItem) -> Unit,
@@ -281,28 +436,60 @@ private fun FilterDialog(
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Select a Source") },
+        icon = {
+            Icon(
+                imageVector = Icons.Default.FilterList,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary
+            )
+        },
+        title = {
+            Text(
+                "Select Source",
+                style = MaterialTheme.typography.headlineSmall
+            )
+        },
         text = {
-            LazyColumn {
-                if (sources.isEmpty()) {
-                    item(
-                        key = "empty",
-                    ) {
-                        Text("No sources available. Please add atleast one source")
-                    }
-                }
-                items(sources) { source ->
-                    ListItem(
-                        headlineContent = { Text(source.label) },
-                        leadingContent = {
-                            RadioButton(
-                                selected = selectedSource?.uniqueKey == source.uniqueKey,
-                                onClick = { onSourceSelected(source) }
+            if (sources.isEmpty()) {
+                EmptySourcesState()
+            } else {
+                LazyColumn(
+                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    items(sources) { source ->
+                        Card(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable { onSourceSelected(source) },
+                            colors = CardDefaults.cardColors(
+                                containerColor = if (selectedSource?.uniqueKey == source.uniqueKey)
+                                    MaterialTheme.colorScheme.primaryContainer
+                                else
+                                    MaterialTheme.colorScheme.surfaceContainerHighest
                             )
-                        },
-                        colors = ListItemDefaults.colors().copy(containerColor = Color.Transparent),
-                        modifier = Modifier.clickable { onSourceSelected(source) }
-                    )
+                        ) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(12.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                            ) {
+                                RadioButton(
+                                    selected = selectedSource?.uniqueKey == source.uniqueKey,
+                                    onClick = { onSourceSelected(source) }
+                                )
+                                Text(
+                                    text = source.label,
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    color = if (selectedSource?.uniqueKey == source.uniqueKey)
+                                        MaterialTheme.colorScheme.onPrimaryContainer
+                                    else
+                                        MaterialTheme.colorScheme.onSurface
+                                )
+                            }
+                        }
+                    }
                 }
             }
         },
@@ -310,6 +497,43 @@ private fun FilterDialog(
             TextButton(onClick = onDismiss) {
                 Text("Close")
             }
-        }
+        },
+        containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
     )
+}
+
+@Composable
+private fun EmptySourcesState() {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Icon(
+            imageVector = Icons.Default.FilterList,
+            contentDescription = null,
+            modifier = Modifier.size(48.dp),
+            tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Text(
+            text = "No Sources Available",
+            style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.onSurface,
+            textAlign = TextAlign.Center
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Text(
+            text = "Please configure at least one wallpaper source in settings",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center
+        )
+    }
 }
