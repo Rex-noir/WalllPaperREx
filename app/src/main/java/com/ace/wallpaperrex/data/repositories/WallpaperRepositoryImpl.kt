@@ -3,6 +3,7 @@ package com.ace.wallpaperrex.data.repositories
 import androidx.compose.ui.graphics.Color
 import androidx.core.graphics.toColorInt
 import com.ace.wallpaperrex.data.http.KtorClient
+import com.ace.wallpaperrex.data.models.SourceApiSafeMode
 import com.ace.wallpaperrex.data.models.WallpaperSourceConfigItem
 import com.ace.wallpaperrex.ui.models.ImageItem
 import com.ace.wallpaperrex.ui.models.Meta
@@ -48,17 +49,24 @@ class WallpaperRepositoryImpl(
             resultListPath = source.responseMapping.resultListPaths.searchPath
         ) {
             parameter(source.api.searchParam, query)
-            if (source.api.safeMode?.enabled ?: false) {
-                val safeModeApi = source.api.safeMode
-                val type = safeModeApi.type
-                if (type == "query") {
-                    parameter(safeModeApi.key, safeModeApi.value)
-                } else if (type == "header") {
-                    header(safeModeApi.key, safeModeApi.value)
-                }
-            }
         }
 
+    }
+
+    private fun HttpRequestBuilder.applySafeMode(safeMode: SourceApiSafeMode) {
+        if (!safeMode.enabled) return
+
+        when (safeMode.type.lowercase()) {
+            "query" -> {
+                url {
+                    parameters.append(safeMode.key, safeMode.value)
+                }
+            }
+
+            "header" -> {
+                headers.append(safeMode.key, safeMode.value)
+            }
+        }
     }
 
     private suspend fun makePaginatedRequest(
@@ -79,6 +87,9 @@ class WallpaperRepositoryImpl(
                 applyAuth()
                 parameter(source.api.pagination.pageParam, page)
                 source.api.pagination.perPageParam?.let { param -> parameter(param, pageSize) }
+                if (source.api.safeMode != null) {
+                    applySafeMode(source.api.safeMode)
+                }
                 requestOptions()
             }
             val body = response.body<String>()
