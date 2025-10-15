@@ -1,5 +1,6 @@
 package com.ace.wallpaperrex.ui.components.sources
 
+import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -21,6 +22,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -167,6 +169,11 @@ private fun SourceSelectorSection(
     val isCustomMode =
         source != AutoChangeWallpaperSetting.Source.FAVORITES
     var showSourcePicker by remember { mutableStateOf(false) }
+
+    LaunchedEffect(customSources, isCustomMode) {
+        showSourcePicker = customSources.isNotEmpty() && isCustomMode
+    }
+
 
     Column(
         modifier = Modifier
