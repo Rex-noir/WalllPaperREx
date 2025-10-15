@@ -8,7 +8,7 @@ import kotlinx.coroutines.flow.asStateFlow
 
 @Immutable
 data class GeneralSettingState(
-    val autoChangeWallpaper: Boolean = false,
+    val autoChangeWallpaper: Boolean = true,
     val autoChangeWallpaperInterval: Int = 15,
     val autoChangeWallpaperSource: GeneralSettingRepository.Companion.AutoChangeWallpaperSource = GeneralSettingRepository.Companion.AutoChangeWallpaperSource.FAVORITES,
     val autoChangeCustomSources: List<String> = emptyList(),

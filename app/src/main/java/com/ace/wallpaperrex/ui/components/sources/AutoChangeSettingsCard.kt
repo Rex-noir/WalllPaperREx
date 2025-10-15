@@ -204,7 +204,10 @@ private fun SourceSelectorSection(
                 )
                 Text(
                     text = if (isCustomMode) {
-                        "${customSources.size} sources selected"
+                        if (customSources.isEmpty())
+                            "Please select at least one source or wallpapers from favorites will be used automatically"
+                        else
+                            "${customSources.size} sources selected."
                     } else {
                         "Use wallpapers from your favorites"
                     },
