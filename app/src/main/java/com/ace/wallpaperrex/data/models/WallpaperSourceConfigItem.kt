@@ -13,7 +13,6 @@ data class WallpaperSourceConfigItem(
     val supportApiKey: Boolean = true,
     val requireApiKey: Boolean = false,
     @Transient val apiKey: String = "",
-    @Transient val isDefault: Boolean = false,
     val documentationUrl: String?,
     val api: SourceApi,
     val responseMapping: SourceResponseMapping
@@ -28,7 +27,8 @@ data class SourceApi(
     val endpoints: SourceEndpoints,
     val authentication: SourceAuthentication,
     val pagination: SourceApiPagination,
-    val searchParam: String
+    val searchParam: String,
+    val safeMode: SourceApiSafeMode? = null
 )
 
 @Serializable
@@ -37,6 +37,14 @@ data class SourceEndpoints(
     val detail: String? = null,
     val curated: String,
     val download: String? = null
+)
+
+@Serializable
+data class SourceApiSafeMode(
+    val param: String,
+    val type: String,
+    val valueType: String,
+    val enabled: Boolean = true
 )
 
 @Serializable

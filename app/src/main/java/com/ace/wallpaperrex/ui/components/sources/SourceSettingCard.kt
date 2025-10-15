@@ -3,14 +3,12 @@ package com.ace.wallpaperrex.ui.components.sources
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -27,7 +25,6 @@ import com.ace.wallpaperrex.data.models.WallpaperSourceConfigItem
 @Composable
 fun SourceSettingCard(
     source: WallpaperSourceConfigItem,
-    onSetAsDefault: () -> Unit, // Add a callback for the action
     modifier: Modifier = Modifier,
     content: @Composable ColumnScope.() -> Unit // Slot for custom body content
 ) {
@@ -44,25 +41,6 @@ fun SourceSettingCard(
                         style = MaterialTheme.typography.titleMedium
                     )
                 },
-                // Trailing content holds the action button or default indicator
-                trailingContent = {
-                    if (source.isDefault) {
-                        // Use a disabled button for a "chip"-like appearance. It's more prominent.
-                        TextButton(
-                            onClick = { },
-                            enabled = false,
-                            colors = ButtonDefaults.textButtonColors(
-                                disabledContentColor = MaterialTheme.colorScheme.onSurface
-                            )
-                        ) {
-                            Text(text = "Default")
-                        }
-                    } else {
-                        TextButton(onClick = onSetAsDefault, enabled = source.isConfigured) {
-                            Text(text = "Set as default")
-                        }
-                    }
-                }
             )
 
             // Custom content passed via the content lambda

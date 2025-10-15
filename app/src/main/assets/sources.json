@@ -25,6 +25,12 @@
         "searchParam": "q",
         "seed": {
           "param": "seed"
+        },
+        "safeMode": {
+          "type": "query",
+          "param": "purity",
+          "valueType": "boolean",
+          "enabled": true
         }
       },
       "responseMapping": {
@@ -126,7 +132,13 @@
           "pageParam": "page",
           "perPageParam": "per_page"
         },
-        "searchParam": "q"
+        "searchParam": "q",
+        "safeMode": {
+          "type": "query",
+          "param": "safesearch",
+          "valueType": "boolean",
+          "enabled": true
+        }
       },
       "responseMapping": {
         "resultListPaths": {

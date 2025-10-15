@@ -11,33 +11,41 @@ import kotlinx.coroutines.flow.map
 
 class WallpaperSourceRepository(
     private val sourceRepository: SourcesRepository,
-    private val userPreferencesRepository: UserPreferencesRepository
+    private val dataStoreRepository: DataStoreRepository
 ) {
 
     val wallpaperSources: Flow<List<WallpaperSourceConfigItem>> = combine(
         sourceRepository.sourcesConfig,
-        userPreferencesRepository.userPreferencesFlow
+        dataStoreRepository.wallpaperSourcesDataStore
     ) { configResult, prefs ->
         val config = configResult.getOrNull() ?: return@combine emptyList()
-        val defaultKey = prefs[UserPrefsKeys.DEFAULT_WALLPAPER_SOURCE_UNIQUE_KEY]
+
+
 
         config.sources.map { item ->
             val key = stringPreferencesKey(item.uniqueKey)
             val apiValue = prefs[key] ?: ""
+
+            val safeModeEnabled =
+                prefs[dataStoreRepository.getSafeModePrefsKey(uniqueKey = item.uniqueKey)]
             item.copy(
                 apiKey = apiValue,
-                isDefault = defaultKey == item.uniqueKey
+                api = item.api.copy(
+                    safeMode = item.api.safeMode?.copy(
+                        enabled = safeModeEnabled ?: item.api.safeMode.enabled
+                    )
+                )
             )
-        }.sortedByDescending { it.isDefault }
+        }
     }
 
     val sourceError = sourceRepository.sourcesConfig.map { it.exceptionOrNull() }
 
     val lastWallpaperSource: Flow<WallpaperSourceConfigItem?> = combine(
-        userPreferencesRepository.userPreferencesFlow,
+        dataStoreRepository.wallpaperSourcesDataStore,
         wallpaperSources
     ) { prefs, allSources ->
-        val lastSourceKey = prefs[UserPrefsKeys.LAST_WALLPAPER_SOURCE_UNIQUE_KEY]
+        val lastSourceKey = prefs[DataStoreKeys.LAST_WALLPAPER_SOURCE_UNIQUE_KEY]
         Log.d("WallpaperSourceRepository", "Last source key: $lastSourceKey")
         allSources.find { it.uniqueKey == lastSourceKey }
     }
@@ -45,17 +53,13 @@ class WallpaperSourceRepository(
     suspend fun getWallpaperSource(key: String): WallpaperSourceConfigItem? =
         wallpaperSources.first().find { it.uniqueKey == key }
 
-    suspend fun setDefaultWallpaperSource(item: WallpaperSourceConfigItem) {
-        userPreferencesRepository.setDefaultWallpaperSourceKey(item.uniqueKey)
-    }
-
     suspend fun setWallpaperApiKey(item: WallpaperSourceConfigItem, apiKey: String) {
         val key = stringPreferencesKey(item.uniqueKey)
-        userPreferencesRepository.setWallpaperApiKey(key, apiKey)
+        dataStoreRepository.setWallpaperApiKey(key, apiKey)
     }
 
     suspend fun setLastWallpaperSource(key: String) {
-        userPreferencesRepository.setLastWallpaperSourceKey(key)
+        dataStoreRepository.setLastWallpaperSourceKey(key)
     }
 
     suspend fun updateSourcesFromNetwork(url: String): Result<Unit> =

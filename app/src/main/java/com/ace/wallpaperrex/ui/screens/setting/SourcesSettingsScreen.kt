@@ -73,14 +73,8 @@ fun SourcesSettingsScreen(
                 SourceSettingCard(
                     source = sourceModel!!,
                     modifier = Modifier,
-                    onSetAsDefault = {
-                        scope.launch {
-                            wallpaperSourceRepository.setDefaultWallpaperSource(sourceItem)
-                        }
-                    }
                 ) {
                     if (sourceItem.supportApiKey) {
-
                         SourceApiKeySettingInput(sourceModel, onApiKeySave = { id, key ->
                             scope.launch {
                                 wallpaperSourceRepository.setWallpaperApiKey(sourceItem, key)
