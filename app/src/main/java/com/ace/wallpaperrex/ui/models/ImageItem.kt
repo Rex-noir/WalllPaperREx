@@ -12,35 +12,38 @@ data class ImageItem(
     val id: String,
     val thumbnail: String,
     val url: String,
-    val aspectRatio: Float = 0f,
     val description: String? = null,
     val extension: String,
     val sourceKey: String,
     val alt: String? = null,
     val uploader: String? = null,
     val uploaderUrl: String? = null,
-    val width: Int? = null,
-    val height: Int? = null,
+    val width: Int,
+    val height: Int,
     @Serializable(with = WallpaperHelper.ColorSerializer::class)
     val placeHolderColor: Color?
-)
+) : BaseImage {
+    override val aspectRatio: Float
+        get() = width.toFloat() / height.toFloat()
+}
 
 fun ImageItem.toEntity(localPath: String? = null): FavoriteImageEntity {
     return FavoriteImageEntity(
         id = id,
         thumbnail = thumbnail,
         url = url,
-        aspectRatio = aspectRatio,
         description = description,
         extension = extension,
         localPath = localPath,
         sourceKey = sourceKey,
         uploader = uploader,
         uploaderUrl = uploaderUrl,
-        alt = alt
+        alt = alt,
+        width = width,
+        height = height,
     );
 }
 
-interface ToImageItemMapper {
-    fun toImageItem(): ImageItem
+interface BaseImage {
+    val aspectRatio: Float
 }

@@ -21,6 +21,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 
@@ -51,11 +52,8 @@ class WallpaperDetailViewModel(
                     val favImage = favoriteImageRepository.getById(image.id)
                     _isFavorite.value = favImage != null
 
-
-                    val detailedImage = repository.getSingleImage(image.id)
-                    if (detailedImage.isSuccess) {
-                        _image.value = detailedImage.getOrThrow()
-                    }
+                    val detailedImage = repository.getSingleImage(image.id).getOrNull()
+                    _image.update { detailedImage }
                 }
             }
         }

@@ -13,7 +13,6 @@ data class FavoriteImageEntity(
     @PrimaryKey val id: String,
     val thumbnail: String,
     val url: String,
-    val aspectRatio: Float = 0f,
     val description: String? = null,
     val extension: String,
     val localPath: String? = null,
@@ -22,8 +21,8 @@ data class FavoriteImageEntity(
     val uploader: String?,
     val uploaderUrl: String?,
     val alt: String? = null,
-    val width: Int? = null,
-    val height: Int? = null
+    val width: Int,
+    val height: Int,
 )
 
 fun FavoriteImageEntity.toImageItem(): ImageItem {
@@ -31,13 +30,14 @@ fun FavoriteImageEntity.toImageItem(): ImageItem {
         id = id,
         thumbnail = thumbnail,
         url = localPath!!,
-        aspectRatio = aspectRatio,
         description = description,
         extension = extension,
         sourceKey = sourceKey,
         uploader = uploader,
         uploaderUrl = uploaderUrl,
         alt = alt,
-        placeHolderColor = null
+        placeHolderColor = null,
+        width = width,
+        height = height
     )
 }

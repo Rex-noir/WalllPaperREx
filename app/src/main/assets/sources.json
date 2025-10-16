@@ -34,9 +34,10 @@
         }
       },
       "responseMapping": {
-        "resultListPaths": {
+        "resultPaths": {
           "curatedPath": "data",
-          "searchPath": "data"
+          "searchPath": "data",
+          "detailPath": "data"
         },
         "pagination": {
           "source": "response",
@@ -84,7 +85,7 @@
         "searchParam": "query"
       },
       "responseMapping": {
-        "resultListPaths": {
+        "resultPaths": {
           "curatedPath": "photos",
           "searchPath": "photos"
         },
@@ -141,7 +142,7 @@
         }
       },
       "responseMapping": {
-        "resultListPaths": {
+        "resultPaths": {
           "curatedPath": "hits",
           "searchPath": "hits"
         },
@@ -190,7 +191,7 @@
         "searchParam": "query"
       },
       "responseMapping": {
-        "resultListPaths": {
+        "resultPaths": {
           "curatedPath": null,
           "searchPath": "results"
         },

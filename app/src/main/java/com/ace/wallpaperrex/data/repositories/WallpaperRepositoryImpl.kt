@@ -46,7 +46,7 @@ class WallpaperRepositoryImpl(
             endpoint,
             page,
             pageSize,
-            resultListPath = source.responseMapping.resultListPaths.searchPath
+            resultListPath = source.responseMapping.resultPaths.searchPath
         ) {
             parameter(source.api.searchParam, query)
         }
@@ -123,7 +123,7 @@ class WallpaperRepositoryImpl(
         return runCatching {
             val mapping = source.responseMapping
             val resultList = resultListPath?.let { jsonObject.extractJsonArray(it) }
-                ?: throw IllegalStateException("Results not found at path: ${mapping.resultListPaths}")
+                ?: throw IllegalStateException("Results not found at path: ${mapping.resultPaths}")
             val imageItems = resultList.map { parseImageItem(it.jsonObject) }
 
             var currentPage: Int? = null
@@ -181,30 +181,48 @@ class WallpaperRepositoryImpl(
         }
     }
 
-    private fun parseImageItem(jsonObject: JsonObject): ImageItem {
+    private fun parseImageItem(jsonObject: JsonObject, path: String? = null): ImageItem {
         val mapping = source.responseMapping.image
-        val width = jsonObject.extractInt(mapping.widthPath)
-            ?: throw IllegalStateException("Width not found at path: ${mapping.widthPath}")
-        val height = jsonObject.extractInt(mapping.heightPath)
-            ?: throw IllegalStateException("Height not found at path: ${mapping.heightPath}")
+
+        fun resolve(fullPath: String): String {
+            return if (path != null) "$path.$fullPath" else fullPath
+        }
+
+        val width = jsonObject.extractInt(resolve(mapping.widthPath))
+        val height = jsonObject.extractInt(resolve(mapping.heightPath))
 
         return ImageItem(
-            id = jsonObject.extractString(mapping.idPath)
-                ?: throw IllegalStateException("ID not found at path: ${mapping.idPath}"),
-            url = jsonObject.extractString(mapping.imageUrlPath)
-                ?: throw IllegalStateException("Image URL not found at path: ${mapping.imageUrlPath}"),
-            thumbnail = jsonObject.extractString(mapping.thumbnailUrlPath)
-                ?: throw IllegalStateException("Thumbnail URL not found at path: ${mapping.thumbnailUrlPath}"),
-            uploader = mapping.uploaderPath?.let { jsonObject.extractString(it) },
-            uploaderUrl = mapping.uploaderUrlPath?.let { jsonObject.extractString(it) },
+            id = jsonObject.extractString(resolve(mapping.idPath))
+                ?: throw IllegalStateException("ID not found at path: ${resolve(mapping.idPath)}"),
+
+            url = jsonObject.extractString(resolve(mapping.imageUrlPath))
+                ?: throw IllegalStateException("Image URL not found at path: ${resolve(mapping.imageUrlPath)}"),
+
+            thumbnail = jsonObject.extractString(resolve(mapping.thumbnailUrlPath))
+                ?: throw IllegalStateException("Thumbnail URL not found at path: ${resolve(mapping.thumbnailUrlPath)}"),
+
+            uploader = mapping.uploaderPath?.let { jsonObject.extractString(resolve(it)) },
+
+            uploaderUrl = mapping.uploaderUrlPath?.let { jsonObject.extractString(resolve(it)) },
+
             extension = "webp",
             sourceKey = source.uniqueKey,
-            alt = mapping.altPath?.let { jsonObject.extractString(it) },
-            width = mapping.widthPath.let { jsonObject.extractInt(it) },
-            height = mapping.heightPath.let { jsonObject.extractInt(it) },
-            aspectRatio = width.toFloat() / height.toFloat(),
-            placeHolderColor = mapping.placeholderColorPath?.let {
-                when (val colorElement = jsonObject.extractValue(it)) {
+
+            alt = mapping.altPath?.let { jsonObject.extractString(resolve(it)) },
+
+            width = width
+                ?: throw IllegalStateException("Width not found at path: ${resolve(mapping.widthPath)}"),
+
+            height = height ?: throw IllegalStateException(
+                "Height not found at path: ${
+                    resolve(
+                        mapping.heightPath
+                    )
+                }"
+            ),
+
+            placeHolderColor = mapping.placeholderColorPath?.let { rawPath ->
+                when (val colorElement = jsonObject.extractValue(resolve(rawPath))) {
                     is JsonPrimitive -> {
                         colorElement.contentOrNull?.runCatching {
                             Color(this.toColorInt())
@@ -212,14 +230,13 @@ class WallpaperRepositoryImpl(
                     }
 
                     is JsonArray -> {
-                        val colorStrings: List<String> =
-                            colorElement.mapNotNull { value -> value.jsonPrimitive.contentOrNull }
+                        val colorStrings = colorElement.mapNotNull { value ->
+                            value.jsonPrimitive.contentOrNull
+                        }
 
                         if (colorStrings.isNotEmpty()) {
                             WallpaperHelper.calculateAverageColor(colorStrings)
-                        } else {
-                            null
-                        }
+                        } else null
                     }
 
                     else -> null
@@ -227,6 +244,7 @@ class WallpaperRepositoryImpl(
             }
         )
     }
+
 
     override suspend fun getImages(
         page: Int,
@@ -238,7 +256,7 @@ class WallpaperRepositoryImpl(
             endpoint,
             page,
             pageSize,
-            resultListPath = source.responseMapping.resultListPaths.curatedPath
+            resultListPath = source.responseMapping.resultPaths.curatedPath
         ) {
             //
         }
@@ -264,7 +282,12 @@ class WallpaperRepositoryImpl(
             }.body()
 
             val jsonObject = jsonParser.parseToJsonElement(response).jsonObject
-            Result.success(parseImageItem(jsonObject))
+            Result.success(
+                parseImageItem(
+                    jsonObject,
+                    path = source.responseMapping.resultPaths.detailPath
+                )
+            )
         } catch (e: Exception) {
             Result.failure(mapToUserFriendlyException(e))
         }

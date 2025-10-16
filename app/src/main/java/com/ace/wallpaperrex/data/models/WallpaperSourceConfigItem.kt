@@ -62,7 +62,7 @@ data class SourceApiPagination(
 
 @Serializable
 data class SourceResponseMapping(
-    val resultListPaths: SourceResponseMappingResultList,
+    val resultPaths: SourceResponseMappingResultList,
     val pagination: SourceResponsePagination,
     val image: SourceResponseImageMapping
 )
@@ -70,7 +70,8 @@ data class SourceResponseMapping(
 @Serializable
 data class SourceResponseMappingResultList(
     val curatedPath: String? = null,
-    val searchPath: String? = null
+    val searchPath: String? = null,
+    val detailPath: String? = null
 )
 
 @Serializable
