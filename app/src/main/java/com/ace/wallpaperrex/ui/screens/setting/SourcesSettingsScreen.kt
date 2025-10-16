@@ -269,13 +269,13 @@ private fun ApiKeySection(
             exit = fadeOut() + shrinkVertically()
         ) {
             Surface(
-                color = MaterialTheme.colorScheme.errorContainer,
+                color = MaterialTheme.colorScheme.secondaryContainer,
                 shape = MaterialTheme.shapes.small
             ) {
                 Text(
                     text = "⚠️ API Key is required for this source",
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onErrorContainer,
+                    color = MaterialTheme.colorScheme.onSecondaryContainer,
                     modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)
                 )
             }
