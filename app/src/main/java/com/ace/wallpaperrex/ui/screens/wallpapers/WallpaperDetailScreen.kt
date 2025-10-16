@@ -3,7 +3,6 @@ package com.ace.wallpaperrex.ui.screens.wallpapers
 import Picture
 import android.graphics.Bitmap
 import android.graphics.drawable.BitmapDrawable
-import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
@@ -105,8 +104,8 @@ fun WallpaperDetailScreen(
     val scope = rememberCoroutineScope()
     var containerSize by remember { mutableStateOf(IntSize.Zero) }
     // Pan state
-    var panOffset by remember { mutableStateOf(Offset.Zero) }
-    var scale by remember { mutableFloatStateOf(1f) }
+    val panOffset by viewModel.panOffset.collectAsStateWithLifecycle()
+    val scale by viewModel.scale.collectAsStateWithLifecycle()
     var maxPanX by remember { mutableFloatStateOf(0f) }
     var maxPanY by remember { mutableFloatStateOf(0f) }
 
@@ -121,7 +120,7 @@ fun WallpaperDetailScreen(
             val containerAspect = containerWidth / containerHeight
 
             // Calculate scale to fill screen
-            scale = if (bitmapAspect > containerAspect) {
+            val scale = if (bitmapAspect > containerAspect) {
                 containerHeight / bitmapHeight
             } else {
                 containerWidth / bitmapWidth
@@ -134,8 +133,7 @@ fun WallpaperDetailScreen(
             maxPanX = ((scaledWidth - containerWidth) / 2f).coerceAtLeast(0f)
             maxPanY = ((scaledHeight - containerHeight) / 2f).coerceAtLeast(0f)
 
-            // Reset pan to center
-            panOffset = Offset.Zero
+            viewModel.updateScale(scale)
         }
     }
 
@@ -241,9 +239,11 @@ fun WallpaperDetailScreen(
                             detectDragGestures { change, dragAmount ->
                                 change.consume()
                                 val newOffset = panOffset + dragAmount
-                                panOffset = Offset(
-                                    x = newOffset.x.coerceIn(-maxPanX, maxPanX),
-                                    y = newOffset.y.coerceIn(-maxPanY, maxPanY)
+                                viewModel.updatePanOffset(
+                                    Offset(
+                                        x = newOffset.x.coerceIn(-maxPanX, maxPanX),
+                                        y = newOffset.y.coerceIn(-maxPanY, maxPanY)
+                                    )
                                 )
                             }
                         }
@@ -280,9 +280,11 @@ fun WallpaperDetailScreen(
                                     detectDragGestures { change, dragAmount ->
                                         change.consume()
                                         val newOffset = panOffset + dragAmount
-                                        panOffset = Offset(
-                                            x = newOffset.x.coerceIn(-maxPanX, maxPanX),
-                                            y = newOffset.y.coerceIn(-maxPanY, maxPanY)
+                                        viewModel.updatePanOffset(
+                                            Offset(
+                                                x = newOffset.x.coerceIn(-maxPanX, maxPanX),
+                                                y = newOffset.y.coerceIn(-maxPanY, maxPanY)
+                                            )
                                         )
                                     }
                                 }
@@ -298,9 +300,7 @@ fun WallpaperDetailScreen(
                     },
                 )
 
-                val image = imageItem!!
-                Log.d("WallpaperDetailScreen", "image: $image")
-                if (image.uploader != null) {
+                imageItem?.uploader?.let {
                     AnimatedVisibility(
                         visible = imageBitmap != null,
                         enter = fadeIn() + expandVertically(),
@@ -308,8 +308,8 @@ fun WallpaperDetailScreen(
                         modifier = Modifier.align(Alignment.BottomCenter)
                     ) {
                         CreditBar(
-                            uploaderName = image.uploader,
-                            uploaderUrl = image.uploaderUrl,
+                            uploaderName = imageItem!!.uploader!!,
+                            uploaderUrl = imageItem!!.uploaderUrl,
                             modifier = Modifier.fillMaxWidth()
                         )
                     }

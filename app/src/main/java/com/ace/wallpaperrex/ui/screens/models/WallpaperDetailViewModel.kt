@@ -3,6 +3,7 @@ package com.ace.wallpaperrex.ui.screens.models
 import android.content.Context
 import android.graphics.Bitmap
 import android.util.Log
+import androidx.compose.ui.geometry.Offset
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
@@ -40,6 +41,20 @@ class WallpaperDetailViewModel(
 
     private val _isSavingAsFavorite = MutableStateFlow(false)
     val isSavingAsFavorite: StateFlow<Boolean> = _isSavingAsFavorite.asStateFlow()
+
+    private val _panOffset = MutableStateFlow(Offset.Zero)
+    val panOffset = _panOffset.asStateFlow()
+
+    private val _scale = MutableStateFlow(1f)
+    val scale = _scale.asStateFlow()
+
+    fun updatePanOffset(offset: Offset) {
+        _panOffset.value = offset
+    }
+
+    fun updateScale(scale: Float) {
+        _scale.value = scale
+    }
 
     private lateinit var repository: WallpaperRepository
 
