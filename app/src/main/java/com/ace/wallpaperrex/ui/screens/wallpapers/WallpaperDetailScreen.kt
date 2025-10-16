@@ -268,33 +268,9 @@ fun WallpaperDetailScreen(
                         Picture(
                             model = imageItem!!.thumbnail,
                             shape = RectangleShape,
-                            contentScale = ContentScale.FillHeight,
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .then(
-                                    if (imageItem != null && imageItem?.placeHolderColor != null) Modifier.background(
-                                        imageItem!!.placeHolderColor!!
-                                    ) else Modifier
-                                )
-                                .pointerInput(Unit) {
-                                    detectDragGestures { change, dragAmount ->
-                                        change.consume()
-                                        val newOffset = panOffset + dragAmount
-                                        viewModel.updatePanOffset(
-                                            Offset(
-                                                x = newOffset.x.coerceIn(-maxPanX, maxPanX),
-                                                y = newOffset.y.coerceIn(-maxPanY, maxPanY)
-                                            )
-                                        )
-                                    }
-                                }
-                                .graphicsLayer {
-                                    scaleX = scale
-                                    scaleY = scale
-                                    translationX = panOffset.x
-                                    translationY = panOffset.y
-                                },
+                            contentScale = ContentScale.Crop,
                             shimmerEnabled = true,
+                            allowHardware = false,
                             crossfadeEnabled = false,
                         )
                     },
