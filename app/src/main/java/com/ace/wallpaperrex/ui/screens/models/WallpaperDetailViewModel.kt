@@ -28,7 +28,7 @@ import kotlinx.coroutines.launch
 class WallpaperDetailViewModel(
     private val favoriteImageRepository: FavoriteImageRepository,
     private val image: ImageItem?,
-    private val source: WallpaperSourceConfigItem?,
+    source: WallpaperSourceConfigItem?,
 ) : ViewModel() {
 
     private val _image =
@@ -44,7 +44,7 @@ class WallpaperDetailViewModel(
     private lateinit var repository: WallpaperRepository
 
     init {
-        if (source != null) {
+        if (source != null && source.api.endpoints.detail != null) {
             repository = WallpaperRepositoryImpl(source)
 
             if (image != null && image.uploader == null && image.uploaderUrl == null) {
