@@ -366,6 +366,7 @@ fun HomeLayout(
                         factory = GeneralSettingViewModel.factory(
                             wallpaperSourceRepository = sourceRepository,
                             generalSettingsRepository = GeneralSettingsRepository(
+                                context = context,
                                 dataStoreRepository,
                                 wallpaperSourceRepository = sourceRepository
                             )

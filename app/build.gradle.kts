@@ -99,6 +99,8 @@ dependencies {
 
     debugImplementation(libs.androidx.ui.tooling)
 
+    implementation(libs.androidx.work.runtime.ktx)
+
     implementation(libs.androidx.navigation.compose)
 
 //    // Optional integrations

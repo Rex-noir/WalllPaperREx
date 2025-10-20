@@ -1,8 +1,15 @@
 package com.ace.wallpaperrex.data.repositories
 
+import android.content.Context
+import androidx.work.ExistingPeriodicWorkPolicy
+import androidx.work.PeriodicWorkRequestBuilder
+import androidx.work.WorkManager
+import com.ace.wallpaperrex.data.workers.WallpaperChangeWorker
 import com.ace.wallpaperrex.ui.screens.models.AutoChangeWallpaperSetting
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
+import java.util.concurrent.TimeUnit
 
 interface AutoChangeWallpaperSettingMethods {
     suspend fun updateAutoChangeWallpaperEnabled(enabled: Boolean): Unit
@@ -11,10 +18,16 @@ interface AutoChangeWallpaperSettingMethods {
     suspend fun updateAutoChangeWallpaperCustomSources(sources: String): Unit
 }
 
+object GeneralSettingsConstants {
+    const val AUTO_CHANGE_WORK_MANAGER_TAG = "auto_change_wallpaper"
+}
+
 class GeneralSettingsRepository(
+    val context: Context,
     val dataStoreRepository: DataStoreRepository,
     val wallpaperSourceRepository: WallpaperSourceRepository
 ) : AutoChangeWallpaperSettingMethods {
+
     val autoChangeWallpaperSetting: Flow<AutoChangeWallpaperSetting> = combine(
         wallpaperSourceRepository.wallpaperSources,
         dataStoreRepository.autoChangeWallpaperDataStore
@@ -45,6 +58,21 @@ class GeneralSettingsRepository(
 
     override suspend fun updateAutoChangeWallpaperEnabled(enabled: Boolean) {
         dataStoreRepository.updateAutoChangeWallpaperEnabled(enabled)
+        val latestConfig = autoChangeWallpaperSetting.first()
+        val workManager = WorkManager.getInstance(context)
+        workManager.cancelUniqueWork(GeneralSettingsConstants.AUTO_CHANGE_WORK_MANAGER_TAG)
+        if (enabled) {
+            val workRequest = PeriodicWorkRequestBuilder<WallpaperChangeWorker>(
+                repeatInterval = latestConfig.interval.toLong().coerceAtLeast(15),
+                TimeUnit.MINUTES
+            ).build()
+            workManager.enqueueUniquePeriodicWork(
+                GeneralSettingsConstants.AUTO_CHANGE_WORK_MANAGER_TAG,
+                ExistingPeriodicWorkPolicy.REPLACE,
+                workRequest
+            )
+        }
+
     }
 
     override suspend fun updateAutoChangeWallpaperInterval(interval: Int) {
