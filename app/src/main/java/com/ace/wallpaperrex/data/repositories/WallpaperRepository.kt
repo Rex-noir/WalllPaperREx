@@ -41,5 +41,6 @@ interface WallpaperRepository {
     }
 
     suspend fun hitDownloadEndpoint(image: ImageItem): Result<Unit>
+    suspend fun getRandomWallpaper(): Result<ImageItem>
 
 }

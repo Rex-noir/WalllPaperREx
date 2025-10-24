@@ -28,7 +28,14 @@ data class SourceApi(
     val authentication: SourceAuthentication,
     val pagination: SourceApiPagination,
     val searchParam: String,
-    val safeMode: SourceApiSafeMode? = null
+    val safeMode: SourceApiSafeMode? = null,
+    val seed: SourceApiSeed? = null
+)
+
+@Serializable
+data class SourceApiSeed(
+    val param: String,
+    val value: String
 )
 
 @Serializable

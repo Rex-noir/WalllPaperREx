@@ -24,7 +24,8 @@
         },
         "searchParam": "q",
         "seed": {
-          "param": "seed"
+          "param": "seed",
+          "value": "zQ1wXm"
         },
         "safeMode": {
           "type": "query",

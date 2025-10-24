@@ -315,6 +315,36 @@ class WallpaperRepositoryImpl(
         }
     }
 
+    override suspend fun getRandomWallpaper(): Result<ImageItem> {
+        val api = source.api;
+        if (api.seed != null) {
+            val response = makePaginatedRequest(
+                api.endpoints.curated,
+                page = 1,
+                pageSize = 2,
+                resultListPath = source.responseMapping.resultPaths.curatedPath
+            ) {
+                parameter(api.seed.param, api.seed.value)
+            }
+            val images = response.getOrThrow();
+            if (images.data.isNotEmpty()) {
+                return Result.success(images.data.random())
+            }
+        }
+        val response = makePaginatedRequest(
+            api.endpoints.curated,
+            page = 1,
+            pageSize = 2,
+            resultListPath = source.responseMapping.resultPaths.curatedPath
+        ) {}
+        val images = response.getOrThrow();
+        if (images.data.isNotEmpty()) {
+            return Result.success(images.data.random())
+        }
+        return Result.failure(Exception("No images found"))
+
+    }
+
     private fun JsonElement.extractValue(path: String): JsonElement? {
         val parts = path.split('.')
         var current: JsonElement? = this
