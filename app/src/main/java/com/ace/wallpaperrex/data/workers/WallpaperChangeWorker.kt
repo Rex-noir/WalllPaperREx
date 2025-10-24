@@ -1,6 +1,7 @@
 package com.ace.wallpaperrex.data.workers
 
 import android.content.Context
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import com.ace.wallpaperrex.data.database.AppDatabase
@@ -30,7 +31,7 @@ class WallpaperChangeWorker(
     private val generalSettingsRepository = GeneralSettingsRepository(
         context = context,
         dataStoreRepository = dataStoreRepository,
-        wallpaperSourceRepository = wallpaperSourceRepository
+        wallpaperSourceRepository = wallpaperSourceRepository,
     )
     private val favoriteImageRepository =
         FavoriteImageRepository(dao = AppDatabase.getDatabase(context).favoriteImageDao())

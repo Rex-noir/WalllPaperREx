@@ -20,6 +20,12 @@ class GeneralSettingViewModel(
     val autoChangeSetting =
         generalSettingsRepository.autoChangeWallpaperSetting
 
+    init {
+        viewModelScope.launch {
+            generalSettingsRepository.observeSettingsForWorker(viewModelScope)
+        }
+    }
+
     fun updateAutoChangeWallpaperEnabled(enabled: Boolean) {
         viewModelScope.launch {
             generalSettingsRepository.updateAutoChangeWallpaperEnabled(enabled)

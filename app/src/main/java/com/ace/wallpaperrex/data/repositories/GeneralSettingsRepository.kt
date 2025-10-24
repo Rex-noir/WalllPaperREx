@@ -6,9 +6,10 @@ import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import com.ace.wallpaperrex.data.workers.WallpaperChangeWorker
 import com.ace.wallpaperrex.ui.screens.models.AutoChangeWallpaperSetting
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import java.util.concurrent.TimeUnit
 
 interface AutoChangeWallpaperSettingMethods {
@@ -25,7 +26,7 @@ object GeneralSettingsConstants {
 class GeneralSettingsRepository(
     val context: Context,
     val dataStoreRepository: DataStoreRepository,
-    val wallpaperSourceRepository: WallpaperSourceRepository
+    val wallpaperSourceRepository: WallpaperSourceRepository,
 ) : AutoChangeWallpaperSettingMethods {
 
     val autoChangeWallpaperSetting: Flow<AutoChangeWallpaperSetting> = combine(
@@ -56,23 +57,30 @@ class GeneralSettingsRepository(
         )
     }
 
+    suspend fun observeSettingsForWorker(scope: CoroutineScope) {
+        scope.launch {
+            autoChangeWallpaperSetting.collect { settings ->
+                val workManager = WorkManager.getInstance(context)
+                if (settings.enabled) {
+                    val workRequest = PeriodicWorkRequestBuilder<WallpaperChangeWorker>(
+                        repeatInterval = settings.interval.toLong().coerceAtLeast(15),
+                        TimeUnit.MINUTES
+                    ).build()
+
+                    workManager.enqueueUniquePeriodicWork(
+                        GeneralSettingsConstants.AUTO_CHANGE_WORK_MANAGER_TAG,
+                        ExistingPeriodicWorkPolicy.REPLACE,
+                        workRequest
+                    )
+                } else {
+                    workManager.cancelUniqueWork(GeneralSettingsConstants.AUTO_CHANGE_WORK_MANAGER_TAG)
+                }
+            }
+        }
+    }
+
     override suspend fun updateAutoChangeWallpaperEnabled(enabled: Boolean) {
         dataStoreRepository.updateAutoChangeWallpaperEnabled(enabled)
-        val latestConfig = autoChangeWallpaperSetting.first()
-        val workManager = WorkManager.getInstance(context)
-        workManager.cancelUniqueWork(GeneralSettingsConstants.AUTO_CHANGE_WORK_MANAGER_TAG)
-        if (enabled) {
-            val workRequest = PeriodicWorkRequestBuilder<WallpaperChangeWorker>(
-                repeatInterval = latestConfig.interval.toLong().coerceAtLeast(15),
-                TimeUnit.MINUTES
-            ).build()
-            workManager.enqueueUniquePeriodicWork(
-                GeneralSettingsConstants.AUTO_CHANGE_WORK_MANAGER_TAG,
-                ExistingPeriodicWorkPolicy.REPLACE,
-                workRequest
-            )
-        }
-
     }
 
     override suspend fun updateAutoChangeWallpaperInterval(interval: Int) {
@@ -86,6 +94,4 @@ class GeneralSettingsRepository(
     override suspend fun updateAutoChangeWallpaperCustomSources(sources: String) {
         dataStoreRepository.updateAutoChangeWallpaperCustomSources(sources)
     }
-
-
 }
