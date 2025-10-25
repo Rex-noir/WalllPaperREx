@@ -1,9 +1,13 @@
 package com.ace.wallpaperrex.data.workers
 
 import android.content.Context
+import android.util.Log
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.core.app.NotificationCompat
 import androidx.work.CoroutineWorker
+import androidx.work.ForegroundInfo
 import androidx.work.WorkerParameters
+import com.ace.wallpaperrex.R
 import com.ace.wallpaperrex.data.database.AppDatabase
 import com.ace.wallpaperrex.data.repositories.DataStoreRepository
 import com.ace.wallpaperrex.data.repositories.FavoriteImageRepository
@@ -41,6 +45,7 @@ class WallpaperChangeWorker(
             val latestConfig = generalSettingsRepository.autoChangeWallpaperSetting.first()
 
             val target = WallpaperHelper.ScreenTarget.BOTH;
+            Log.d("WallpaperChangeWorker", "doWork: $latestConfig")
             if (!latestConfig.enabled) return Result.success()
 
             if (latestConfig.source == AutoChangeWallpaperSetting.Source.FAVORITES) {

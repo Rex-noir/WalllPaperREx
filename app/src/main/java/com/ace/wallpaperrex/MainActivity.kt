@@ -1,5 +1,9 @@
 package com.ace.wallpaperrex
 
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.content.Context
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -55,7 +59,7 @@ class MainActivity : ComponentActivity() {
                     composable<AppRoute.HomeRoute> {
                         HomeLayout(
                             modifier = Modifier.fillMaxSize(),
-                            onWallpaperClick = { imageItem , source ->
+                            onWallpaperClick = { imageItem, source ->
                                 sharedViewModel.setSelectedImage(imageItem, source)
                                 appNavController.navigate(AppRoute.WallpaperDetailRoute(imageItem.id))
                             },
