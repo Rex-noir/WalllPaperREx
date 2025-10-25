@@ -10,6 +10,7 @@ import com.ace.wallpaperrex.ui.screens.models.AutoChangeWallpaperSetting
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 import java.util.concurrent.TimeUnit
 
@@ -66,23 +67,25 @@ class GeneralSettingsRepository(
 
     suspend fun observeSettingsForWorker(scope: CoroutineScope) {
         scope.launch {
-            autoChangeWallpaperSetting.collect { settings ->
-                val workManager = WorkManager.getInstance(context)
-                if (settings.enabled) {
-                    val workRequest = PeriodicWorkRequestBuilder<WallpaperChangeWorker>(
-                        repeatInterval = settings.interval.toLong().coerceAtLeast(15),
-                        TimeUnit.MINUTES
-                    ).build()
+            autoChangeWallpaperSetting
+                .distinctUntilChanged() // Only emit when settings actually change
+                .collect { settings ->
+                    val workManager = WorkManager.getInstance(context)
+                    if (settings.enabled) {
+                        val workRequest = PeriodicWorkRequestBuilder<WallpaperChangeWorker>(
+                            repeatInterval = settings.interval.toLong().coerceAtLeast(15),
+                            TimeUnit.MINUTES
+                        ).build()
 
-                    workManager.enqueueUniquePeriodicWork(
-                        GeneralSettingsConstants.AUTO_CHANGE_WORK_MANAGER_TAG,
-                        ExistingPeriodicWorkPolicy.REPLACE,
-                        workRequest
-                    )
-                } else {
-                    workManager.cancelUniqueWork(GeneralSettingsConstants.AUTO_CHANGE_WORK_MANAGER_TAG)
+                        workManager.enqueueUniquePeriodicWork(
+                            GeneralSettingsConstants.AUTO_CHANGE_WORK_MANAGER_TAG,
+                            ExistingPeriodicWorkPolicy.REPLACE,
+                            workRequest
+                        )
+                    } else {
+                        workManager.cancelUniqueWork(GeneralSettingsConstants.AUTO_CHANGE_WORK_MANAGER_TAG)
+                    }
                 }
-            }
         }
     }
 
