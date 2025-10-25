@@ -79,7 +79,7 @@ class GeneralSettingsRepository(
 
                         workManager.enqueueUniquePeriodicWork(
                             GeneralSettingsConstants.AUTO_CHANGE_WORK_MANAGER_TAG,
-                            ExistingPeriodicWorkPolicy.REPLACE,
+                            ExistingPeriodicWorkPolicy.UPDATE,
                             workRequest
                         )
                     } else {
