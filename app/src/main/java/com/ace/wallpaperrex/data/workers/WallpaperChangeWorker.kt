@@ -26,22 +26,28 @@ class WallpaperChangeWorker(
     params: WorkerParameters
 ) : CoroutineWorker(context, params) {
 
-    private val dataStoreRepository = DataStoreRepository(context = applicationContext)
-    private val sourceRepository = SourcesRepositoryImpl(context = applicationContext)
-    private val wallpaperSourceRepository = WallpaperSourceRepository(
-        sourceRepository = sourceRepository,
-        dataStoreRepository = dataStoreRepository
-    )
-    private val generalSettingsRepository = GeneralSettingsRepository(
-        context = context,
-        dataStoreRepository = dataStoreRepository,
-        wallpaperSourceRepository = wallpaperSourceRepository,
-    )
-    private val favoriteImageRepository =
-        FavoriteImageRepository(dao = AppDatabase.getDatabase(context).favoriteImageDao())
-
     override suspend fun doWork(): Result {
         try {
+
+            val dataStoreRepository = DataStoreRepository(context = applicationContext)
+            val sourceRepository = SourcesRepositoryImpl(context = applicationContext)
+            sourceRepository.triggerInitialLoadI()
+            val wallpaperSourceRepository = WallpaperSourceRepository(
+                sourceRepository = sourceRepository,
+                dataStoreRepository = dataStoreRepository
+            )
+            val generalSettingsRepository = GeneralSettingsRepository(
+                context = applicationContext,
+                dataStoreRepository = dataStoreRepository,
+                wallpaperSourceRepository = wallpaperSourceRepository,
+            )
+            val favoriteImageRepository =
+                FavoriteImageRepository(
+                    dao = AppDatabase.getDatabase(applicationContext).favoriteImageDao()
+                )
+
+            val wallpaperSources = wallpaperSourceRepository.wallpaperSources.first()
+            Log.d("WallpaperChangeWorker", "walllpaperSources with first: $wallpaperSources")
             val latestConfig = generalSettingsRepository.autoChangeWallpaperSetting.first()
 
             val target = WallpaperHelper.ScreenTarget.BOTH;

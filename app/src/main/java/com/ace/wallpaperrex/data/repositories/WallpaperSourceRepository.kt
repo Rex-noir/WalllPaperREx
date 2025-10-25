@@ -18,9 +18,10 @@ class WallpaperSourceRepository(
         sourceRepository.sourcesConfig,
         dataStoreRepository.wallpaperSourcesDataStore
     ) { configResult, prefs ->
-        val config = configResult.getOrNull() ?: return@combine emptyList()
+        Log.d("WallpaperSourceRepository", "Sources config result: $configResult")
+        val config = configResult.getOrThrow() ?: return@combine emptyList()
 
-
+        Log.d("WallpaperSourceRepository", "Sources config: $config")
 
         config.sources.map { item ->
             val key = stringPreferencesKey(item.uniqueKey)

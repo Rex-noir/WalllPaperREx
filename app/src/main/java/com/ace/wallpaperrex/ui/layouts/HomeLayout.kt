@@ -182,6 +182,7 @@ fun HomeLayout(
     val sourceError by sourceRepository.sourceError.collectAsState(initial = null)
     var isLoading by remember { mutableStateOf(true) }
     LaunchedEffect(Unit) {
+        sourcesRepository.triggerInitialLoadI()
         sourceRepository.initialize()
         isLoading = false
     }

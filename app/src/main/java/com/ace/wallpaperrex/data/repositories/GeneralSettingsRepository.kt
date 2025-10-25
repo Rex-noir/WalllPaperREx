@@ -1,6 +1,7 @@
 package com.ace.wallpaperrex.data.repositories
 
 import android.content.Context
+import android.util.Log
 import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
@@ -41,6 +42,12 @@ class GeneralSettingsRepository(
 
         val isEnabled = prefs[DataStoreKeys.AUTO_CHANGE_WALLPAPER_ENABLED_KEY] ?: false
         val interval = prefs[DataStoreKeys.AUTO_CHANGE_WALLPAPER_INTERVAL_KEY] ?: 15
+        Log.d("GeneralSettingsRepository", "customSources $customSources");
+        Log.d(
+            "Raw Custom Sources",
+            prefs[DataStoreKeys.AUTO_CHANGE_WALLPAPER_CUSTOM_SOURCES].toString()
+        )
+        Log.d("WallpaperSources", wallpaperSources.toString())
         val sourceParsed =
             AutoChangeWallpaperSetting.Source.fromKey(prefs[DataStoreKeys.AUTO_CHANGE_WALLPAPER_SOURCE])
         val source =
