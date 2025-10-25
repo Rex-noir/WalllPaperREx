@@ -171,7 +171,7 @@ fun HomeLayout(
     val scope = rememberCoroutineScope()
 
     val dataStoreRepository = DataStoreRepository(context)
-    val sourcesRepository = SourcesRepositoryImpl(context)
+    val sourcesRepository = remember { SourcesRepositoryImpl(context) }
     val sourceRepository = remember {
         WallpaperSourceRepository(
             sourceRepository = sourcesRepository,

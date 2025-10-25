@@ -19,7 +19,7 @@ class WallpaperSourceRepository(
         dataStoreRepository.wallpaperSourcesDataStore
     ) { configResult, prefs ->
         Log.d("WallpaperSourceRepository", "Sources config result: $configResult")
-        val config = configResult.getOrThrow() ?: return@combine emptyList()
+        val config = configResult.getOrNull() ?: return@combine emptyList()
 
         Log.d("WallpaperSourceRepository", "Sources config: $config")
 
