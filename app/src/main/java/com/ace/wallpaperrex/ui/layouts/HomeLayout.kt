@@ -181,8 +181,8 @@ fun HomeLayout(
     val sources by sourceRepository.wallpaperSources.collectAsState(initial = emptyList())
     val sourceError by sourceRepository.sourceError.collectAsState(initial = null)
     var isLoading by remember { mutableStateOf(true) }
-    LaunchedEffect(Unit) {
-        sourcesRepository.triggerInitialLoadI()
+
+    LaunchedEffect(sourcesRepository) {
         sourceRepository.initialize()
         isLoading = false
     }

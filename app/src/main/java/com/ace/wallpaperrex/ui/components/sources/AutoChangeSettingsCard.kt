@@ -230,7 +230,7 @@ private fun SourceSelectorSection(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    availableSources.forEach { sourceItem ->
+                    availableSources.filter { it.isConfigured }.forEach { sourceItem ->
                         val isSelected = customSources.contains(sourceItem)
                         FilterChip(
                             selected = isSelected,
