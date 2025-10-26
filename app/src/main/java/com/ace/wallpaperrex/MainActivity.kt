@@ -21,6 +21,7 @@ import com.ace.wallpaperrex.ui.layouts.HomeLayout
 import com.ace.wallpaperrex.ui.screens.models.SharedViewModel
 import com.ace.wallpaperrex.ui.screens.wallpapers.WallpaperDetailScreen
 import com.ace.wallpaperrex.ui.theme.AppTheme
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.serialization.Serializable
 
 interface AppRoute {
@@ -40,6 +41,7 @@ interface AppRoute {
     ) : AppRoute
 }
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {

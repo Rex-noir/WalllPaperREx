@@ -5,6 +5,7 @@ plugins {
     kotlin("plugin.serialization") version "2.2.20"
     alias(libs.plugins.devtools.ksp)
     alias(libs.plugins.androidx.room)
+    alias(libs.plugins.hilt.android)
 }
 
 android {
@@ -95,7 +96,8 @@ dependencies {
     implementation(libs.androidx.foundation)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material.icons.extended.android) // Use the latest stable version
-
+    implementation("com.google.dagger:hilt-android:2.57.1")
+    ksp("com.google.dagger:hilt-android-compiler:2.57.1")
 
     debugImplementation(libs.androidx.ui.tooling)
 
