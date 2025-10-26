@@ -8,9 +8,12 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
+import javax.inject.Inject
+import javax.inject.Singleton
 
-class WallpaperSourceRepository(
-    private val sourceRepository: SourcesRepository,
+@Singleton
+class WallpaperSourceRepository @Inject constructor(
+    private val sourceRepository: SourcesRepositoryImpl,
     private val dataStoreRepository: DataStoreRepository
 ) {
 
@@ -18,11 +21,7 @@ class WallpaperSourceRepository(
         sourceRepository.sourcesConfig,
         dataStoreRepository.wallpaperSourcesDataStore
     ) { configResult, prefs ->
-        Log.d("WallpaperSourceRepository", "Sources config result: $configResult")
         val config = configResult.getOrNull() ?: return@combine emptyList()
-
-        Log.d("WallpaperSourceRepository", "Sources config: $config")
-
         config.sources.map { item ->
             val key = stringPreferencesKey(item.uniqueKey)
             val apiValue = prefs[key] ?: ""

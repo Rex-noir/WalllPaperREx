@@ -7,10 +7,13 @@ import com.ace.wallpaperrex.data.models.WallpaperSourceConfigItem
 import com.ace.wallpaperrex.data.repositories.GeneralSettingsRepository
 import com.ace.wallpaperrex.data.repositories.WallpaperSourceRepository
 import com.ace.wallpaperrex.ui.screens.models.AutoChangeWallpaperSetting
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 
-class GeneralSettingViewModel(
+@HiltViewModel
+class GeneralSettingViewModel @Inject constructor(
     sourcesRepository: WallpaperSourceRepository,
     private val generalSettingsRepository: GeneralSettingsRepository
 ) :

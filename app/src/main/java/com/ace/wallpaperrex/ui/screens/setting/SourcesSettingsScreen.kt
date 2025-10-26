@@ -53,17 +53,20 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ace.wallpaperrex.data.models.WallpaperSourceConfigItem
 import com.ace.wallpaperrex.data.repositories.WallpaperSourceRepository
+import com.ace.wallpaperrex.ui.screens.models.SourceSettingsViewModel
 import kotlinx.coroutines.launch
 
 @Composable
 fun SourcesSettingsScreen(
     modifier: Modifier = Modifier,
-    wallpaperSourceRepository: WallpaperSourceRepository
+    viewModel: SourceSettingsViewModel = hiltViewModel<SourceSettingsViewModel>()
 ) {
     val scope = rememberCoroutineScope()
-    val sources by wallpaperSourceRepository.wallpaperSources.collectAsState(
+    val sources by viewModel.sources.collectAsState(
         initial = emptyList(),
     )
 
@@ -107,20 +110,10 @@ fun SourcesSettingsScreen(
                 EnhancedSourceCard(
                     source = sourceModel!!,
                     onSafeModeToggle = { enabled ->
-                        scope.launch {
-                            wallpaperSourceRepository.updateSafeModeForSource(
-                                sourceModel,
-                                enabled
-                            )
-                        }
+                        viewModel.updateSafeModeForSource(sourceItem, enabled)
                     },
                     onApiKeySave = { key ->
-                        scope.launch {
-                            wallpaperSourceRepository.setWallpaperApiKey(
-                                sourceItem,
-                                key
-                            )
-                        }
+                        viewModel.setWallpaperApiKey(sourceItem, key);
                     }
                 )
             }

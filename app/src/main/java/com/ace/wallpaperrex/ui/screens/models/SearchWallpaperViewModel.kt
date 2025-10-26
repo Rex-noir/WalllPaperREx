@@ -14,6 +14,8 @@ import com.ace.wallpaperrex.data.repositories.WallpaperRepository
 import com.ace.wallpaperrex.data.repositories.WallpaperRepositoryImpl
 import com.ace.wallpaperrex.data.repositories.WallpaperSourceRepository
 import com.ace.wallpaperrex.ui.models.ImageItem
+import dagger.hilt.android.lifecycle.HiltViewModel
+import jakarta.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
@@ -24,8 +26,9 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-class SearchWallpaperViewModel(
-    wallpaperSourceRepository: WallpaperSourceRepository,
+@HiltViewModel
+class SearchWallpaperViewModel @Inject constructor(
+    private val wallpaperSourceRepository: WallpaperSourceRepository,
     application: Application
 ) : AndroidViewModel(application) {
     private val searchHistoryDao = AppDatabase.getDatabase(application).searchHistoryDao()
@@ -35,6 +38,7 @@ class SearchWallpaperViewModel(
         started = SharingStarted.WhileSubscribed(5000),
         initialValue = emptyList()
     )
+    val wallpaperSources = wallpaperSourceRepository.wallpaperSources
 
     private val _selectedSource = MutableStateFlow<WallpaperSourceConfigItem?>(null);
     val selectedSource = _selectedSource.asStateFlow()

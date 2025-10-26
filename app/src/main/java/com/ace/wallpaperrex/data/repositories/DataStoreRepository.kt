@@ -8,9 +8,12 @@ import androidx.datastore.preferences.core.emptyPreferences
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import okio.IOException
+import javax.inject.Inject
+import javax.inject.Singleton
 
 private val Context.userPreferencesDataStore by preferencesDataStore(name = "user_preferences")
 private val Context.wallpaperSourcesDataStore by preferencesDataStore(name = "wallpaper_sources")
@@ -26,8 +29,9 @@ object DataStoreKeys {
         stringPreferencesKey("auto_change_wallpaper_custom_sources")
 }
 
-class DataStoreRepository(
-    private val context: Context
+@Singleton
+class DataStoreRepository @Inject constructor(
+    @param:ApplicationContext private val context: Context
 ) : AutoChangeWallpaperSettingMethods {
 
     val wallpaperSourcesDataStore: Flow<Preferences> =

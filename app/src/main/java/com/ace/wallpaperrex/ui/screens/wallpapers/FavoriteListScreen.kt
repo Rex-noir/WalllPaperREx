@@ -26,6 +26,7 @@ import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ace.wallpaperrex.R
 import com.ace.wallpaperrex.data.models.WallpaperSourceConfigItem
@@ -38,8 +39,7 @@ import kotlinx.coroutines.launch
 fun FavoriteListScreen(
     onWallpaperClick: (ImageItem, WallpaperSourceConfigItem?) -> Unit,
     modifier: Modifier = Modifier,
-    wallpaperSourceRepository: WallpaperSourceRepository,
-    favoriteListViewModel: FavoriteListViewModel = viewModel(factory = FavoriteListViewModel.Factory),
+    favoriteListViewModel: FavoriteListViewModel = hiltViewModel<FavoriteListViewModel>(),
 ) {
     val scope = rememberCoroutineScope()
 
@@ -83,10 +83,11 @@ fun FavoriteListScreen(
                         .aspectRatio(item.aspectRatio.takeIf { it > 0 } ?: (3f / 4f))
                         .clip(RoundedCornerShape(size = 0.dp))
                         .clickable(onClick = {
-                           scope.launch {
-                               val source = wallpaperSourceRepository.getWallpaperSource(item.sourceKey)
-                               onWallpaperClick(item, source)
-                           }
+                            scope.launch {
+                                val source =
+                                    favoriteListViewModel.getWallpaperSource(item.sourceKey)
+                                onWallpaperClick(item, source)
+                            }
                         })
                 )
             }

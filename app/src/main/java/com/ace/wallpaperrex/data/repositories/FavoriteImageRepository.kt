@@ -3,8 +3,10 @@ package com.ace.wallpaperrex.data.repositories
 import com.ace.wallpaperrex.data.daos.FavoriteImageDao
 import com.ace.wallpaperrex.data.entities.FavoriteImageEntity
 import kotlinx.coroutines.flow.Flow
+import javax.inject.Inject
+import javax.inject.Singleton
 
-class FavoriteImageRepository(private val dao: FavoriteImageDao) {
+class FavoriteImageRepository @Inject constructor(private val dao: FavoriteImageDao) {
 
     fun getAllFavorites(): Flow<List<FavoriteImageEntity>> {
         return dao.getAll()

@@ -19,12 +19,13 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ace.wallpaperrex.data.models.WallpaperSourceConfigItem
-import com.ace.wallpaperrex.data.repositories.WallpaperSourceRepository
 import com.ace.wallpaperrex.ui.components.wallpaper.WallpaperStaggeredGrid
 import com.ace.wallpaperrex.ui.models.ImageItem
+import com.ace.wallpaperrex.ui.screens.models.WallpaperListViewModel
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
@@ -33,11 +34,11 @@ import kotlinx.coroutines.launch
 @Composable
 fun WallpaperListScreen(
     onWallpaperClick: (ImageItem, WallpaperSourceConfigItem) -> Unit,
-    wallpaperSourceRepository: WallpaperSourceRepository
+    viewModel: WallpaperListViewModel = hiltViewModel<WallpaperListViewModel>()
 ) {
     val scope = rememberCoroutineScope()
 
-    val allWallpaperSources by wallpaperSourceRepository.wallpaperSources
+    val allWallpaperSources by viewModel.sources
         .collectAsStateWithLifecycle(initialValue = emptyList())
 
     val wallpaperSources by remember(allWallpaperSources) {
@@ -48,15 +49,10 @@ fun WallpaperListScreen(
     var initialSource by remember { mutableStateOf<WallpaperSourceConfigItem?>(null) }
 
     LaunchedEffect(wallpaperSources) {
-        // We only proceed if the list of sources is actually loaded.
         if (wallpaperSources.isNotEmpty()) {
-            // Asynchronously get the first emitted value from the Flow.
-            val lastSource = wallpaperSourceRepository.lastWallpaperSource.first()
+            val lastSource = viewModel.lastWallpaperSource.first()
 
-            initialSource = // Case 1: A "last used" source was found, so we use it.
-                lastSource
-                    ?: // Case 2: No "last used" source, so we fall back to the first one in the list.
-                            wallpaperSources.first()
+            initialSource = lastSource ?: wallpaperSources.first()
         }
     }
 
@@ -100,13 +96,15 @@ fun WallpaperListScreen(
                 key = { pageIndex -> wallpaperSources[pageIndex].uniqueKey }
             ) { pageIndex ->
                 val source = wallpaperSources[pageIndex]
-                val viewModel: WallpaperListViewModel = viewModel(
-                    factory = WallpaperListViewModel.createFactory(
-                        source.uniqueKey,
-                        wallpaperSourceRepository
-                    ),
-                    key = "source-${source.uniqueKey}"
-                )
+                val viewModel: com.ace.wallpaperrex.ui.screens.wallpapers.WallpaperListViewModel =
+                    viewModel(
+                        factory = com.ace.wallpaperrex.ui.screens.wallpapers.WallpaperListViewModel.createFactory(
+                            source.uniqueKey,
+                            viewModel.wallpaperRepository
+                        ),
+                        key = "source-${source.uniqueKey}"
+                    )
+
                 val uiState by viewModel.uiState.collectAsStateWithLifecycle()
                 WallpaperStaggeredGrid(
                     items = uiState.items,
@@ -126,7 +124,7 @@ fun WallpaperListScreen(
             LaunchedEffect(pagerState.currentPage) {
                 if (wallpaperSources.isNotEmpty()) {
                     val currentSourceKey = wallpaperSources[pagerState.currentPage].uniqueKey
-                    wallpaperSourceRepository.setLastWallpaperSource(currentSourceKey)
+                    viewModel.setLastWallpaperSource(currentSourceKey)
                 }
             }
         }

@@ -44,6 +44,7 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavDestination
 import androidx.navigation.NavDestination.Companion.hasRoute
@@ -61,6 +62,7 @@ import com.ace.wallpaperrex.data.repositories.SourcesRepositoryImpl
 import com.ace.wallpaperrex.data.repositories.WallpaperSourceRepository
 import com.ace.wallpaperrex.ui.components.sources.SourceSettingTopBar
 import com.ace.wallpaperrex.ui.models.ImageItem
+import com.ace.wallpaperrex.ui.screens.models.HomeViewModel
 import com.ace.wallpaperrex.ui.screens.models.SearchWallpaperViewModel
 import com.ace.wallpaperrex.ui.screens.setting.GeneralSettingScreen
 import com.ace.wallpaperrex.ui.screens.setting.GeneralSettingViewModel
@@ -162,6 +164,8 @@ fun AppBottomNavigationBar(
 fun HomeLayout(
     onWallpaperClick: (image: ImageItem, source: WallpaperSourceConfigItem?) -> Unit,
     modifier: Modifier = Modifier,
+    viewModel: HomeViewModel = hiltViewModel<HomeViewModel>()
+
 ) {
     val homeNavController = rememberNavController() // For navigation within HomeLayout
     val currentHomeBackStackEntry by homeNavController.currentBackStackEntryAsState()
@@ -170,22 +174,10 @@ fun HomeLayout(
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
 
-    val dataStoreRepository = DataStoreRepository(context)
-    val sourcesRepository = remember { SourcesRepositoryImpl(context) }
-    val sourceRepository = remember {
-        WallpaperSourceRepository(
-            sourceRepository = sourcesRepository,
-            dataStoreRepository = dataStoreRepository
-        )
-    }
-    val sources by sourceRepository.wallpaperSources.collectAsState(initial = emptyList())
-    val sourceError by sourceRepository.sourceError.collectAsState(initial = null)
-    var isLoading by remember { mutableStateOf(true) }
 
-    LaunchedEffect(sourcesRepository) {
-        sourceRepository.initialize()
-        isLoading = false
-    }
+    val sources by viewModel.sources.collectAsState(initial = emptyList())
+    val sourceError by viewModel.sourceError.collectAsState(initial = null)
+    val isLoading by viewModel.configLoading.collectAsState(initial = true)
 
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
     val snackbarHostState = remember { SnackbarHostState() }
@@ -240,7 +232,7 @@ fun HomeLayout(
                     Text(text = "${sourceError?.message}")
                     Button(onClick = {
                         scope.launch {
-                            sourceRepository.resetSourceConfigToDefault()
+                            viewModel.resetConfigToDefault()
                         }
                     }) {
                         Text("Reset to default source config")
@@ -295,7 +287,7 @@ fun HomeLayout(
                         title = navItem?.titleResId ?: R.string.bottom_nav_sources_setting,
                         onResetClick = {
                             scope.launch {
-                                val result = sourceRepository.resetSourceConfigToDefault()
+                                val result = viewModel.resetConfigToDefault()
                                 if (result.isSuccess) {
                                     snackbarHostState.showSnackbar(
                                         context.getString(R.string.sources_reset_success)
@@ -355,42 +347,24 @@ fun HomeLayout(
                     onWallpaperClick = { image, source ->
                         onWallpaperClick(image, source)
                     },
-                    wallpaperSourceRepository = sourceRepository
                 )
             }
             composable<SourcesSettingsRoute> {
-                SourcesSettingsScreen(wallpaperSourceRepository = sourceRepository)
+                SourcesSettingsScreen()
             }
             composable<SettingsRoute> {
-                GeneralSettingScreen(
-                    viewModel = viewModel(
-                        factory = GeneralSettingViewModel.factory(
-                            wallpaperSourceRepository = sourceRepository,
-                            generalSettingsRepository = GeneralSettingsRepository(
-                                context = context,
-                                dataStoreRepository,
-                                wallpaperSourceRepository = sourceRepository
-                            )
-                        )
-                    )
-                )
+                GeneralSettingScreen()
             }
             composable<FavoriteListRoute> {
                 FavoriteListScreen(
                     onWallpaperClick = { image, source ->
                         onWallpaperClick(image, source)
                     },
-                    wallpaperSourceRepository = sourceRepository
                 )
             }
             composable<SearchWallpapersRoute> { currentHomeBackStackEntry ->
                 SearchWallpapersScreen(
                     onWallpaperClick = onWallpaperClick,
-                    wallpaperSourceRepository = sourceRepository,
-                    searchViewModel = viewModel(
-                        viewModelStoreOwner = currentHomeBackStackEntry,
-                        factory = SearchWallpaperViewModel.createFactory(sourceRepository)
-                    )
                 )
             }
         }

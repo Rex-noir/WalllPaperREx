@@ -5,6 +5,7 @@ import android.net.Uri
 import android.util.Log
 import com.ace.wallpaperrex.data.models.WallpaperSourceConfig
 import com.ace.wallpaperrex.utils.mapToUserFriendlyException
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -14,6 +15,8 @@ import kotlinx.serialization.json.Json
 import okio.IOException
 import java.io.File
 import java.net.URL
+import javax.inject.Inject
+import javax.inject.Singleton
 
 interface SourcesRepository {
     val sourcesConfig: StateFlow<Result<WallpaperSourceConfig>>
@@ -26,8 +29,9 @@ interface SourcesRepository {
 }
 
 
-class SourcesRepositoryImpl(
-    private val context: Context
+@Singleton
+class SourcesRepositoryImpl @Inject constructor(
+    @ApplicationContext private val context: Context
 ) : SourcesRepository {
     private val jsonParser = Json { ignoreUnknownKeys = true; isLenient = true }
     private val _sourcesConfig = MutableStateFlow<Result<WallpaperSourceConfig>>(

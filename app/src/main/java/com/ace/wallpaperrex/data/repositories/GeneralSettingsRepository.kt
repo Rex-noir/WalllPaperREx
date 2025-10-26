@@ -7,12 +7,15 @@ import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import com.ace.wallpaperrex.data.workers.WallpaperChangeWorker
 import com.ace.wallpaperrex.ui.screens.models.AutoChangeWallpaperSetting
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 import java.util.concurrent.TimeUnit
+import javax.inject.Inject
+import javax.inject.Singleton
 
 interface AutoChangeWallpaperSettingMethods {
     suspend fun updateAutoChangeWallpaperEnabled(enabled: Boolean): Unit
@@ -25,8 +28,9 @@ object GeneralSettingsConstants {
     const val AUTO_CHANGE_WORK_MANAGER_TAG = "auto_change_wallpaper"
 }
 
-class GeneralSettingsRepository(
-    val context: Context,
+@Singleton
+class GeneralSettingsRepository @Inject constructor(
+    @ApplicationContext val context: Context,
     val dataStoreRepository: DataStoreRepository,
     val wallpaperSourceRepository: WallpaperSourceRepository,
 ) : AutoChangeWallpaperSettingMethods {

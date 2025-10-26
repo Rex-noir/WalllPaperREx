@@ -7,13 +7,15 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ace.wallpaperrex.ui.components.sources.AutoChangeSettingsCard
 import com.ace.wallpaperrex.ui.screens.models.AutoChangeWallpaperSetting
 
 @Composable
 fun GeneralSettingScreen(
     modifier: Modifier = Modifier,
-    viewModel: GeneralSettingViewModel,
+    viewModel: GeneralSettingViewModel = hiltViewModel<GeneralSettingViewModel>(),
 ) {
     val sources by viewModel.wallpaperSources.collectAsState(initial = emptyList())
     val autoChangeSettings by viewModel.autoChangeSetting.collectAsState(initial = AutoChangeWallpaperSetting())

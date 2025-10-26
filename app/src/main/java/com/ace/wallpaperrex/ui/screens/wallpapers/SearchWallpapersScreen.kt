@@ -67,7 +67,9 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.traversalIndex
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ace.wallpaperrex.data.entities.SearchHistoryItem
 import com.ace.wallpaperrex.data.models.WallpaperSourceConfigItem
 import com.ace.wallpaperrex.data.repositories.WallpaperSourceRepository
@@ -79,13 +81,11 @@ import kotlinx.coroutines.flow.map
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SearchWallpapersScreen(
-    searchViewModel: SearchWallpaperViewModel,
+    searchViewModel: SearchWallpaperViewModel = hiltViewModel<SearchWallpaperViewModel>(),
     onWallpaperClick: (ImageItem, WallpaperSourceConfigItem) -> Unit,
     contentPadding: PaddingValues = PaddingValues(0.dp),
-    wallpaperSourceRepository: WallpaperSourceRepository
 ) {
 
-    // --- State Management ---
     val textFieldState: TextFieldState = rememberTextFieldState()
     var expanded by rememberSaveable { mutableStateOf(false) }
     var showFilterDialog by remember { mutableStateOf(false) }
@@ -93,7 +93,7 @@ fun SearchWallpapersScreen(
 
     val searchHistory by searchViewModel.searchHistory.collectAsState()
 
-    val wallpaperSources by wallpaperSourceRepository.wallpaperSources
+    val wallpaperSources by searchViewModel.wallpaperSources
         .map { sourceItems -> sourceItems.filter { it.isConfigured } }
         .collectAsStateWithLifecycle(initialValue = emptyList())
 

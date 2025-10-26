@@ -39,6 +39,7 @@ android {
 
     kotlinOptions {
         jvmTarget = "11"
+        freeCompilerArgs = listOf("-XXLanguage:+PropertyParamAnnotationDefaultTargetMode")
     }
 
     buildFeatures {
@@ -96,8 +97,9 @@ dependencies {
     implementation(libs.androidx.foundation)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material.icons.extended.android) // Use the latest stable version
-    implementation("com.google.dagger:hilt-android:2.57.1")
-    ksp("com.google.dagger:hilt-android-compiler:2.57.1")
+    implementation(libs.hilt.android)
+    ksp(libs.hilt.android.compiler)
+    implementation(libs.androidx.hilt.navigation.compose)
 
     debugImplementation(libs.androidx.ui.tooling)
 
