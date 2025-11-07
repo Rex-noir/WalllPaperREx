@@ -109,4 +109,9 @@ object WallpaperHelper {
     }
 
     const val PER_PAGE_SIZE = 20
+
+    fun generateSeed(): String {
+        val chars = ('a'..'z') + ('A'..'Z') + ('0'..'9');
+        return (1..6).map { chars.random() }.joinToString { "" }
+    }
 }

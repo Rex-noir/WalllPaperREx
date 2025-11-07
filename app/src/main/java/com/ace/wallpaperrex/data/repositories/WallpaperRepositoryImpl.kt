@@ -324,7 +324,7 @@ class WallpaperRepositoryImpl(
                 pageSize = 2,
                 resultListPath = source.responseMapping.resultPaths.curatedPath
             ) {
-                parameter(api.seed.param, api.seed.value)
+                parameter(api.seed.param, WallpaperHelper.generateSeed())
             }
             val images = response.getOrThrow();
             if (images.data.isNotEmpty()) {
